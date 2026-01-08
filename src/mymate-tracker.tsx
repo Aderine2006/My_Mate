@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
-import { Plus, Target, Award, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame } from 'lucide-react';
+import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
+import { Plus, Target, Award, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, PenTool, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff } from 'lucide-react';
 
 interface User {
   id: string;
@@ -63,6 +64,62 @@ interface StreakData {
   longestStreak: number;
 }
 
+interface ScheduleTask {
+  id: number;
+  title: string;
+  description: string;
+  time: string; // Format: "HH:MM"
+  dayOfWeek: number[]; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  priority: 'low' | 'medium' | 'high';
+  category: string;
+  estimatedDuration: number; // in minutes
+  createdAt: string;
+}
+
+interface DailyTask {
+  id: number;
+  scheduleTaskId: number;
+  title: string;
+  description: string;
+  time: string;
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+  completedAt?: string;
+  missed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  category: string;
+}
+
+interface Reflection {
+  id: number;
+  date: string; // YYYY-MM-DD
+  mood: string;
+  highlights: string;
+  challenges: string;
+  lessons: string;
+  gratitude: string;
+  goalsForTomorrow: string;
+  createdAt: string;
+}
+
+interface ManualNote {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ChatMessage {
+  id: number;
+  text: string;
+  isUser: boolean;
+  timestamp: string;
+}
+
+
 const MYMate = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -89,6 +146,24 @@ const MYMate = () => {
   const [contentForm, setContentForm] = useState({ title: '', type: 'youtube' as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: 'youtube', script: '', status: 'draft' as 'draft' | 'in-progress' | 'completed' | 'published', publishDate: '', targetDate: '', tags: '', notes: '' });
   const [authError, setAuthError] = useState<string | null>(null);
   const [streak, setStreak] = useState<StreakData>({ lastVisitDate: '', visitDates: [], currentStreak: 0, longestStreak: 0 });
+  const [scheduleTasks, setScheduleTasks] = useState<ScheduleTask[]>([]);
+  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<number | null>(null);
+  const [scheduleForm, setScheduleForm] = useState({ title: '', description: '', time: '', dayOfWeek: [] as number[], priority: 'medium' as 'low' | 'medium' | 'high', category: 'general', estimatedDuration: '30' });
+  const [reflections, setReflections] = useState<Reflection[]>([]);
+  const [showReflectionForm, setShowReflectionForm] = useState(false);
+  const [editingReflection, setEditingReflection] = useState<number | null>(null);
+  const [reflectionForm, setReflectionForm] = useState({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
+  const [manualNotes, setManualNotes] = useState<ManualNote[]>([]);
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [editingNote, setEditingNote] = useState<number | null>(null);
+  const [noteForm, setNoteForm] = useState({ title: '', content: '', category: 'general', tags: '' });
+  const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [ollamaAvailable, setOllamaAvailable] = useState(false);
+  const [isLoadingResponse, setIsLoadingResponse] = useState(false);
 
   // Helper function to clear all data state
   const clearAllData = () => {
@@ -98,6 +173,10 @@ const MYMate = () => {
     setAchievements([]);
     setContents([]);
     setStreak({ lastVisitDate: '', visitDates: [], currentStreak: 0, longestStreak: 0 });
+    setScheduleTasks([]);
+    setDailyTasks([]);
+    setReflections([]);
+    setManualNotes([]);
   };
 
   // Get today's date in YYYY-MM-DD format
@@ -217,12 +296,20 @@ const MYMate = () => {
       const timeLogsData = localStorage.getItem(`timeLogs-${user.id}`);
       const achievementsData = localStorage.getItem(`achievements-${user.id}`);
       const contentsData = localStorage.getItem(`contents-${user.id}`);
+      const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
+      const dailyTasksData = localStorage.getItem(`dailyTasks-${user.id}`);
+      const reflectionsData = localStorage.getItem(`reflections-${user.id}`);
+      const manualNotesData = localStorage.getItem(`manualNotes-${user.id}`);
       
       if (goalsData) setGoals(JSON.parse(goalsData));
       if (skillsData) setSkills(JSON.parse(skillsData));
       if (timeLogsData) setTimeLogs(JSON.parse(timeLogsData));
       if (achievementsData) setAchievements(JSON.parse(achievementsData));
       if (contentsData) setContents(JSON.parse(contentsData));
+      if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
+      if (dailyTasksData) setDailyTasks(JSON.parse(dailyTasksData));
+      if (reflectionsData) setReflections(JSON.parse(reflectionsData));
+      if (manualNotesData) setManualNotes(JSON.parse(manualNotesData));
     } catch (error) {
       console.error('Error loading data:', error);
       clearAllData();
@@ -261,13 +348,540 @@ const MYMate = () => {
     }
   }, [user]);
 
-  const saveData = (key: string, data: Goal[] | Skill[] | TimeLog[] | Achievement[] | Content[]) => {
+  // Generate daily tasks and check missed tasks when schedule or date changes
+  useEffect(() => {
+    if (user && scheduleTasks.length > 0) {
+      const today = getTodayDate();
+      generateDailyTasks(today);
+      checkMissedTasks();
+      adjustScheduleForMissedTasks();
+    }
+  }, [scheduleTasks, user]);
+
+  // Schedule management handlers
+  const handleAddSchedule = () => {
+    if (!scheduleForm.title || scheduleForm.dayOfWeek.length === 0) return;
+    const newSchedule: ScheduleTask = {
+      id: Date.now(),
+      ...scheduleForm,
+      estimatedDuration: parseInt(scheduleForm.estimatedDuration) || 30,
+      createdAt: new Date().toISOString()
+    };
+    const updated = [...scheduleTasks, newSchedule];
+    setScheduleTasks(updated);
+    saveData('scheduleTasks', updated);
+    setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' });
+    setShowScheduleForm(false);
+  };
+
+  const handleEditSchedule = (schedule: ScheduleTask) => {
+    setEditingSchedule(schedule.id);
+    setScheduleForm({
+      title: schedule.title,
+      description: schedule.description,
+      time: schedule.time,
+      dayOfWeek: schedule.dayOfWeek,
+      priority: schedule.priority,
+      category: schedule.category,
+      estimatedDuration: schedule.estimatedDuration.toString()
+    });
+    setShowScheduleForm(true);
+  };
+
+  const handleUpdateSchedule = () => {
+    const updated = scheduleTasks.map(s =>
+      s.id === editingSchedule
+        ? { ...s, ...scheduleForm, estimatedDuration: parseInt(scheduleForm.estimatedDuration) || 30 }
+        : s
+    );
+    setScheduleTasks(updated);
+    saveData('scheduleTasks', updated);
+    setEditingSchedule(null);
+    setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' });
+    setShowScheduleForm(false);
+  };
+
+  const handleDeleteSchedule = (id: number) => {
+    const updated = scheduleTasks.filter(s => s.id !== id);
+    setScheduleTasks(updated);
+    saveData('scheduleTasks', updated);
+    // Also remove related daily tasks
+    const updatedDailyTasks = dailyTasks.filter(dt => dt.scheduleTaskId !== id);
+    setDailyTasks(updatedDailyTasks);
+    saveData('dailyTasks', updatedDailyTasks);
+  };
+
+  // Task completion handler
+  const handleToggleTask = (taskId: number) => {
+    const updated = dailyTasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          completed: !task.completed,
+          completedAt: !task.completed ? new Date().toISOString() : undefined,
+          missed: false
+        };
+      }
+      return task;
+    });
+    setDailyTasks(updated);
+    saveData('dailyTasks', updated);
+  };
+
+  // Reflection handlers
+  const handleAddReflection = () => {
+    const today = getTodayDate();
+    const newReflection: Reflection = {
+      id: Date.now(),
+      date: today,
+      ...reflectionForm,
+      createdAt: new Date().toISOString()
+    };
+    // Check if reflection already exists for today, update it
+    const existingIndex = reflections.findIndex(r => r.date === today);
+    let updated;
+    if (existingIndex >= 0) {
+      updated = reflections.map((r, idx) => idx === existingIndex ? { ...newReflection, id: r.id } : r);
+    } else {
+      updated = [...reflections, newReflection];
+    }
+    setReflections(updated);
+    saveData('reflections', updated);
+    setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
+    setShowReflectionForm(false);
+  };
+
+  const handleEditReflection = (reflection: Reflection) => {
+    setEditingReflection(reflection.id);
+    setReflectionForm({
+      mood: reflection.mood,
+      highlights: reflection.highlights,
+      challenges: reflection.challenges,
+      lessons: reflection.lessons,
+      gratitude: reflection.gratitude,
+      goalsForTomorrow: reflection.goalsForTomorrow
+    });
+    setShowReflectionForm(true);
+  };
+
+  const handleUpdateReflection = () => {
+    const updated = reflections.map(r =>
+      r.id === editingReflection ? { ...r, ...reflectionForm } : r
+    );
+    setReflections(updated);
+    saveData('reflections', updated);
+    setEditingReflection(null);
+    setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
+    setShowReflectionForm(false);
+  };
+
+  const handleDeleteReflection = (id: number) => {
+    const updated = reflections.filter(r => r.id !== id);
+    setReflections(updated);
+    saveData('reflections', updated);
+  };
+
+  const getTodayReflection = (): Reflection | undefined => {
+    const today = getTodayDate();
+    return reflections.find(r => r.date === today);
+  };
+
+  // Manual Notes handlers
+  const handleAddNote = () => {
+    if (!noteForm.title) return;
+    const tags = noteForm.tags.split(',').map(t => t.trim()).filter(t => t);
+    const newNote: ManualNote = {
+      id: Date.now(),
+      ...noteForm,
+      tags,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const updated = [...manualNotes, newNote];
+    setManualNotes(updated);
+    saveData('manualNotes', updated);
+    setNoteForm({ title: '', content: '', category: 'general', tags: '' });
+    setShowNoteForm(false);
+  };
+
+  const handleEditNote = (note: ManualNote) => {
+    setEditingNote(note.id);
+    setNoteForm({ ...note, tags: note.tags.join(', ') });
+    setShowNoteForm(true);
+  };
+
+  const handleUpdateNote = () => {
+    const tags = noteForm.tags.split(',').map(t => t.trim()).filter(t => t);
+    const updated = manualNotes.map(n =>
+      n.id === editingNote ? { ...n, ...noteForm, tags, updatedAt: new Date().toISOString() } : n
+    );
+    setManualNotes(updated);
+    saveData('manualNotes', updated);
+    setEditingNote(null);
+    setNoteForm({ title: '', content: '', category: 'general', tags: '' });
+    setShowNoteForm(false);
+  };
+
+  const handleDeleteNote = (id: number) => {
+    const updated = manualNotes.filter(n => n.id !== id);
+    setManualNotes(updated);
+    saveData('manualNotes', updated);
+  };
+
+  // Get user context for chatbot understanding
+  const getUserContext = (): UserContext => {
+    const todayTasks = getTodayTasks();
+    const todayReflection = getTodayReflection();
+    const completedGoalsCount = goals.filter(g => g.status === 'completed').length;
+    const activeGoalsCount = goals.filter(g => g.status === 'in-progress').length;
+    const totalHours = timeLogs.reduce((sum, log) => sum + log.hours, 0);
+    const recentReflection = reflections[reflections.length - 1];
+    const recentNotes = manualNotes.slice(-5);
+
+    return {
+      user: user?.name || 'User',
+      streak: streak.currentStreak,
+      todayTasksCompleted: todayTasks.filter(t => t.completed).length,
+      todayTasksTotal: todayTasks.length,
+      completionRate: calculatePerfection(),
+      completedGoals: completedGoalsCount,
+      activeGoals: activeGoalsCount,
+      totalSkills: skills.length,
+      totalHours,
+      achievements: achievements.length,
+      todayReflection: todayReflection ? {
+        mood: todayReflection.mood,
+        challenges: todayReflection.challenges,
+        highlights: todayReflection.highlights
+      } : null,
+      recentReflection: recentReflection || null,
+      recentNotes: recentNotes.map(n => ({ title: n.title, content: n.content.substring(0, 100) })),
+      topSkills: skills.sort((a, b) => b.hoursInvested - a.hoursInvested).slice(0, 3)
+    };
+  };
+
+  // Generate intelligent chatbot response
+  const generateChatResponse = (userMessage: string): string => {
+    const context = getUserContext();
+    const message = userMessage.toLowerCase().trim();
+
+    // Greeting patterns
+    if (message.match(/^(hi|hello|hey|greetings|what's up)/)) {
+      return `Hello ${context.user}! 👋 I'm your personal assistant. I can help you with:\n\n• Your daily tasks and schedule\n• Goal progress and achievements\n• Skills and learning insights\n• Reflections and notes\n• Performance analysis\n\nWhat would you like to know?`;
+    }
+
+    // Task-related queries
+    if (message.match(/(task|todo|schedule|what.*do|what.*need)/)) {
+      if (context.todayTasksTotal === 0) {
+        return `You don't have any tasks scheduled for today. Would you like to add some? You can go to the "Daily Schedule" tab to create recurring tasks. 📋`;
+      }
+      const remaining = context.todayTasksTotal - context.todayTasksCompleted;
+      if (remaining === 0) {
+        return `🎉 Great job! You've completed all ${context.todayTasksTotal} tasks for today! Your completion rate is ${context.completionRate}%. Keep up the excellent work!`;
+      }
+      return `You have ${remaining} task${remaining > 1 ? 's' : ''} remaining out of ${context.todayTasksTotal} today. You've completed ${context.todayTasksCompleted} so far. Your completion rate is ${context.completionRate}%. Would you like me to show your remaining tasks? ✅`;
+    }
+
+    // Goal-related queries
+    if (message.match(/(goal|progress|achievement|target)/)) {
+      if (context.activeGoals === 0 && context.completedGoals === 0) {
+        return `You don't have any goals set yet. Setting goals can help you stay focused and motivated! You can add goals in the "Goals" section. 🎯`;
+      }
+      return `You have ${context.activeGoals} active goal${context.activeGoals !== 1 ? 's' : ''} and ${context.completedGoals} completed goal${context.completedGoals !== 1 ? 's' : ''}. You've also achieved ${context.achievements} milestone${context.achievements !== 1 ? 's' : ''}! 🏆 Keep pushing forward!`;
+    }
+
+    // Skills-related queries
+    if (message.match(/(skill|learning|study|improve|develop)/)) {
+      if (context.totalSkills === 0) {
+        return `You haven't added any skills yet. Start tracking your skills development in the "Skills" section! 📚`;
+      }
+      const topSkill = context.topSkills[0];
+      return `You're tracking ${context.totalSkills} skill${context.totalSkills !== 1 ? 's' : ''} and have invested ${context.totalHours.toFixed(1)} hours in learning. Your top skill is ${topSkill.name} (${topSkill.level}) with ${topSkill.hoursInvested} hours. Keep learning! 💪`;
+    }
+
+    // Streak-related queries
+    if (message.match(/(streak|consistent|daily|habit)/)) {
+      if (context.streak === 0) {
+        return `Start building your daily streak by visiting MyMate every day! 🔥 Your longest streak so far is ${streak.longestStreak} day${streak.longestStreak !== 1 ? 's' : ''}.`;
+      }
+      return `You're on a ${context.streak}-day streak! 🔥 That's amazing consistency! Your longest streak is ${streak.longestStreak} day${streak.longestStreak !== 1 ? 's' : ''}. Keep it up!`;
+    }
+
+    // Reflection/mood queries
+    if (message.match(/(reflection|mood|feeling|how.*feel|how.*day)/)) {
+      if (context.todayReflection) {
+        let response = `Based on today's reflection, you're feeling: ${context.todayReflection.mood || 'not specified'}\n\n`;
+        if (context.todayReflection.highlights) {
+          response += `Your highlights: ${context.todayReflection.highlights.substring(0, 150)}${context.todayReflection.highlights.length > 150 ? '...' : ''}\n\n`;
+        }
+        if (context.todayReflection.challenges) {
+          response += `Challenges: ${context.todayReflection.challenges.substring(0, 150)}${context.todayReflection.challenges.length > 150 ? '...' : ''}\n\n`;
+        }
+        response += `Keep reflecting! It helps track your growth. 💭`;
+        return response;
+      }
+      return `You haven't added a reflection for today. Would you like to reflect on your day? Go to the "Reflections" tab to add one! 📝`;
+    }
+
+    // Performance/completion queries
+    if (message.match(/(performance|progress|how.*doing|completion|perfect)/)) {
+      const rate = context.completionRate;
+      if (rate >= 90) {
+        return `🌟 Outstanding! Your completion rate is ${rate}%! You're doing exceptionally well. Keep maintaining this high performance!`;
+      } else if (rate >= 70) {
+        return `Great job! Your completion rate is ${rate}%. You're on the right track. A bit more consistency and you'll reach 90%+! 💪`;
+      } else if (rate >= 50) {
+        return `Your completion rate is ${rate}%. There's room for improvement. Try to focus on completing your daily tasks consistently. You've got this! 📈`;
+      } else {
+        return `Your completion rate is ${rate}%. Let's work on improving this together! Start by focusing on completing at least one task each day, then gradually increase. Every step counts! 🚀`;
+      }
+    }
+
+    // Help/What can you do
+    if (message.match(/(help|what.*can|what.*do|how.*help|assist)/)) {
+      return `I can help you with:\n\n📋 **Tasks & Schedule**: Ask about your daily tasks or schedule\n🎯 **Goals**: Get updates on your goals and progress\n📚 **Skills**: Learn about your skills development\n🔥 **Streak**: Check your daily streak\n💭 **Reflections**: Discuss your daily reflections\n📊 **Performance**: Get insights on your completion rate\n\nJust ask me anything about your progress!`;
+    }
+
+    // Notes-related queries
+    if (message.match(/(note|remember|idea|thought)/)) {
+      if (context.recentNotes.length === 0) {
+        return `You don't have any notes yet. Start capturing your ideas in the "Manual Notes" section! 💡`;
+      }
+      return `You have ${manualNotes.length} note${manualNotes.length !== 1 ? 's' : ''} saved. Recent notes:\n${context.recentNotes.map(n => `• ${n.title}`).join('\n')}\n\nCheck the "Manual Notes" tab to view all your notes! 📝`;
+    }
+
+    // Default response
+    return `I understand you're asking about "${userMessage}". Based on your data:\n\n• ${context.todayTasksCompleted}/${context.todayTasksTotal} tasks completed today\n• ${context.completionRate}% completion rate\n• ${context.streak}-day streak\n• ${context.activeGoals} active goals\n\nHow can I help you improve or organize better? Ask me about your tasks, goals, skills, or reflections! 💬`;
+  };
+
+  // Handle chat message send
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || isLoadingResponse) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now(),
+      text: chatInput.trim(),
+      isUser: true,
+      timestamp: new Date().toISOString()
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    const messageText = chatInput.trim();
+    setChatInput('');
+    setIsLoadingResponse(true);
+
+    // Add loading indicator
+    const loadingMessageId = Date.now() + 1;
+    const loadingMessage: ChatMessage = {
+      id: loadingMessageId,
+      text: 'Thinking...',
+      isUser: false,
+      timestamp: new Date().toISOString()
+    };
+    setChatMessages(prev => [...prev, loadingMessage]);
+
+    try {
+      const context = getUserContext();
+      let botResponseText: string;
+
+      // Try Ollama first if available
+      if (ollamaAvailable) {
+        try {
+          botResponseText = await generateOllamaResponse(messageText, context);
+        } catch (ollamaError) {
+          console.error('Ollama error, falling back to rule-based:', ollamaError);
+          // Fallback to rule-based
+          botResponseText = generateChatResponse(messageText);
+        }
+      } else {
+        // Use rule-based response
+        botResponseText = generateChatResponse(messageText);
+      }
+
+      // Remove loading message and add actual response
+      setChatMessages(prev => {
+        const withoutLoading = prev.filter(msg => msg.id !== loadingMessageId);
+        return [...withoutLoading, {
+          id: Date.now() + 2,
+          text: botResponseText,
+          isUser: false,
+          timestamp: new Date().toISOString()
+        }];
+      });
+    } catch (error) {
+      console.error('Error generating response:', error);
+      // Remove loading message and add error response
+      setChatMessages(prev => {
+        const withoutLoading = prev.filter(msg => msg.id !== loadingMessageId);
+        return [...withoutLoading, {
+          id: Date.now() + 2,
+          text: 'Sorry, I encountered an error. Please try again or use the rule-based responses.',
+          isUser: false,
+          timestamp: new Date().toISOString()
+        }];
+      });
+    } finally {
+      setIsLoadingResponse(false);
+    }
+  };
+
+  // Check Ollama connection when chatbot opens
+  useEffect(() => {
+    if (chatbotOpen && user) {
+      checkOllamaConnection().then(available => {
+        setOllamaAvailable(available);
+      });
+    }
+  }, [chatbotOpen, user]);
+
+  // Initialize chat with welcome message
+  useEffect(() => {
+    if (chatbotOpen && chatMessages.length === 0 && user) {
+      const aiMode = ollamaAvailable ? 'I\'m powered by AI (Ollama) to provide intelligent, personalized responses based on all your data.' : 'I\'m in basic mode. To enable AI-powered responses, make sure Ollama is running on your machine.';
+      
+      const welcomeMessage: ChatMessage = {
+        id: Date.now(),
+        text: `Hello ${user.name}! 👋 I'm your personal MyMate assistant. ${aiMode}\n\nI understand your:\n• Achievements & Goals\n• Skills & Learning Progress\n• Daily Reflections\n• Notes & Journal Entries\n• Habits & Performance\n\nI can help you:\n• Track your daily progress\n• Understand your performance patterns\n• Get personalized insights\n• Set and achieve goals\n• Reflect on your journey\n\nWhat would you like to know?`,
+        isUser: false,
+        timestamp: new Date().toISOString()
+      };
+      setChatMessages([welcomeMessage]);
+    }
+  }, [chatbotOpen, user, ollamaAvailable]);
+
+  const saveData = (key: string, data: Goal[] | Skill[] | TimeLog[] | Achievement[] | Content[] | ScheduleTask[] | DailyTask[] | Reflection[] | ManualNote[]) => {
     if (!user) return;
     try {
       localStorage.setItem(`${key}-${user.id}`, JSON.stringify(data));
     } catch (error) {
       console.error('Error:', error);
     }
+  };
+
+  // Generate daily tasks from schedule for a specific date
+  const generateDailyTasks = (date: string) => {
+    const dayOfWeek = new Date(date).getDay();
+    const newTasks: DailyTask[] = [];
+    
+    scheduleTasks.forEach(scheduleTask => {
+      // Check if this task should occur on this day of week
+      if (scheduleTask.dayOfWeek.includes(dayOfWeek)) {
+        // Check if task already exists for this date
+        const existingTask = dailyTasks.find(
+          dt => dt.scheduleTaskId === scheduleTask.id && dt.date === date
+        );
+        
+        if (!existingTask) {
+          newTasks.push({
+            id: Date.now() + Math.random(),
+            scheduleTaskId: scheduleTask.id,
+            title: scheduleTask.title,
+            description: scheduleTask.description,
+            time: scheduleTask.time,
+            date: date,
+            completed: false,
+            missed: false,
+            priority: scheduleTask.priority,
+            category: scheduleTask.category
+          });
+        }
+      }
+    });
+    
+    if (newTasks.length > 0) {
+      const updatedTasks = [...dailyTasks, ...newTasks];
+      setDailyTasks(updatedTasks);
+      saveData('dailyTasks', updatedTasks);
+    }
+  };
+
+  // Check and mark missed tasks for past dates
+  const checkMissedTasks = () => {
+    const today = getTodayDate();
+    const updatedTasks = dailyTasks.map(task => {
+      if (!task.completed && task.date < today && !task.missed) {
+        return { ...task, missed: true };
+      }
+      return task;
+    });
+    
+    if (JSON.stringify(updatedTasks) !== JSON.stringify(dailyTasks)) {
+      setDailyTasks(updatedTasks);
+      saveData('dailyTasks', updatedTasks);
+    }
+  };
+
+  // Adjust schedule based on missed tasks
+  const adjustScheduleForMissedTasks = () => {
+    const today = getTodayDate();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    // Find missed tasks from yesterday
+    const missedTasks = dailyTasks.filter(
+      task => task.date === yesterdayStr && task.missed && !task.completed
+    );
+    
+    if (missedTasks.length > 0) {
+      // For each missed task, add it to today's schedule
+      const newTasks: DailyTask[] = [];
+      missedTasks.forEach(missedTask => {
+        const scheduleTask = scheduleTasks.find(st => st.id === missedTask.scheduleTaskId);
+        if (scheduleTask) {
+          // Check if task already exists for today
+          const existingToday = dailyTasks.find(
+            dt => dt.scheduleTaskId === scheduleTask.id && dt.date === today
+          );
+          
+          if (!existingToday) {
+            newTasks.push({
+              id: Date.now() + Math.random(),
+              scheduleTaskId: scheduleTask.id,
+              title: scheduleTask.title,
+              description: scheduleTask.description,
+              time: scheduleTask.time,
+              date: today,
+              completed: false,
+              missed: false,
+              priority: scheduleTask.priority,
+              category: scheduleTask.category
+            });
+          }
+        }
+      });
+      
+      if (newTasks.length > 0) {
+        const updatedTasks = [...dailyTasks, ...newTasks];
+        setDailyTasks(updatedTasks);
+        saveData('dailyTasks', updatedTasks);
+      }
+    }
+  };
+
+  // Calculate perfection percentage
+  const calculatePerfection = (): number => {
+    const today = getTodayDate();
+    const last7Days: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      last7Days.push(date.toISOString().split('T')[0]);
+    }
+    
+    const tasksInPeriod = dailyTasks.filter(task => last7Days.includes(task.date));
+    if (tasksInPeriod.length === 0) return 100;
+    
+    const completed = tasksInPeriod.filter(task => task.completed).length;
+    return Math.round((completed / tasksInPeriod.length) * 100);
+  };
+
+  // Get today's tasks
+  const getTodayTasks = (): DailyTask[] => {
+    const today = getTodayDate();
+    return dailyTasks
+      .filter(task => task.date === today)
+      .sort((a, b) => a.time.localeCompare(b.time));
   };
 
   // Generate unique user ID from email
@@ -573,7 +1187,7 @@ const MYMate = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-indigo-900 text-white transition-all duration-300 overflow-hidden`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} h-screen bg-indigo-900 text-white transition-all duration-300 overflow-y-auto overflow-x-hidden`}>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8">
             {/* Logo to the left of the name */}
@@ -587,11 +1201,15 @@ const MYMate = () => {
           <nav className="space-y-2">
             {[
               { id: 'dashboard', icon: TrendingUp, label: 'Dashboard' },
+              { id: 'schedule', icon: ListTodo, label: 'Daily Schedule' },
               { id: 'goals', icon: Target, label: 'Goals' },
               { id: 'skills', icon: BookOpen, label: 'Skills' },
               { id: 'time', icon: Clock, label: 'Time Logs' },
               { id: 'achievements', icon: Award, label: 'Achievements' },
-              { id: 'content', icon: Video, label: 'Content Creation' }
+              { id: 'content', icon: Video, label: 'Content Creation' },
+              { id: 'reflections', icon: PenTool, label: 'Reflections' },
+              { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
+              { id: 'analysis', icon: BarChart3, label: 'Analysis' }
             ].map(item => (
               <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg ${activeTab === item.id ? 'bg-indigo-700' : 'hover:bg-indigo-800'}`}>
                 <item.icon size={20} />
@@ -612,8 +1230,8 @@ const MYMate = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm p-4 flex items-center justify-between">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="bg-white shadow-sm p-4 flex items-center justify-between flex-shrink-0">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Toggle sidebar">
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -632,7 +1250,7 @@ const MYMate = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
           {activeTab === 'dashboard' && (
             <div>
               <h2 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
@@ -654,7 +1272,7 @@ const MYMate = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                 {/* Daily Streak Card */}
                 <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow p-6 border border-orange-200">
                   <div className="flex items-center justify-between mb-2">
@@ -668,6 +1286,22 @@ const MYMate = () => {
                         ? '🔥 Your longest streak!' 
                         : `Best: ${streak.longestStreak} days`
                       : 'Start your streak today!'}
+                  </p>
+                </div>
+                {/* Completion % Card */}
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow p-6 border border-indigo-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-gray-700 font-medium">Completion %</h3>
+                    <BarChart3 className="text-indigo-500" size={28} />
+                  </div>
+                  <p className="text-3xl font-bold text-indigo-600">{calculatePerfection()}%</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {(() => {
+                      const todayTasks = getTodayTasks();
+                      const completed = todayTasks.filter(t => t.completed).length;
+                      const total = todayTasks.length;
+                      return total > 0 ? `${completed}/${total} tasks today` : 'No tasks today';
+                    })()}
                   </p>
                 </div>
                 <div className="bg-white rounded-xl shadow p-6">
@@ -693,6 +1327,53 @@ const MYMate = () => {
                   </div>
                   <p className="text-3xl font-bold text-gray-800">{stats.totalAchievements}</p>
                   <p className="text-sm text-gray-500 mt-1">Keep going!</p>
+                </div>
+              </div>
+
+              {/* Daily Schedule Section */}
+              <div className="bg-white rounded-xl shadow p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <ListTodo className="text-indigo-600" size={24} />
+                    Today's Schedule
+                  </h3>
+                  <span className="text-sm text-gray-500">{getTodayDate()}</span>
+                </div>
+                <div className="space-y-3">
+                  {getTodayTasks().length > 0 ? (
+                    getTodayTasks().map(task => (
+                      <div key={task.id} className={`flex items-center justify-between p-4 rounded-lg border-2 ${task.completed ? 'bg-green-50 border-green-200' : task.missed ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className="flex items-center gap-3 flex-1">
+                          <button
+                            onClick={() => handleToggleTask(task.id)}
+                            className="text-gray-400 hover:text-indigo-600"
+                            aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                          >
+                            {task.completed ? <CheckCircle className="text-green-600" size={24} /> : <Circle size={24} />}
+                          </button>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-800">{task.title}</span>
+                              <span className={`px-2 py-1 rounded text-xs ${task.priority === 'high' ? 'bg-red-100 text-red-700' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {task.priority}
+                              </span>
+                            </div>
+                            {task.description && <p className="text-sm text-gray-600 mt-1">{task.description}</p>}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                              <span>🕐 {task.time}</span>
+                              <span>📁 {task.category}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <ListTodo className="mx-auto text-gray-300 mb-2" size={48} />
+                      <p>No tasks scheduled for today</p>
+                      <p className="text-sm mt-1">Add tasks to your schedule to get started!</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1202,7 +1883,586 @@ const MYMate = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'schedule' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-800">Daily Schedule</h2>
+                <button onClick={() => setShowScheduleForm(!showScheduleForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                  <Plus size={20} />
+                  <span>Add Schedule Task</span>
+                </button>
+              </div>
+
+              {showScheduleForm && (
+                <div className="bg-white rounded-xl shadow p-6 mb-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">{editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <input type="text" value={scheduleForm.title} onChange={(e) => setScheduleForm({...scheduleForm, title: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Morning Exercise" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea value={scheduleForm.description} onChange={(e) => setScheduleForm({...scheduleForm, description: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={2} placeholder="Task description" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                        <input type="time" value={scheduleForm.time} onChange={(e) => setScheduleForm({...scheduleForm, time: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                        <input type="number" value={scheduleForm.estimatedDuration} onChange={(e) => setScheduleForm({...scheduleForm, estimatedDuration: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" min="1" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                        <select value={scheduleForm.priority} onChange={(e) => setScheduleForm({...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high'})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <input type="text" value={scheduleForm.category} onChange={(e) => setScheduleForm({...scheduleForm, category: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Health, Work" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Days of Week</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              const days = scheduleForm.dayOfWeek.includes(index)
+                                ? scheduleForm.dayOfWeek.filter(d => d !== index)
+                                : [...scheduleForm.dayOfWeek, index];
+                              setScheduleForm({...scheduleForm, dayOfWeek: days});
+                            }}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              scheduleForm.dayOfWeek.includes(index)
+                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-300'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                        <Save size={18} />
+                        <span>{editingSchedule ? 'Update' : 'Save'}</span>
+                      </button>
+                      <button onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {scheduleTasks.map(schedule => (
+                  <div key={schedule.id} className="bg-white rounded-xl shadow p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800">{schedule.title}</h3>
+                        {schedule.description && <p className="text-gray-600 mt-1 text-sm">{schedule.description}</p>}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button onClick={() => handleEditSchedule(schedule)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Edit schedule">
+                          <Edit2 size={18} />
+                        </button>
+                        <button onClick={() => handleDeleteSchedule(schedule.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete schedule">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Time:</span>
+                        <span className="font-semibold text-gray-800">{schedule.time}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Duration:</span>
+                        <span className="font-semibold text-gray-800">{schedule.estimatedDuration} min</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Priority:</span>
+                        <span className={`px-2 py-1 rounded text-xs ${schedule.priority === 'high' ? 'bg-red-100 text-red-700' : schedule.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {schedule.priority}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Days:</span>
+                        <div className="flex gap-1">
+                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                            schedule.dayOfWeek.includes(index) && (
+                              <span key={index} className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs">{day}</span>
+                            )
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {scheduleTasks.length === 0 && (
+                  <div className="col-span-2 bg-white rounded-xl shadow p-12 text-center">
+                    <ListTodo size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">No schedule tasks yet. Add your first scheduled task!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'analysis' && (
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">Analysis Dashboard</h2>
+              
+              {/* Perfection Meter */}
+              <div className="bg-white rounded-xl shadow p-6 mb-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <BarChart3 className="text-indigo-600" size={24} />
+                  Perfection Meter
+                </h3>
+                <div className="flex items-center justify-center mb-4">
+                  <div className="relative w-48 h-48">
+                    <svg className="transform -rotate-90 w-48 h-48">
+                      <circle
+                        cx="96"
+                        cy="96"
+                        r="88"
+                        stroke="currentColor"
+                        strokeWidth="12"
+                        fill="transparent"
+                        className="text-gray-200"
+                      />
+                      <circle
+                        cx="96"
+                        cy="96"
+                        r="88"
+                        stroke="currentColor"
+                        strokeWidth="12"
+                        fill="transparent"
+                        strokeDasharray={`${(calculatePerfection() / 100) * 552} 552`}
+                        className="text-indigo-600 transition-all duration-500"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-indigo-600">{calculatePerfection()}%</div>
+                        <div className="text-sm text-gray-500 mt-1">Completion Rate</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-green-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {dailyTasks.filter(t => t.completed).length}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">Completed Tasks</div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      {dailyTasks.filter(t => t.missed).length}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">Missed Tasks</div>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {dailyTasks.length}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">Total Tasks</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Task Completion Stats */}
+              <div className="bg-white rounded-xl shadow p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Last 7 Days Performance</h3>
+                <div className="space-y-3">
+                  {(() => {
+                    const last7Days: string[] = [];
+                    for (let i = 6; i >= 0; i--) {
+                      const date = new Date();
+                      date.setDate(date.getDate() - i);
+                      last7Days.push(date.toISOString().split('T')[0]);
+                    }
+                    return last7Days.map(date => {
+                      const dayTasks = dailyTasks.filter(t => t.date === date);
+                      const completed = dayTasks.filter(t => t.completed).length;
+                      const total = dayTasks.length;
+                      const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                      const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+                      const dayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      
+                      return (
+                        <div key={date} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="text-sm font-medium text-gray-700 w-20">{dayName}</div>
+                            <div className="text-xs text-gray-500">{dayDate}</div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-1 max-w-xs">
+                            <div className="flex-1 bg-gray-200 rounded-full h-4">
+                              <div
+                                className={`h-4 rounded-full transition-all duration-300 ${
+                                  percentage === 100 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                            <div className="text-sm font-semibold text-gray-700 w-16 text-right">
+                              {completed}/{total}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'reflections' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-800">Daily Reflections</h2>
+                <button onClick={() => { const todayReflection = getTodayReflection(); if (todayReflection) handleEditReflection(todayReflection); else setShowReflectionForm(true); }} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                  <Plus size={20} />
+                  <span>{getTodayReflection() ? 'Edit Today\'s Reflection' : 'Add Today\'s Reflection'}</span>
+                </button>
+              </div>
+
+              {showReflectionForm && (
+                <div className="bg-white rounded-xl shadow p-6 mb-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">{editingReflection ? 'Edit Reflection' : 'Today\'s Reflection'}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Mood/Feeling</label>
+                      <input type="text" value={reflectionForm.mood} onChange={(e) => setReflectionForm({...reflectionForm, mood: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="How are you feeling today?" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Highlights</label>
+                      <textarea value={reflectionForm.highlights} onChange={(e) => setReflectionForm({...reflectionForm, highlights: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={3} placeholder="What went well today?" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Challenges</label>
+                      <textarea value={reflectionForm.challenges} onChange={(e) => setReflectionForm({...reflectionForm, challenges: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={3} placeholder="What challenges did you face?" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Lessons Learned</label>
+                      <textarea value={reflectionForm.lessons} onChange={(e) => setReflectionForm({...reflectionForm, lessons: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={3} placeholder="What did you learn today?" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gratitude</label>
+                      <textarea value={reflectionForm.gratitude} onChange={(e) => setReflectionForm({...reflectionForm, gratitude: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={3} placeholder="What are you grateful for today?" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Goals for Tomorrow</label>
+                      <textarea value={reflectionForm.goalsForTomorrow} onChange={(e) => setReflectionForm({...reflectionForm, goalsForTomorrow: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={3} placeholder="What do you want to accomplish tomorrow?" />
+                    </div>
+                    <div className="flex space-x-3">
+                      <button onClick={editingReflection ? handleUpdateReflection : handleAddReflection} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                        <Save size={18} />
+                        <span>{editingReflection ? 'Update' : 'Save'}</span>
+                      </button>
+                      <button onClick={() => { setShowReflectionForm(false); setEditingReflection(null); setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' }); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Today's Reflection Display */}
+              {!showReflectionForm && getTodayReflection() && (
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl shadow p-6 mb-6 border border-purple-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <PenTool className="text-purple-600" size={24} />
+                      Today's Reflection ({getTodayDate()})
+                    </h3>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEditReflection(getTodayReflection()!)} className="p-2 text-gray-600 hover:bg-purple-100 rounded-lg" aria-label="Edit reflection">
+                        <Edit2 size={18} />
+                      </button>
+                      <button onClick={() => handleDeleteReflection(getTodayReflection()!.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete reflection">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {getTodayReflection()!.mood && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Mood:</h4>
+                        <p className="text-gray-600">{getTodayReflection()!.mood}</p>
+                      </div>
+                    )}
+                    {getTodayReflection()!.highlights && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Highlights:</h4>
+                        <p className="text-gray-600 whitespace-pre-wrap">{getTodayReflection()!.highlights}</p>
+                      </div>
+                    )}
+                    {getTodayReflection()!.challenges && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Challenges:</h4>
+                        <p className="text-gray-600 whitespace-pre-wrap">{getTodayReflection()!.challenges}</p>
+                      </div>
+                    )}
+                    {getTodayReflection()!.lessons && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Lessons Learned:</h4>
+                        <p className="text-gray-600 whitespace-pre-wrap">{getTodayReflection()!.lessons}</p>
+                      </div>
+                    )}
+                    {getTodayReflection()!.gratitude && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Gratitude:</h4>
+                        <p className="text-gray-600 whitespace-pre-wrap">{getTodayReflection()!.gratitude}</p>
+                      </div>
+                    )}
+                    {getTodayReflection()!.goalsForTomorrow && (
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-1">Goals for Tomorrow:</h4>
+                        <p className="text-gray-600 whitespace-pre-wrap">{getTodayReflection()!.goalsForTomorrow}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Past Reflections */}
+              <div className="bg-white rounded-xl shadow p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Past Reflections</h3>
+                <div className="space-y-4">
+                  {reflections.filter(r => r.date !== getTodayDate()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(reflection => (
+                    <div key={reflection.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-semibold text-gray-800">{reflection.date}</span>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleEditReflection(reflection)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Edit reflection">
+                            <Edit2 size={18} />
+                          </button>
+                          <button onClick={() => handleDeleteReflection(reflection.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete reflection">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                      {reflection.mood && <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Mood:</span> {reflection.mood}</p>}
+                      {reflection.highlights && <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Highlights:</span> {reflection.highlights.substring(0, 100)}{reflection.highlights.length > 100 ? '...' : ''}</p>}
+                    </div>
+                  ))}
+                  {reflections.filter(r => r.date !== getTodayDate()).length === 0 && (
+                    <p className="text-gray-500 text-center py-8">No past reflections yet. Start reflecting today!</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notes' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-800">Manual Notes</h2>
+                <button onClick={() => setShowNoteForm(!showNoteForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                  <Plus size={20} />
+                  <span>Add Note</span>
+                </button>
+              </div>
+
+              {showNoteForm && (
+                <div className="bg-white rounded-xl shadow p-6 mb-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">{editingNote ? 'Edit Note' : 'New Note'}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <input type="text" value={noteForm.title} onChange={(e) => setNoteForm({...noteForm, title: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Note title" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                      <textarea value={noteForm.content} onChange={(e) => setNoteForm({...noteForm, content: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" rows={8} placeholder="Write your notes here..." />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <input type="text" value={noteForm.category} onChange={(e) => setNoteForm({...noteForm, category: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Ideas, Reminders" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+                        <input type="text" value={noteForm.tags} onChange={(e) => setNoteForm({...noteForm, tags: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., important, meeting" />
+                      </div>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button onClick={editingNote ? handleUpdateNote : handleAddNote} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                        <Save size={18} />
+                        <span>{editingNote ? 'Update' : 'Save'}</span>
+                      </button>
+                      <button onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {manualNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map(note => (
+                  <div key={note.id} className="bg-white rounded-xl shadow p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">{note.title}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs">{note.category}</span>
+                          <span className="text-xs text-gray-500">{new Date(note.updatedAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button onClick={() => handleEditNote(note)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Edit note">
+                          <Edit2 size={18} />
+                        </button>
+                        <button onClick={() => handleDeleteNote(note.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete note">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 whitespace-pre-wrap mb-3">{note.content}</p>
+                    {note.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {note.tags.map((tag, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {manualNotes.length === 0 && (
+                  <div className="col-span-2 bg-white rounded-xl shadow p-12 text-center">
+                    <StickyNote size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">No notes yet. Create your first note!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </main>
+      </div>
+
+      {/* Chatbot Floating Button & Window */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {chatbotOpen ? (
+          <div className="bg-white rounded-xl shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200">
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-t-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <Bot size={24} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold">MyMate Assistant</h3>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs opacity-90">Your personal coach</p>
+                    <div className="flex items-center gap-1">
+                      {ollamaAvailable ? (
+                        <>
+                          <Wifi size={12} className="text-green-300" />
+                          <span className="text-xs opacity-75">AI Powered</span>
+                        </>
+                      ) : (
+                        <>
+                          <WifiOff size={12} className="text-yellow-300" />
+                          <span className="text-xs opacity-75">Basic Mode</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setChatbotOpen(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="Close chat"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+              {chatMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${
+                      message.isUser
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-800 border border-gray-200'
+                    }`}
+                  >
+                    {!message.isUser && (
+                      <div className="flex items-center gap-2 mb-1">
+                        <Bot size={16} className="text-indigo-600" />
+                        <span className="text-xs font-semibold text-indigo-600">Assistant</span>
+                      </div>
+                    )}
+                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    <span className={`text-xs mt-1 block ${message.isUser ? 'text-indigo-100' : 'text-gray-400'}`}>
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Input */}
+            <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !isLoadingResponse) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder={isLoadingResponse ? "AI is thinking..." : "Type your message..."}
+                  disabled={isLoadingResponse}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!chatInput.trim() || isLoadingResponse}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  aria-label="Send message"
+                >
+                  {isLoadingResponse ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send size={20} />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Ask about your tasks, goals, skills, reflections, or performance
+              </p>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setChatbotOpen(true)}
+            className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
+            aria-label="Open chatbot"
+          >
+            <MessageCircle size={28} />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -34,23 +34,28 @@ firebase init
 ### Step 5: Create Firebase Config File
 Create `src/firebase.ts` with your config:
 ```typescript
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDrsFAwWYbUH4F_89ewh2wiSjpONdk-CDg",
+  authDomain: "mymate-f9181.firebaseapp.com",
+  projectId: "mymate-f9181",
+  storageBucket: "mymate-f9181.firebasestorage.app",
+  messagingSenderId: "252007772362",
+  appId: "1:252007772362:web:6adcd022ec9fb72bd20433",
+  measurementId: "G-CYXRLRLR0F"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-```
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 ### Step 6: Install Firebase SDK
 ```bash
