@@ -169,6 +169,7 @@ const MYMate = () => {
     const savedTheme = localStorage.getItem('mymate-theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   // Helper function to clear all data state
   const clearAllData = () => {
@@ -1198,6 +1199,32 @@ const MYMate = () => {
     return days;
   };
 
+  const getTimeRemainingInDay = () => {
+    const now = currentTime;
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const diff = endOfDay.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      return { hours: 0, minutes: 0, seconds: 0 };
+    }
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { hours, minutes, seconds };
+  };
+
+  useEffect(() => {
+    // Realtime clock updater
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   const stats = {
     totalGoals: goals.length,
     completedGoals: goals.filter(g => g.status === 'completed').length,
@@ -1338,10 +1365,34 @@ const MYMate = () => {
       </div>
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center justify-between flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200" aria-label="Toggle sidebar">
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+        <header className="bg-white dark:bg-gray-800 shadow-sm px-4 py-3 flex items-center justify-between flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200"
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+          {/* Center Top Remaining Time in Day */}
+          <div className="flex-1 flex justify-center pointer-events-none">
+            {(() => {
+              const timeRemaining = getTimeRemainingInDay();
+              return (
+                <div className="inline-flex items-baseline gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md pointer-events-auto">
+                  <Clock size={18} className="opacity-80" />
+                  <span className="text-lg font-semibold tracking-wide tabular-nums font-mono">
+                    {String(timeRemaining.hours).padStart(2, '0')}:
+                    {String(timeRemaining.minutes).padStart(2, '0')}:
+                    {String(timeRemaining.seconds).padStart(2, '0')}
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
+
           <div className="flex items-center gap-4">
             {/* Daily Streak Icon */}
             {user && streak.currentStreak > 0 && (
