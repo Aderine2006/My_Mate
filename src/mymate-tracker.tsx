@@ -170,6 +170,7 @@ const MYMate = () => {
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Helper function to clear all data state
   const clearAllData = () => {
@@ -522,6 +523,21 @@ const MYMate = () => {
     });
     setDailyTasks(updated);
     saveData('dailyTasks', updated);
+    
+    // Check if all tasks for today are completed
+    const today = getTodayDate();
+    const todayTasks = updated.filter(task => task.date === today);
+    const allCompleted = todayTasks.length > 0 && todayTasks.every(task => task.completed);
+    
+    // Only celebrate if a task was just completed (not uncompleted)
+    const completedTask = updated.find(task => task.id === taskId);
+    if (allCompleted && completedTask?.completed) {
+      setShowCelebration(true);
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        setShowCelebration(false);
+      }, 5000);
+    }
   };
 
   // Reflection handlers
@@ -1329,8 +1345,107 @@ const MYMate = () => {
     );
   }
 
+  // Celebration Component
+  const CelebrationOverlay = () => {
+    if (!showCelebration) return null;
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+        {/* Confetti/Spray Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(100)].map((_, i) => {
+            const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const left = Math.random() * 100;
+            const delay = Math.random() * 2;
+            const duration = 2 + Math.random() * 2;
+            const size = 8 + Math.random() * 12;
+            
+            return (
+              <div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  left: `${left}%`,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  backgroundColor: color,
+                  animation: `confetti-fall ${duration}s ease-out ${delay}s forwards`,
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                }}
+              />
+            );
+          })}
+        </div>
+        
+        {/* Crackers/Sparkles Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(50)].map((_, i) => {
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const delay = Math.random() * 1.5;
+            const duration = 1 + Math.random() * 1.5;
+            const size = 4 + Math.random() * 8;
+            
+            return (
+              <div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  left: `${left}%`,
+                  top: `${top}%`,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  backgroundColor: '#FFD700',
+                  boxShadow: `0 0 ${size * 2}px #FFD700, 0 0 ${size * 3}px #FFD700`,
+                  animation: `sparkle ${duration}s ease-out ${delay}s forwards`,
+                }}
+              />
+            );
+          })}
+        </div>
+        
+        {/* Celebration Message */}
+        <div className="relative z-10 text-center pointer-events-auto">
+          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-12 py-8 rounded-2xl shadow-2xl transform animate-bounce">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-4xl font-bold mb-2">Congratulations!</h2>
+            <p className="text-2xl">You've completed all tasks for today!</p>
+            <p className="text-xl mt-2 opacity-90">Amazing work! 🚀</p>
+          </div>
+        </div>
+        
+        {/* CSS Animations */}
+        <style>{`
+          @keyframes confetti-fall {
+            0% {
+              transform: translateY(-100vh) rotate(0deg);
+              opacity: 1;
+            }
+            100% {
+              transform: translateY(100vh) rotate(720deg);
+              opacity: 0;
+            }
+          }
+          
+          @keyframes sparkle {
+            0%, 100% {
+              transform: scale(0) rotate(0deg);
+              opacity: 1;
+            }
+            50% {
+              transform: scale(1.5) rotate(180deg);
+              opacity: 0.8;
+            }
+          }
+        `}</style>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      <CelebrationOverlay />
       <div className={`${sidebarOpen ? 'w-64' : 'w-0'} h-screen bg-indigo-900 dark:bg-gray-800 text-white transition-all duration-300 overflow-y-auto overflow-x-hidden`}>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8">
