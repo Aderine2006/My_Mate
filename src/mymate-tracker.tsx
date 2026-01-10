@@ -171,6 +171,7 @@ const MYMate = () => {
   });
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [showCelebration, setShowCelebration] = useState(false);
+  const [currentDate, setCurrentDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
 
   // Helper function to clear all data state
   const clearAllData = () => {
@@ -445,15 +446,14 @@ const MYMate = () => {
     }
   }, [user]);
 
-  // Generate daily tasks and check missed tasks when schedule or date changes
+  // Generate daily tasks when schedule changes (date changes are handled by currentDate useEffect)
   useEffect(() => {
-    if (user && scheduleTasks.length > 0) {
-      const today = getTodayDate();
-      generateDailyTasks(today);
+    if (user && scheduleTasks.length > 0 && currentDate) {
+      generateDailyTasks(currentDate);
       checkMissedTasks();
       adjustScheduleForMissedTasks();
     }
-  }, [scheduleTasks, user]);
+  }, [scheduleTasks, user, currentDate]);
 
   // Schedule management handlers
   const handleAddSchedule = () => {
@@ -872,69 +872,81 @@ const MYMate = () => {
 
   // Generate / sync daily tasks from schedule for a specific date
   const generateDailyTasks = (date: string) => {
-    const dayOfWeek = new Date(date).getDay();
-    
-    // Start from existing tasks so we can update them in place
-    let updatedTasks: DailyTask[] = [...dailyTasks];
-    
-    scheduleTasks.forEach(scheduleTask => {
-      // Check if this task should occur on this day of week
-      if (scheduleTask.dayOfWeek.includes(dayOfWeek)) {
-        // Try to find an existing daily task for this schedule + date
-        const existingIndex = updatedTasks.findIndex(
-          dt => dt.scheduleTaskId === scheduleTask.id && dt.date === date
-        );
+    setDailyTasks(prevTasks => {
+      const dayOfWeek = new Date(date).getDay();
+      
+      // Start from existing tasks so we can update them in place
+      let updatedTasks: DailyTask[] = [...prevTasks];
+      let hasChanges = false;
+      
+      scheduleTasks.forEach(scheduleTask => {
+        // Check if this task should occur on this day of week
+        if (scheduleTask.dayOfWeek.includes(dayOfWeek)) {
+          // Try to find an existing daily task for this schedule + date
+          const existingIndex = updatedTasks.findIndex(
+            dt => dt.scheduleTaskId === scheduleTask.id && dt.date === date
+          );
 
-        if (existingIndex === -1) {
-          // Create a new daily task if it doesn't exist yet
-          updatedTasks.push({
-            id: Date.now() + Math.random(),
-            scheduleTaskId: scheduleTask.id,
-            title: scheduleTask.title,
-            description: scheduleTask.description,
-            time: scheduleTask.time,
-            date: date,
-            completed: false,
-            missed: false,
-            priority: scheduleTask.priority,
-            category: scheduleTask.category
-          });
-        } else {
-          // Sync existing daily task with the latest schedule details
-          const existingTask = updatedTasks[existingIndex];
-          updatedTasks[existingIndex] = {
-            ...existingTask,
-            title: scheduleTask.title,
-            description: scheduleTask.description,
-            time: scheduleTask.time,
-            priority: scheduleTask.priority,
-            category: scheduleTask.category
-          };
+          if (existingIndex === -1) {
+            // Create a new daily task if it doesn't exist yet
+            hasChanges = true;
+            updatedTasks.push({
+              id: Date.now() + Math.random(),
+              scheduleTaskId: scheduleTask.id,
+              title: scheduleTask.title,
+              description: scheduleTask.description,
+              time: scheduleTask.time,
+              date: date,
+              completed: false,
+              missed: false,
+              priority: scheduleTask.priority,
+              category: scheduleTask.category
+            });
+          } else {
+            // Sync existing daily task with the latest schedule details
+            const existingTask = updatedTasks[existingIndex];
+            const updatedTask = {
+              ...existingTask,
+              title: scheduleTask.title,
+              description: scheduleTask.description,
+              time: scheduleTask.time,
+              priority: scheduleTask.priority,
+              category: scheduleTask.category
+            };
+            if (JSON.stringify(existingTask) !== JSON.stringify(updatedTask)) {
+              hasChanges = true;
+              updatedTasks[existingIndex] = updatedTask;
+            }
+          }
         }
+      });
+      
+      // Persist only if something actually changed
+      if (hasChanges) {
+        saveData('dailyTasks', updatedTasks);
+        return updatedTasks;
       }
+      return prevTasks;
     });
-    
-    // Persist only if something actually changed
-    if (updatedTasks !== dailyTasks) {
-      setDailyTasks(updatedTasks);
-      saveData('dailyTasks', updatedTasks);
-    }
   };
 
   // Check and mark missed tasks for past dates
   const checkMissedTasks = () => {
     const today = getTodayDate();
-    const updatedTasks = dailyTasks.map(task => {
-      if (!task.completed && task.date < today && !task.missed) {
-        return { ...task, missed: true };
+    setDailyTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task => {
+        if (!task.completed && task.date < today && !task.missed) {
+          return { ...task, missed: true };
+        }
+        return task;
+      });
+      
+      if (JSON.stringify(updatedTasks) !== JSON.stringify(prevTasks)) {
+        saveData('dailyTasks', updatedTasks);
+        return updatedTasks;
       }
-      return task;
+      return prevTasks;
     });
-    
-    if (JSON.stringify(updatedTasks) !== JSON.stringify(dailyTasks)) {
-      setDailyTasks(updatedTasks);
-      saveData('dailyTasks', updatedTasks);
-    }
   };
 
   // Adjust schedule based on missed tasks
@@ -944,45 +956,48 @@ const MYMate = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
-    // Find missed tasks from yesterday
-    const missedTasks = dailyTasks.filter(
-      task => task.date === yesterdayStr && task.missed && !task.completed
-    );
-    
-    if (missedTasks.length > 0) {
-      // For each missed task, add it to today's schedule
-      const newTasks: DailyTask[] = [];
-      missedTasks.forEach(missedTask => {
-        const scheduleTask = scheduleTasks.find(st => st.id === missedTask.scheduleTaskId);
-        if (scheduleTask) {
-          // Check if task already exists for today
-          const existingToday = dailyTasks.find(
-            dt => dt.scheduleTaskId === scheduleTask.id && dt.date === today
-          );
-          
-          if (!existingToday) {
-            newTasks.push({
-              id: Date.now() + Math.random(),
-              scheduleTaskId: scheduleTask.id,
-              title: scheduleTask.title,
-              description: scheduleTask.description,
-              time: scheduleTask.time,
-              date: today,
-              completed: false,
-              missed: false,
-              priority: scheduleTask.priority,
-              category: scheduleTask.category
-            });
-          }
-        }
-      });
+    setDailyTasks(prevTasks => {
+      // Find missed tasks from yesterday
+      const missedTasks = prevTasks.filter(
+        task => task.date === yesterdayStr && task.missed && !task.completed
+      );
       
-      if (newTasks.length > 0) {
-        const updatedTasks = [...dailyTasks, ...newTasks];
-        setDailyTasks(updatedTasks);
-        saveData('dailyTasks', updatedTasks);
+      if (missedTasks.length > 0) {
+        // For each missed task, add it to today's schedule
+        const newTasks: DailyTask[] = [];
+        missedTasks.forEach(missedTask => {
+          const scheduleTask = scheduleTasks.find(st => st.id === missedTask.scheduleTaskId);
+          if (scheduleTask) {
+            // Check if task already exists for today
+            const existingToday = prevTasks.find(
+              dt => dt.scheduleTaskId === scheduleTask.id && dt.date === today
+            );
+            
+            if (!existingToday) {
+              newTasks.push({
+                id: Date.now() + Math.random(),
+                scheduleTaskId: scheduleTask.id,
+                title: scheduleTask.title,
+                description: scheduleTask.description,
+                time: scheduleTask.time,
+                date: today,
+                completed: false,
+                missed: false,
+                priority: scheduleTask.priority,
+                category: scheduleTask.category
+              });
+            }
+          }
+        });
+        
+        if (newTasks.length > 0) {
+          const updatedTasks = [...prevTasks, ...newTasks];
+          saveData('dailyTasks', updatedTasks);
+          return updatedTasks;
+        }
       }
-    }
+      return prevTasks;
+    });
   };
 
   // Calculate perfection percentage
@@ -1002,17 +1017,25 @@ const MYMate = () => {
     return Math.round((completed / tasksInPeriod.length) * 100);
   };
 
-  // Calculate today's completion % using only the first 4 tasks
-  const calculateTodayTop4Completion = (): number => {
-    const topTasks = getTodayTasks().slice(0, 4);
-    if (topTasks.length === 0) return 0;
-    const completed = topTasks.filter(task => task.completed).length;
-    return Math.round((completed / topTasks.length) * 100);
+  // Calculate today's completion % for all tasks of the day
+  const calculateTodayCompletion = (): number => {
+    const todayTasks = getTodayTasks();
+    if (todayTasks.length === 0) return 0;
+    const completed = todayTasks.filter(task => task.completed).length;
+    return Math.round((completed / todayTasks.length) * 100);
+  };
+
+  // Get today's completion stats (completed count, total count)
+  const getTodayCompletionStats = () => {
+    const todayTasks = getTodayTasks();
+    const completed = todayTasks.filter(task => task.completed).length;
+    const total = todayTasks.length;
+    return { completed, total };
   };
 
   // Get today's tasks
   const getTodayTasks = (): DailyTask[] => {
-    const today = getTodayDate();
+    const today = currentDate || getTodayDate();
     return dailyTasks
       .filter(task => task.date === today)
       .sort((a, b) => a.time.localeCompare(b.time));
@@ -1233,13 +1256,43 @@ const MYMate = () => {
   };
 
   useEffect(() => {
-    // Realtime clock updater
+    // Initialize currentDate on mount
+    setCurrentDate(getTodayDate());
+    
+    // Realtime clock updater and date change detector
     const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
+      const now = new Date();
+      setCurrentTime(now);
+      
+      // Check if date has changed
+      const today = getTodayDate();
+      setCurrentDate(prevDate => {
+        if (today !== prevDate) {
+          // Date has changed - this will trigger the date change useEffect
+          return today;
+        }
+        return prevDate;
+      });
     }, 1000);
 
     return () => clearInterval(intervalId);
   }, []);
+
+  // Regenerate tasks and update when date changes
+  useEffect(() => {
+    if (user && currentDate) {
+      // When date changes, regenerate everything
+      if (scheduleTasks.length > 0) {
+        // Always generate tasks for the current date when it changes
+        generateDailyTasks(currentDate);
+        checkMissedTasks();
+        adjustScheduleForMissedTasks();
+      }
+      updateStreak();
+      // Reset celebration when date changes
+      setShowCelebration(false);
+    }
+  }, [currentDate, user]);
 
   const stats = {
     totalGoals: goals.length,
@@ -1632,13 +1685,11 @@ const MYMate = () => {
                     <h3 className="text-gray-700 dark:text-gray-300 font-medium">Completion %</h3>
                     <BarChart3 className="text-indigo-500 dark:text-indigo-400" size={28} />
                   </div>
-                  <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{calculateTodayTop4Completion()}%</p>
+                  <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{calculateTodayCompletion()}%</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     {(() => {
-                      const todayTasks = getTodayTasks().slice(0, 4);
-                      const completed = todayTasks.filter(t => t.completed).length;
-                      const total = todayTasks.length;
-                      return total > 0 ? `${completed}/${total} of today's first 4 tasks` : 'No tasks today';
+                      const { completed, total } = getTodayCompletionStats();
+                      return total > 0 ? `${completed}/${total} of today's tasks completed` : 'No tasks for today';
                     })()}
                   </p>
                 </div>
@@ -1678,7 +1729,7 @@ const MYMate = () => {
                     <ListTodo className="text-indigo-600 dark:text-indigo-400" size={24} />
                     Today's Schedule
                   </h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{formatDateDDMMYYYY(getTodayDate())}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{formatDateDDMMYYYY(currentDate)}</span>
                 </div>
                 <div className="space-y-3">
                   {getTodayTasks().length > 0 ? (
