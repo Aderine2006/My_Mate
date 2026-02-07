@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
-import { Plus, Target, Award, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, PenTool, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun } from 'lucide-react';
+import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun } from 'lucide-react';
 
 interface User {
   id: string;
@@ -38,13 +38,6 @@ interface DeadlinePlan {
   status: 'pending' | 'completed' | 'overdue';
   reminderTime: string; // ISO Date string
   notificationSent: boolean;
-}
-
-interface Achievement {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
 }
 
 interface Content {
@@ -94,18 +87,6 @@ interface DailyTask {
   category: string;
 }
 
-interface Reflection {
-  id: number;
-  date: string; // YYYY-MM-DD
-  mood: string;
-  highlights: string;
-  challenges: string;
-  lessons: string;
-  gratitude: string;
-  goalsForTomorrow: string;
-  createdAt: string;
-}
-
 interface ManualNote {
   id: number;
   title: string;
@@ -123,6 +104,49 @@ interface ChatMessage {
   timestamp: string;
 }
 
+
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
+            <p className="text-gray-700 mb-4">The application encountered an error. Please try refreshing the page.</p>
+            <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-60 text-red-800">
+              {this.state.error?.toString()}
+            </pre>
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+              className="mt-6 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
+            >
+              Clear Data & Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const MYMate = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -149,9 +173,6 @@ const MYMate = () => {
     priority: 'medium' as 'low' | 'medium' | 'high',
     reminderOffset: '15' // minutes before
   });
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [showAchievementForm, setShowAchievementForm] = useState(false);
-  const [achievementForm, setAchievementForm] = useState({ title: '', description: '', date: new Date().toISOString().split('T')[0] });
   const [contents, setContents] = useState<Content[]>([]);
   const [showContentForm, setShowContentForm] = useState(false);
   const [editingContent, setEditingContent] = useState<number | null>(null);
@@ -163,10 +184,6 @@ const MYMate = () => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<number | null>(null);
   const [scheduleForm, setScheduleForm] = useState({ title: '', description: '', time: '', dayOfWeek: [] as number[], priority: 'medium' as 'low' | 'medium' | 'high', category: 'general', estimatedDuration: '30' });
-  const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [showReflectionForm, setShowReflectionForm] = useState(false);
-  const [editingReflection, setEditingReflection] = useState<number | null>(null);
-  const [reflectionForm, setReflectionForm] = useState({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
   const [manualNotes, setManualNotes] = useState<ManualNote[]>([]);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [editingNote, setEditingNote] = useState<number | null>(null);
@@ -190,12 +207,10 @@ const MYMate = () => {
     setGoals([]);
     setSkills([]);
     setDeadlinePlans([]);
-    setAchievements([]);
     setContents([]);
     setStreak({ lastVisitDate: '', visitDates: [], currentStreak: 0, longestStreak: 0 });
     setScheduleTasks([]);
     setDailyTasks([]);
-    setReflections([]);
     setManualNotes([]);
   };
 
@@ -405,21 +420,17 @@ const MYMate = () => {
       const goalsData = localStorage.getItem(`goals-${user.id}`);
       const skillsData = localStorage.getItem(`skills-${user.id}`);
       const deadlinePlansData = localStorage.getItem(`deadlinePlans-${user.id}`);
-      const achievementsData = localStorage.getItem(`achievements-${user.id}`);
       const contentsData = localStorage.getItem(`contents-${user.id}`);
       const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
       const dailyTasksData = localStorage.getItem(`dailyTasks-${user.id}`);
-      const reflectionsData = localStorage.getItem(`reflections-${user.id}`);
       const manualNotesData = localStorage.getItem(`manualNotes-${user.id}`);
 
       if (goalsData) setGoals(JSON.parse(goalsData));
       if (skillsData) setSkills(JSON.parse(skillsData));
       if (deadlinePlansData) setDeadlinePlans(JSON.parse(deadlinePlansData));
-      if (achievementsData) setAchievements(JSON.parse(achievementsData));
       if (contentsData) setContents(JSON.parse(contentsData));
       if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
       if (dailyTasksData) setDailyTasks(JSON.parse(dailyTasksData));
-      if (reflectionsData) setReflections(JSON.parse(reflectionsData));
       if (manualNotesData) setManualNotes(JSON.parse(manualNotesData));
     } catch (error) {
       console.error('Error loading data:', error);
@@ -607,63 +618,7 @@ const MYMate = () => {
     }
   };
 
-  // Reflection handlers
-  const handleAddReflection = () => {
-    const today = getTodayDate();
-    const newReflection: Reflection = {
-      id: Date.now(),
-      date: today,
-      ...reflectionForm,
-      createdAt: new Date().toISOString()
-    };
-    // Check if reflection already exists for today, update it
-    const existingIndex = reflections.findIndex(r => r.date === today);
-    let updated;
-    if (existingIndex >= 0) {
-      updated = reflections.map((r, idx) => idx === existingIndex ? { ...newReflection, id: r.id } : r);
-    } else {
-      updated = [...reflections, newReflection];
-    }
-    setReflections(updated);
-    saveData('reflections', updated);
-    setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
-    setShowReflectionForm(false);
-  };
 
-  const handleEditReflection = (reflection: Reflection) => {
-    setEditingReflection(reflection.id);
-    setReflectionForm({
-      mood: reflection.mood,
-      highlights: reflection.highlights,
-      challenges: reflection.challenges,
-      lessons: reflection.lessons,
-      gratitude: reflection.gratitude,
-      goalsForTomorrow: reflection.goalsForTomorrow
-    });
-    setShowReflectionForm(true);
-  };
-
-  const handleUpdateReflection = () => {
-    const updated = reflections.map(r =>
-      r.id === editingReflection ? { ...r, ...reflectionForm } : r
-    );
-    setReflections(updated);
-    saveData('reflections', updated);
-    setEditingReflection(null);
-    setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' });
-    setShowReflectionForm(false);
-  };
-
-  const handleDeleteReflection = (id: number) => {
-    const updated = reflections.filter(r => r.id !== id);
-    setReflections(updated);
-    saveData('reflections', updated);
-  };
-
-  const getTodayReflection = (): Reflection | undefined => {
-    const today = getTodayDate();
-    return reflections.find(r => r.date === today);
-  };
 
   // Manual Notes handlers
   const handleAddNote = () => {
@@ -710,11 +665,9 @@ const MYMate = () => {
   // Get user context for chatbot understanding
   const getUserContext = (): UserContext => {
     const todayTasks = getTodayTasks();
-    const todayReflection = getTodayReflection();
-    const completedGoalsCount = goals.filter(g => g.status === 'completed').length;
-    const activeGoalsCount = goals.filter(g => g.status === 'in-progress').length;
-    const totalHours = skills.reduce((sum, skill) => sum + skill.hoursInvested, 0); // Changed from timeLogs to skills
-    const recentReflection = reflections[reflections.length - 1];
+    const completedGoalsCount = (goals || []).filter(g => g.status === 'completed').length;
+    const activeGoalsCount = (goals || []).filter(g => g.status === 'in-progress').length;
+    const totalHours = (skills || []).reduce((sum, skill) => sum + skill.hoursInvested, 0);
     const recentNotes = manualNotes.slice(-5);
 
     return {
@@ -725,17 +678,10 @@ const MYMate = () => {
       completionRate: calculatePerfection(),
       completedGoals: completedGoalsCount,
       activeGoals: activeGoalsCount,
-      totalSkills: skills.length,
+      totalSkills: (skills || []).length,
       totalHours,
-      achievements: achievements.length,
-      todayReflection: todayReflection ? {
-        mood: todayReflection.mood,
-        challenges: todayReflection.challenges,
-        highlights: todayReflection.highlights
-      } : null,
-      recentReflection: recentReflection || null,
-      recentNotes: recentNotes.map(n => ({ title: n.title, content: n.content.substring(0, 100) })),
-      topSkills: skills.sort((a, b) => b.hoursInvested - a.hoursInvested).slice(0, 3)
+      recentNotes: (recentNotes || []).map(n => ({ title: n.title, content: n.content.substring(0, 100) })),
+      topSkills: (skills || []).slice().sort((a, b) => b.hoursInvested - a.hoursInvested).slice(0, 3)
     };
   };
 
@@ -766,7 +712,7 @@ const MYMate = () => {
       if (context.activeGoals === 0 && context.completedGoals === 0) {
         return `You don't have any goals set yet. Setting goals can help you stay focused and motivated! You can add goals in the "Goals" section. 🎯`;
       }
-      return `You have ${context.activeGoals} active goal${context.activeGoals !== 1 ? 's' : ''} and ${context.completedGoals} completed goal${context.completedGoals !== 1 ? 's' : ''}. You've also achieved ${context.achievements} milestone${context.achievements !== 1 ? 's' : ''}! 🏆 Keep pushing forward!`;
+      return `You have ${context.activeGoals} active goal${context.activeGoals !== 1 ? 's' : ''} and ${context.completedGoals} completed goal${context.completedGoals !== 1 ? 's' : ''}. Keep pushing forward! 🏆`;
     }
 
     // Skills-related queries
@@ -786,21 +732,7 @@ const MYMate = () => {
       return `You're on a ${context.streak}-day streak! 🔥 That's amazing consistency! Your longest streak is ${streak.longestStreak} day${streak.longestStreak !== 1 ? 's' : ''}. Keep it up!`;
     }
 
-    // Reflection/mood queries
-    if (message.match(/(reflection|mood|feeling|how.*feel|how.*day)/)) {
-      if (context.todayReflection) {
-        let response = `Based on today's reflection, you're feeling: ${context.todayReflection.mood || 'not specified'}\n\n`;
-        if (context.todayReflection.highlights) {
-          response += `Your highlights: ${context.todayReflection.highlights.substring(0, 150)}${context.todayReflection.highlights.length > 150 ? '...' : ''}\n\n`;
-        }
-        if (context.todayReflection.challenges) {
-          response += `Challenges: ${context.todayReflection.challenges.substring(0, 150)}${context.todayReflection.challenges.length > 150 ? '...' : ''}\n\n`;
-        }
-        response += `Keep reflecting! It helps track your growth. 💭`;
-        return response;
-      }
-      return `You haven't added a reflection for today. Would you like to reflect on your day? Go to the "Reflections" tab to add one! 📝`;
-    }
+
 
     // Performance/completion queries
     if (message.match(/(performance|progress|how.*doing|completion|perfect)/)) {
@@ -818,7 +750,7 @@ const MYMate = () => {
 
     // Help/What can you do
     if (message.match(/(help|what.*can|what.*do|how.*help|assist)/)) {
-      return `I can help you with:\n\n📋 **Tasks & Schedule**: Ask about your daily tasks or schedule\n🎯 **Goals**: Get updates on your goals and progress\n📚 **Skills**: Learn about your skills development\n🔥 **Streak**: Check your daily streak\n💭 **Reflections**: Discuss your daily reflections\n📊 **Performance**: Get insights on your completion rate\n\nJust ask me anything about your progress!`;
+      return `I can help you with:\n\n📋 **Tasks & Schedule**: Ask about your daily tasks or schedule\n🎯 **Goals**: Get updates on your goals and progress\n📚 **Skills**: Learn about your skills development\n🔥 **Streak**: Check your daily streak\n📊 **Performance**: Get insights on your completion rate\n\nJust ask me anything about your progress!`;
     }
 
     // Notes-related queries
@@ -830,7 +762,7 @@ const MYMate = () => {
     }
 
     // Default response
-    return `I understand you're asking about "${userMessage}". Based on your data:\n\n• ${context.todayTasksCompleted}/${context.todayTasksTotal} tasks completed today\n• ${context.completionRate}% completion rate\n• ${context.streak}-day streak\n• ${context.activeGoals} active goals\n\nHow can I help you improve or organize better? Ask me about your tasks, goals, skills, or reflections! 💬`;
+    return `I understand you're asking about "${userMessage}". Based on your data:\n\n• ${context.todayTasksCompleted}/${context.todayTasksTotal} tasks completed today\n• ${context.completionRate}% completion rate\n• ${context.streak}-day streak\n• ${context.activeGoals} active goals\n\nHow can I help you improve or organize better? Ask me about your tasks, goals, or skills! 💬`;
   };
 
   // Handle chat message send
@@ -920,7 +852,7 @@ const MYMate = () => {
 
       const welcomeMessage: ChatMessage = {
         id: Date.now(),
-        text: `Hello ${user.name}! 👋 I'm your personal MyMate assistant. ${aiMode}\n\nI understand your:\n• Achievements & Goals\n• Skills & Learning Progress\n• Daily Reflections\n• Notes & Journal Entries\n• Habits & Performance\n\nI can help you:\n• Track your daily progress\n• Understand your performance patterns\n• Get personalized insights\n• Set and achieve goals\n• Reflect on your journey\n\nWhat would you like to know?`,
+        text: `Hello ${user.name}! 👋 I'm your personal MyMate assistant. ${aiMode}\n\nI understand your:\n• Goals\n• Skills & Learning Progress\n• Notes & Journal Entries\n• Habits & Performance\n\nI can help you:\n• Track your daily progress\n• Understand your performance patterns\n• Get personalized insights\n• Set and achieve goals\n\nWhat would you like to know?`,
         isUser: false,
         timestamp: new Date().toISOString()
       };
@@ -928,7 +860,7 @@ const MYMate = () => {
     }
   }, [chatbotOpen, user, ollamaAvailable]);
 
-  const saveData = (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Achievement[] | Content[] | ScheduleTask[] | DailyTask[] | Reflection[] | ManualNote[]) => {
+  const saveData = (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Content[] | ScheduleTask[] | DailyTask[] | ManualNote[]) => {
     if (!user) return;
     try {
       localStorage.setItem(`${key}-${user.id}`, JSON.stringify(data));
@@ -1285,21 +1217,7 @@ const MYMate = () => {
     saveData('deadlinePlans', updated);
   };
 
-  const handleAddAchievement = () => {
-    if (!achievementForm.title) return;
-    const newAchievement: Achievement = { id: Date.now(), ...achievementForm };
-    const updatedAchievements = [...achievements, newAchievement];
-    setAchievements(updatedAchievements);
-    saveData('achievements', updatedAchievements);
-    setAchievementForm({ title: '', description: '', date: new Date().toISOString().split('T')[0] });
-    setShowAchievementForm(false);
-  };
 
-  const handleDeleteAchievement = (id: number) => {
-    const updatedAchievements = achievements.filter(a => a.id !== id);
-    setAchievements(updatedAchievements);
-    saveData('achievements', updatedAchievements);
-  };
 
   const handleAddContent = () => {
     if (!contentForm.title) return;
@@ -1345,7 +1263,7 @@ const MYMate = () => {
   };
 
   const handleExport = () => {
-    const data = { goals, skills, deadlinePlans, achievements, contents, exportedAt: new Date().toISOString() };
+    const data = { goals, skills, deadlinePlans, contents, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1419,12 +1337,11 @@ const MYMate = () => {
   }, [currentDate, user]);
 
   const stats = {
-    totalGoals: goals.length,
-    completedGoals: goals.filter(g => g.status === 'completed').length,
-    activeGoals: goals.filter(g => g.status === 'in-progress').length,
-    totalSkills: skills.length,
-    totalHours: timeLogs.reduce((sum, log) => sum + log.hours, 0),
-    totalAchievements: achievements.length
+    totalGoals: (goals || []).length,
+    completedGoals: (goals || []).filter(g => g.status === 'completed').length,
+    activeGoals: (goals || []).filter(g => g.status === 'in-progress').length,
+    totalSkills: (skills || []).length,
+    totalHours: (skills || []).reduce((sum, skill) => sum + skill.hoursInvested, 0)
   };
 
   if (showAuth) {
@@ -1641,9 +1558,7 @@ const MYMate = () => {
               { id: 'goals', icon: Target, label: 'Goals' },
               { id: 'skills', icon: BookOpen, label: 'Skills' },
               { id: 'planner', icon: Calendar, label: 'Planner' },
-              { id: 'achievements', icon: Award, label: 'Achievements' },
               { id: 'content', icon: Video, label: 'Content Creation' },
-              { id: 'reflections', icon: PenTool, label: 'Reflections' },
               { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
               { id: 'analysis', icon: BarChart3, label: 'Analysis' }
             ].map(item => (
@@ -1837,12 +1752,8 @@ const MYMate = () => {
                 </div>
                 {/* Achievements Card */}
                 <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-xl shadow-lg p-6 border-2 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-100 dark:ring-yellow-900/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-700 dark:text-gray-300 font-medium">Achievements</h3>
-                    <Award className="text-yellow-600 dark:text-yellow-400" size={28} />
-                  </div>
-                  <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{stats.totalAchievements}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Keep going!</p>
+                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalHours}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Total Hours</div>
                 </div>
               </div>
 
@@ -1893,7 +1804,7 @@ const MYMate = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Active Goals</h3>
                   <div className="space-y-3">
@@ -1906,18 +1817,7 @@ const MYMate = () => {
                     {goals.filter(g => g.status === 'in-progress').length === 0 && <p className="text-gray-500 dark:text-gray-400 text-center py-4">No active goals</p>}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Recent Achievements</h3>
-                  <div className="space-y-3">
-                    {achievements.slice(-3).reverse().map(achievement => (
-                      <div key={achievement.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <span className="text-gray-700 dark:text-gray-300">{achievement.title}</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{achievement.date}</span>
-                      </div>
-                    ))}
-                    {achievements.length === 0 && <p className="text-gray-500 dark:text-gray-400 text-center py-4">No achievements yet</p>}
-                  </div>
-                </div>
+
               </div>
             </div>
           )}
@@ -2168,7 +2068,7 @@ const MYMate = () => {
               )}
 
               <div className="grid grid-cols-1 gap-4">
-                {deadlinePlans.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
+                {(deadlinePlans || []).sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
                   <div key={plan.id} className={`bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-blue-500'} dark:border-gray-700`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -2204,72 +2104,7 @@ const MYMate = () => {
             </div>
           )}
 
-          {activeTab === 'achievements' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Achievements</h2>
-                <button onClick={() => setShowAchievementForm(!showAchievementForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
-                  <Plus size={20} />
-                  <span>Add Achievement</span>
-                </button>
-              </div>
 
-              {showAchievementForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">New Achievement</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="achievement-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="achievement-title" type="text" value={achievementForm.title} onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What did you achieve?" />
-                    </div>
-                    <div>
-                      <label htmlFor="achievement-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea id="achievement-description" value={achievementForm.description} onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Tell more about it" />
-                    </div>
-                    <div>
-                      <label htmlFor="achievement-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                      <input id="achievement-date" type="date" value={achievementForm.date} onChange={(e) => setAchievementForm({ ...achievementForm, date: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Achievement date" />
-                    </div>
-                    <div className="flex space-x-3">
-                      <button onClick={handleAddAchievement} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
-                        <Save size={18} />
-                        <span>Save</span>
-                      </button>
-                      <button onClick={() => { setShowAchievementForm(false); setAchievementForm({ title: '', description: '', date: new Date().toISOString().split('T')[0] }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {achievements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(achievement => (
-                  <div key={achievement.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <Award className="text-yellow-500 dark:text-yellow-400" size={24} />
-                          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{achievement.title}</h3>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{achievement.description}</p>
-                        <div className="flex items-center space-x-4 ml-9 text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">{achievement.date}</span>
-                        </div>
-                      </div>
-                      <button onClick={() => handleDeleteAchievement(achievement.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete achievement">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {achievements.length === 0 && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
-                    <Award size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">No achievements yet. Celebrate your wins!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {activeTab === 'content' && (
             <div>
@@ -2712,142 +2547,6 @@ const MYMate = () => {
             </div>
           )}
 
-          {activeTab === 'reflections' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Daily Reflections</h2>
-                <button onClick={() => { const todayReflection = getTodayReflection(); if (todayReflection) handleEditReflection(todayReflection); else setShowReflectionForm(true); }} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
-                  <Plus size={20} />
-                  <span>{getTodayReflection() ? 'Edit Today\'s Reflection' : 'Add Today\'s Reflection'}</span>
-                </button>
-              </div>
-
-              {showReflectionForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingReflection ? 'Edit Reflection' : 'Today\'s Reflection'}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mood/Feeling</label>
-                      <input type="text" value={reflectionForm.mood} onChange={(e) => setReflectionForm({ ...reflectionForm, mood: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="How are you feeling today?" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Highlights</label>
-                      <textarea value={reflectionForm.highlights} onChange={(e) => setReflectionForm({ ...reflectionForm, highlights: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="What went well today?" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Challenges</label>
-                      <textarea value={reflectionForm.challenges} onChange={(e) => setReflectionForm({ ...reflectionForm, challenges: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="What challenges did you face?" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lessons Learned</label>
-                      <textarea value={reflectionForm.lessons} onChange={(e) => setReflectionForm({ ...reflectionForm, lessons: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="What did you learn today?" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gratitude</label>
-                      <textarea value={reflectionForm.gratitude} onChange={(e) => setReflectionForm({ ...reflectionForm, gratitude: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="What are you grateful for today?" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Goals for Tomorrow</label>
-                      <textarea value={reflectionForm.goalsForTomorrow} onChange={(e) => setReflectionForm({ ...reflectionForm, goalsForTomorrow: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="What do you want to accomplish tomorrow?" />
-                    </div>
-                    <div className="flex space-x-3">
-                      <button onClick={editingReflection ? handleUpdateReflection : handleAddReflection} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
-                        <Save size={18} />
-                        <span>{editingReflection ? 'Update' : 'Save'}</span>
-                      </button>
-                      <button onClick={() => { setShowReflectionForm(false); setEditingReflection(null); setReflectionForm({ mood: '', highlights: '', challenges: '', lessons: '', gratitude: '', goalsForTomorrow: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Today's Reflection Display */}
-              {!showReflectionForm && getTodayReflection() && (
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl shadow p-6 mb-6 border border-purple-200 dark:border-purple-800">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                      <PenTool className="text-purple-600 dark:text-purple-400" size={24} />
-                      Today's Reflection ({getTodayDate()})
-                    </h3>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEditReflection(getTodayReflection()!)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg" aria-label="Edit reflection">
-                        <Edit2 size={18} />
-                      </button>
-                      <button onClick={() => handleDeleteReflection(getTodayReflection()!.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete reflection">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {getTodayReflection()!.mood && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Mood:</h4>
-                        <p className="text-gray-600 dark:text-gray-300">{getTodayReflection()!.mood}</p>
-                      </div>
-                    )}
-                    {getTodayReflection()!.highlights && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Highlights:</h4>
-                        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{getTodayReflection()!.highlights}</p>
-                      </div>
-                    )}
-                    {getTodayReflection()!.challenges && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Challenges:</h4>
-                        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{getTodayReflection()!.challenges}</p>
-                      </div>
-                    )}
-                    {getTodayReflection()!.lessons && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Lessons Learned:</h4>
-                        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{getTodayReflection()!.lessons}</p>
-                      </div>
-                    )}
-                    {getTodayReflection()!.gratitude && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Gratitude:</h4>
-                        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{getTodayReflection()!.gratitude}</p>
-                      </div>
-                    )}
-                    {getTodayReflection()!.goalsForTomorrow && (
-                      <div>
-                        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Goals for Tomorrow:</h4>
-                        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{getTodayReflection()!.goalsForTomorrow}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Past Reflections */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Past Reflections</h3>
-                <div className="space-y-4">
-                  {reflections.filter(r => r.date !== getTodayDate()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(reflection => (
-                    <div key={reflection.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-gray-800 dark:text-gray-100">{reflection.date}</span>
-                        <div className="flex gap-2">
-                          <button onClick={() => handleEditReflection(reflection)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg" aria-label="Edit reflection">
-                            <Edit2 size={18} />
-                          </button>
-                          <button onClick={() => handleDeleteReflection(reflection.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete reflection">
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-                      {reflection.mood && <p className="text-sm text-gray-600 dark:text-gray-300 mb-2"><span className="font-medium">Mood:</span> {reflection.mood}</p>}
-                      {reflection.highlights && <p className="text-sm text-gray-600 dark:text-gray-300 mb-2"><span className="font-medium">Highlights:</span> {reflection.highlights.substring(0, 100)}{reflection.highlights.length > 100 ? '...' : ''}</p>}
-                    </div>
-                  ))}
-                  {reflections.filter(r => r.date !== getTodayDate()).length === 0 && (
-                    <p className="text-gray-500 dark:text-gray-400 text-center py-8">No past reflections yet. Start reflecting today!</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === 'notes' && (
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -3049,5 +2748,11 @@ const MYMate = () => {
   );
 };
 
-export default MYMate;
 
+const MYMateWithErrorBoundary = () => (
+  <ErrorBoundary>
+    <MYMate />
+  </ErrorBoundary>
+);
+
+export default MYMateWithErrorBoundary;

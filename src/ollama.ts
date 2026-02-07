@@ -33,15 +33,8 @@ export interface UserContext {
   activeGoals: number;
   totalSkills: number;
   totalHours: number;
-  achievements: number;
-  todayReflection: {
-    mood: string;
-    challenges: string;
-    highlights: string;
-  } | null;
-  recentReflection: any | null;
-  recentNotes: Array<{ title: string; content: string }>;
-  topSkills: Array<{ name: string; level: string; hoursInvested: number }>;
+  recentNotes: { title: string; content: string }[];
+  topSkills: { name: string; level: string; hoursInvested: number }[];
 }
 
 // Check if Ollama is available
@@ -66,12 +59,12 @@ export const checkOllamaConnection = async (): Promise<boolean> => {
 // Format user context into a comprehensive prompt
 export const formatContextPrompt = (context: UserContext, userMessage: string): string => {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  
+
   return `You are MyMate, a personal productivity assistant for ${context.user}. Your role is to help them understand their progress, provide insights, and offer personalized guidance.
 
 TODAY'S DATE: ${today}
 
-STRUCTURED DATA (Achievements, Skills, Goals, Habits):
+STRUCTURED DATA (Skills, Goals, Habits):
 - Daily Streak: ${context.streak} days (maintains consistency by using the app daily)
 - Today's Tasks: ${context.todayTasksCompleted} completed out of ${context.todayTasksTotal} total
 - Completion Rate: ${context.completionRate}% (7-day average)
@@ -79,15 +72,9 @@ STRUCTURED DATA (Achievements, Skills, Goals, Habits):
 - Completed Goals: ${context.completedGoals}
 - Total Skills Tracked: ${context.totalSkills}
 - Hours Invested in Learning: ${context.totalHours.toFixed(1)} hours
-- Total Achievements: ${context.achievements}
 ${context.topSkills.length > 0 ? `- Top Skills:\n${context.topSkills.map(s => `  • ${s.name} (${s.level}) - ${s.hoursInvested} hours`).join('\n')}` : ''}
 
-UNSTRUCTURED DATA (Reflections, Notes, Journal Entries):
-${context.todayReflection ? `- Today's Reflection:
-  • Mood: ${context.todayReflection.mood || 'Not specified'}
-  • Highlights: ${context.todayReflection.highlights || 'None recorded'}
-  • Challenges: ${context.todayReflection.challenges || 'None recorded'}` : '- Today\'s Reflection: Not yet recorded'}
-${context.recentReflection ? `- Recent Reflection Insights: Available` : ''}
+UNSTRUCTURED DATA (Notes):
 ${context.recentNotes.length > 0 ? `- Recent Notes:\n${context.recentNotes.map(n => `  • ${n.title}: ${n.content}`).join('\n')}` : '- Notes: None yet'}
 
 YOUR CAPABILITIES:
@@ -117,7 +104,7 @@ export const generateOllamaResponse = async (
 ): Promise<string> => {
   try {
     const prompt = formatContextPrompt(context, userMessage);
-    
+
     const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: {
@@ -157,7 +144,7 @@ export const streamOllamaResponse = async (
 ): Promise<void> => {
   try {
     const prompt = formatContextPrompt(context, userMessage);
-    
+
     const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: {
