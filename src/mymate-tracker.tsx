@@ -29,12 +29,15 @@ interface Skill {
   targetHours: number;
 }
 
-interface TimeLog {
+interface DeadlinePlan {
   id: number;
-  activity: string;
-  hours: number;
-  date: string;
-  category: string;
+  title: string;
+  description: string;
+  deadline: string; // ISO Date string
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'completed' | 'overdue';
+  reminderTime: string; // ISO Date string
+  notificationSent: boolean;
 }
 
 interface Achievement {
@@ -136,9 +139,16 @@ const MYMate = () => {
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [editingSkill, setEditingSkill] = useState<number | null>(null);
   const [skillForm, setSkillForm] = useState({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' });
-  const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
-  const [showTimeForm, setShowTimeForm] = useState(false);
-  const [timeForm, setTimeForm] = useState({ activity: '', hours: '', date: new Date().toISOString().split('T')[0], category: 'learning' });
+
+  const [deadlinePlans, setDeadlinePlans] = useState<DeadlinePlan[]>([]);
+  const [showPlanForm, setShowPlanForm] = useState(false);
+  const [planForm, setPlanForm] = useState({
+    title: '',
+    description: '',
+    deadline: '',
+    priority: 'medium' as 'low' | 'medium' | 'high',
+    reminderOffset: '15' // minutes before
+  });
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [showAchievementForm, setShowAchievementForm] = useState(false);
   const [achievementForm, setAchievementForm] = useState({ title: '', description: '', date: new Date().toISOString().split('T')[0] });
@@ -179,7 +189,7 @@ const MYMate = () => {
   const clearAllData = () => {
     setGoals([]);
     setSkills([]);
-    setTimeLogs([]);
+    setDeadlinePlans([]);
     setAchievements([]);
     setContents([]);
     setStreak({ lastVisitDate: '', visitDates: [], currentStreak: 0, longestStreak: 0 });
@@ -394,7 +404,7 @@ const MYMate = () => {
 
       const goalsData = localStorage.getItem(`goals-${user.id}`);
       const skillsData = localStorage.getItem(`skills-${user.id}`);
-      const timeLogsData = localStorage.getItem(`timeLogs-${user.id}`);
+      const deadlinePlansData = localStorage.getItem(`deadlinePlans-${user.id}`);
       const achievementsData = localStorage.getItem(`achievements-${user.id}`);
       const contentsData = localStorage.getItem(`contents-${user.id}`);
       const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
@@ -404,7 +414,7 @@ const MYMate = () => {
 
       if (goalsData) setGoals(JSON.parse(goalsData));
       if (skillsData) setSkills(JSON.parse(skillsData));
-      if (timeLogsData) setTimeLogs(JSON.parse(timeLogsData));
+      if (deadlinePlansData) setDeadlinePlans(JSON.parse(deadlinePlansData));
       if (achievementsData) setAchievements(JSON.parse(achievementsData));
       if (contentsData) setContents(JSON.parse(contentsData));
       if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
@@ -466,6 +476,7 @@ const MYMate = () => {
   }, [user]);
 
   // Generate daily tasks when schedule changes (date changes are handled by currentDate useEffect)
+  // Schedule management handlers
   useEffect(() => {
     if (user && scheduleTasks.length > 0 && currentDate) {
       generateDailyTasks(currentDate);
@@ -473,6 +484,43 @@ const MYMate = () => {
       adjustScheduleForMissedTasks();
     }
   }, [scheduleTasks, user, currentDate]);
+
+  // Request notification permission and check for reminders
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+
+    const checkReminders = () => {
+      const now = new Date();
+
+      const newPlans = deadlinePlans.map(plan => {
+        if (!plan.notificationSent && plan.status === 'pending' && plan.reminderTime) {
+          const reminderTime = new Date(plan.reminderTime);
+          if (now >= reminderTime) {
+            // Trigger notification
+            if (Notification.permission === 'granted') {
+              new Notification(`Reminder: ${plan.title}`, {
+                body: `Deadline: ${new Date(plan.deadline).toLocaleString()}`,
+                icon: '/favicon.ico' // Assuming a favicon exists or browser default
+              });
+            }
+            return { ...plan, notificationSent: true };
+          }
+        }
+        return plan;
+      });
+
+      // Update state if any notification was sent to avoid repeated alerts
+      if (JSON.stringify(newPlans) !== JSON.stringify(deadlinePlans)) {
+        setDeadlinePlans(newPlans);
+        saveData('deadlinePlans', newPlans);
+      }
+    };
+
+    const intervalId = setInterval(checkReminders, 60000); // Check every minute
+    return () => clearInterval(intervalId);
+  }, [deadlinePlans]);
 
   // Schedule management handlers
   const handleAddSchedule = () => {
@@ -665,7 +713,7 @@ const MYMate = () => {
     const todayReflection = getTodayReflection();
     const completedGoalsCount = goals.filter(g => g.status === 'completed').length;
     const activeGoalsCount = goals.filter(g => g.status === 'in-progress').length;
-    const totalHours = timeLogs.reduce((sum, log) => sum + log.hours, 0);
+    const totalHours = skills.reduce((sum, skill) => sum + skill.hoursInvested, 0); // Changed from timeLogs to skills
     const recentReflection = reflections[reflections.length - 1];
     const recentNotes = manualNotes.slice(-5);
 
@@ -880,7 +928,7 @@ const MYMate = () => {
     }
   }, [chatbotOpen, user, ollamaAvailable]);
 
-  const saveData = (key: string, data: Goal[] | Skill[] | TimeLog[] | Achievement[] | Content[] | ScheduleTask[] | DailyTask[] | Reflection[] | ManualNote[]) => {
+  const saveData = (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Achievement[] | Content[] | ScheduleTask[] | DailyTask[] | Reflection[] | ManualNote[]) => {
     if (!user) return;
     try {
       localStorage.setItem(`${key}-${user.id}`, JSON.stringify(data));
@@ -1198,20 +1246,43 @@ const MYMate = () => {
     saveData('skills', updatedSkills);
   };
 
-  const handleAddTimeLog = () => {
-    if (!timeForm.activity || !timeForm.hours) return;
-    const newLog: TimeLog = { id: Date.now(), ...timeForm, hours: parseFloat(timeForm.hours) };
-    const updatedLogs = [...timeLogs, newLog];
-    setTimeLogs(updatedLogs);
-    saveData('timeLogs', updatedLogs);
-    setTimeForm({ activity: '', hours: '', date: new Date().toISOString().split('T')[0], category: 'learning' });
-    setShowTimeForm(false);
+  const handleAddPlan = () => {
+    if (!planForm.title || !planForm.deadline) return;
+
+    // Calculate reminder time
+    const deadlineDate = new Date(planForm.deadline);
+    const reminderDate = new Date(deadlineDate.getTime() - parseInt(planForm.reminderOffset) * 60000);
+
+    const newPlan: DeadlinePlan = {
+      id: Date.now(),
+      title: planForm.title,
+      description: planForm.description,
+      deadline: planForm.deadline,
+      priority: planForm.priority,
+      status: 'pending',
+      reminderTime: reminderDate.toISOString(),
+      notificationSent: false
+    };
+
+    const updated = [...deadlinePlans, newPlan];
+    setDeadlinePlans(updated);
+    saveData('deadlinePlans', updated);
+    setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+    setShowPlanForm(false);
   };
 
-  const handleDeleteTimeLog = (id: number) => {
-    const updatedLogs = timeLogs.filter(l => l.id !== id);
-    setTimeLogs(updatedLogs);
-    saveData('timeLogs', updatedLogs);
+  const handleDeletePlan = (id: number) => {
+    const updated = deadlinePlans.filter(p => p.id !== id);
+    setDeadlinePlans(updated);
+    saveData('deadlinePlans', updated);
+  };
+
+  const handleTogglePlan = (id: number) => {
+    const updated = deadlinePlans.map(p =>
+      p.id === id ? { ...p, status: p.status === 'completed' ? 'pending' : 'completed' as 'pending' | 'completed' | 'overdue' } : p
+    );
+    setDeadlinePlans(updated);
+    saveData('deadlinePlans', updated);
   };
 
   const handleAddAchievement = () => {
@@ -1274,7 +1345,7 @@ const MYMate = () => {
   };
 
   const handleExport = () => {
-    const data = { goals, skills, timeLogs, achievements, contents, exportedAt: new Date().toISOString() };
+    const data = { goals, skills, deadlinePlans, achievements, contents, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1569,7 +1640,7 @@ const MYMate = () => {
               { id: 'schedule', icon: ListTodo, label: 'Daily Schedule' },
               { id: 'goals', icon: Target, label: 'Goals' },
               { id: 'skills', icon: BookOpen, label: 'Skills' },
-              { id: 'time', icon: Clock, label: 'Time Logs' },
+              { id: 'planner', icon: Calendar, label: 'Planner' },
               { id: 'achievements', icon: Award, label: 'Achievements' },
               { id: 'content', icon: Video, label: 'Content Creation' },
               { id: 'reflections', icon: PenTool, label: 'Reflections' },
@@ -2041,92 +2112,94 @@ const MYMate = () => {
             </div>
           )}
 
-          {activeTab === 'time' && (
+          {activeTab === 'planner' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Time Logs</h2>
-                <button onClick={() => setShowTimeForm(!showTimeForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Deadline Planner</h2>
+                <button onClick={() => setShowPlanForm(!showPlanForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
                   <Plus size={20} />
-                  <span>Log Time</span>
+                  <span>Add Plan</span>
                 </button>
               </div>
 
-              {showTimeForm && (
+              {showPlanForm && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">New Time Log</h3>
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">New Deadline Plan</h3>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="time-activity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity</label>
-                      <input id="time-activity" type="text" value={timeForm.activity} onChange={(e) => setTimeForm({ ...timeForm, activity: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What did you work on?" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="time-hours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours</label>
-                        <input id="time-hours" type="number" step="0.5" value={timeForm.hours} onChange={(e) => setTimeForm({ ...timeForm, hours: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" min="0" placeholder="2.5" aria-label="Hours" />
-                      </div>
-                      <div>
-                        <label htmlFor="time-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input id="time-date" type="date" value={timeForm.date} onChange={(e) => setTimeForm({ ...timeForm, date: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Date" />
-                      </div>
+                      <label htmlFor="plan-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                      <input id="plan-title" type="text" value={planForm.title} onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What needs to be done?" />
                     </div>
                     <div>
-                      <label htmlFor="time-category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                      <select id="time-category" value={timeForm.category} onChange={(e) => setTimeForm({ ...timeForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Category">
-                        <option value="learning">Learning</option>
-                        <option value="project">Project Work</option>
-                        <option value="networking">Networking</option>
-                        <option value="research">Research</option>
-                        <option value="other">Other</option>
-                      </select>
+                      <label htmlFor="plan-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                      <textarea id="plan-desc" value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={2} />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="plan-deadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
+                        <input id="plan-deadline" type="datetime-local" value={planForm.deadline} onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                      </div>
+                      <div>
+                        <label htmlFor="plan-priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                        <select id="plan-priority" value={planForm.priority} onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="plan-reminder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remind Me</label>
+                        <select id="plan-reminder" value={planForm.reminderOffset} onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                          <option value="15">15 minutes before</option>
+                          <option value="60">1 hour before</option>
+                          <option value="1440">1 day before</option>
+                        </select>
+                      </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={handleAddTimeLog} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                      <button onClick={handleAddPlan} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
                         <Save size={18} />
-                        <span>Save</span>
+                        <span>Save Plan</span>
                       </button>
-                      <button onClick={() => { setShowTimeForm(false); setTimeForm({ activity: '', hours: '', date: new Date().toISOString().split('T')[0], category: 'learning' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden border border-gray-200 dark:border-gray-700">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-700/50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Hours</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Category</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {timeLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(log => (
-                        <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{log.activity}</td>
-                          <td className="px-6 py-4 text-gray-800 dark:text-gray-100 font-semibold">{log.hours}h</td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{log.date}</td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm capitalize">{log.category}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <button onClick={() => handleDeleteTimeLog(log.id)} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300" aria-label="Delete time log">
-                              <Trash2 size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {timeLogs.length === 0 && (
-                    <div className="p-12 text-center">
-                      <Clock size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">No time logs yet. Start tracking your time!</p>
+              <div className="grid grid-cols-1 gap-4">
+                {deadlinePlans.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
+                  <div key={plan.id} className={`bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-blue-500'} dark:border-gray-700`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <button onClick={() => handleTogglePlan(plan.id)} className="text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+                            {plan.status === 'completed' ? <CheckCircle className="text-green-600 dark:text-green-400" size={24} /> : <Circle size={24} />}
+                          </button>
+                          <h3 className={`text-xl font-bold ${plan.status === 'completed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-800 dark:text-gray-100'}`}>{plan.title}</h3>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{plan.description}</p>
+                        <div className="flex items-center space-x-4 ml-9 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs uppercase ${plan.priority === 'high' ? 'bg-red-100 text-red-700' : plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>{plan.priority}</span>
+                          <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <Clock size={14} />
+                            {new Date(plan.deadline).toLocaleString()}
+                          </span>
+                          {plan.status === 'overdue' && <span className="text-red-600 font-bold">Overdue</span>}
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeletePlan(plan.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                ))}
+                {deadlinePlans.length === 0 && (
+                  <div className="p-12 text-center bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700">
+                    <Calendar size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">No active plans. Add a deadline to get started!</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
