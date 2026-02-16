@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
+import { saveToFirestore, loadFromFirestore, migrateLocalStorageToFirestore, hasUserMigrated } from './firestore-helpers';
 import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun } from 'lucide-react';
 
 interface User {
@@ -407,8 +408,8 @@ const MYMate = () => {
     }
   };
 
-  // Load user data from localStorage
-  const loadData = () => {
+  // Load user data from Firestore (with localStorage fallback)
+  const loadData = async () => {
     if (!user) {
       clearAllData();
       return;
@@ -417,24 +418,64 @@ const MYMate = () => {
       // Reset all arrays first to prevent showing previous user's data
       clearAllData();
 
-      const goalsData = localStorage.getItem(`goals-${user.id}`);
-      const skillsData = localStorage.getItem(`skills-${user.id}`);
-      const deadlinePlansData = localStorage.getItem(`deadlinePlans-${user.id}`);
-      const contentsData = localStorage.getItem(`contents-${user.id}`);
-      const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
-      const dailyTasksData = localStorage.getItem(`dailyTasks-${user.id}`);
-      const manualNotesData = localStorage.getItem(`manualNotes-${user.id}`);
+      // Check if user needs to migrate from localStorage
+      if (!hasUserMigrated(user.id)) {
+        const hasLocalData = localStorage.getItem(`goals-${user.id}`) ||
+          localStorage.getItem(`skills-${user.id}`) ||
+          localStorage.getItem(`deadlinePlans-${user.id}`);
 
-      if (goalsData) setGoals(JSON.parse(goalsData));
-      if (skillsData) setSkills(JSON.parse(skillsData));
-      if (deadlinePlansData) setDeadlinePlans(JSON.parse(deadlinePlansData));
-      if (contentsData) setContents(JSON.parse(contentsData));
-      if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
-      if (dailyTasksData) setDailyTasks(JSON.parse(dailyTasksData));
-      if (manualNotesData) setManualNotes(JSON.parse(manualNotesData));
+        if (hasLocalData) {
+          console.log('📦 Migrating data from localStorage to Firestore...');
+          await migrateLocalStorageToFirestore(user.id);
+          console.log('✅ Migration complete!');
+        } else {
+          // Mark as migrated even if no data to migrate
+          localStorage.setItem(`migrated-to-firestore-${user.id}`, 'true');
+        }
+      }
+
+      // Load from Firestore
+      const [goalsData, skillsData, deadlinePlansData, contentsData, scheduleTasksData, dailyTasksData, manualNotesData] = await Promise.all([
+        loadFromFirestore(user.id, 'goals'),
+        loadFromFirestore(user.id, 'skills'),
+        loadFromFirestore(user.id, 'deadlinePlans'),
+        loadFromFirestore(user.id, 'contents'),
+        loadFromFirestore(user.id, 'scheduleTasks'),
+        loadFromFirestore(user.id, 'dailyTasks'),
+        loadFromFirestore(user.id, 'manualNotes')
+      ]);
+
+      if (goalsData) setGoals(goalsData);
+      if (skillsData) setSkills(skillsData);
+      if (deadlinePlansData) setDeadlinePlans(deadlinePlansData);
+      if (contentsData) setContents(contentsData);
+      if (scheduleTasksData) setScheduleTasks(scheduleTasksData);
+      if (dailyTasksData) setDailyTasks(dailyTasksData);
+      if (manualNotesData) setManualNotes(manualNotesData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      clearAllData();
+      console.error('Error loading data from Firestore:', error);
+
+      // Fallback to localStorage if Firestore fails
+      try {
+        const goalsData = localStorage.getItem(`goals-${user.id}`);
+        const skillsData = localStorage.getItem(`skills-${user.id}`);
+        const deadlinePlansData = localStorage.getItem(`deadlinePlans-${user.id}`);
+        const contentsData = localStorage.getItem(`contents-${user.id}`);
+        const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
+        const dailyTasksData = localStorage.getItem(`dailyTasks-${user.id}`);
+        const manualNotesData = localStorage.getItem(`manualNotes-${user.id}`);
+
+        if (goalsData) setGoals(JSON.parse(goalsData));
+        if (skillsData) setSkills(JSON.parse(skillsData));
+        if (deadlinePlansData) setDeadlinePlans(JSON.parse(deadlinePlansData));
+        if (contentsData) setContents(JSON.parse(contentsData));
+        if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
+        if (dailyTasksData) setDailyTasks(JSON.parse(dailyTasksData));
+        if (manualNotesData) setManualNotes(JSON.parse(manualNotesData));
+      } catch (localError) {
+        console.error('Error loading from localStorage:', localError);
+        clearAllData();
+      }
     }
   };
 
@@ -860,12 +901,21 @@ const MYMate = () => {
     }
   }, [chatbotOpen, user, ollamaAvailable]);
 
-  const saveData = (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Content[] | ScheduleTask[] | DailyTask[] | ManualNote[]) => {
+  const saveData = async (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Content[] | ScheduleTask[] | DailyTask[] | ManualNote[]) => {
     if (!user) return;
     try {
+      // Save to Firestore
+      await saveToFirestore(user.id, key as any, data);
+      // Also keep in localStorage as backup for offline use
       localStorage.setItem(`${key}-${user.id}`, JSON.stringify(data));
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error saving data:', error);
+      // If Firestore fails, at least save to localStorage
+      try {
+        localStorage.setItem(`${key}-${user.id}`, JSON.stringify(data));
+      } catch (localError) {
+        console.error('Error saving to localStorage:', localError);
+      }
     }
   };
 
