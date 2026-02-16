@@ -3,7 +3,8 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
 import { saveToFirestore, loadFromFirestore, migrateLocalStorageToFirestore, hasUserMigrated } from './firestore-helpers';
-import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun } from 'lucide-react';
+import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun, Wallet } from 'lucide-react';
+import BudgetPlanner from './components/BudgetPlanner';
 
 interface User {
   id: string;
@@ -1608,6 +1609,7 @@ const MYMate = () => {
               { id: 'goals', icon: Target, label: 'Goals' },
               { id: 'skills', icon: BookOpen, label: 'Skills' },
               { id: 'planner', icon: Calendar, label: 'Planner' },
+              { id: 'budget', icon: Wallet, label: 'Budget Planner' },
               { id: 'content', icon: Video, label: 'Content Creation' },
               { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
               { id: 'analysis', icon: BarChart3, label: 'Analysis' }
@@ -2678,6 +2680,10 @@ const MYMate = () => {
                 )}
               </div>
             </div>
+          )}
+
+          {activeTab === 'budget' && (
+            <BudgetPlanner user={user} theme={theme} />
           )}
         </main>
       </div>

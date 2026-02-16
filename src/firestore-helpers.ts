@@ -2,7 +2,7 @@ import { db } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Generic type for all data collections
-export type DataType = 'goals' | 'skills' | 'deadlinePlans' | 'contents' | 'scheduleTasks' | 'dailyTasks' | 'manualNotes' | 'streak';
+export type DataType = 'goals' | 'skills' | 'deadlinePlans' | 'contents' | 'scheduleTasks' | 'dailyTasks' | 'manualNotes' | 'streak' | 'budgetIncomes' | 'budgetExpenses' | 'budgetLimits' | 'budgetGoals';
 
 /**
  * Save data to Firestore for a specific user
