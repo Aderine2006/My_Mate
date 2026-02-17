@@ -1,0 +1,103 @@
+[debug] [2026-02-17T15:23:55.982Z] ----------------------------------------------------------------------
+[debug] [2026-02-17T15:23:55.984Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\ADERINE\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-02-17T15:23:55.984Z] CLI Version:   15.6.0
+[debug] [2026-02-17T15:23:55.984Z] Platform:      win32
+[debug] [2026-02-17T15:23:55.984Z] Node Version:  v24.9.0
+[debug] [2026-02-17T15:23:55.984Z] Time:          Tue Feb 17 2026 20:53:55 GMT+0530 (India Standard Time)
+[debug] [2026-02-17T15:23:55.984Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-17T15:24:00.179Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-17T15:24:00.179Z] > authorizing via signed-in user (perezaderine@gmail.com)
+[debug] [2026-02-17T15:24:00.179Z] [iam] checking project mymate-2487 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-02-17T15:24:00.181Z] Checked if tokens are valid: false, expires at: 1771266428683
+[debug] [2026-02-17T15:24:00.181Z] Checked if tokens are valid: false, expires at: 1771266428683
+[debug] [2026-02-17T15:24:00.181Z] > refreshing access token with scopes: []
+[debug] [2026-02-17T15:24:00.184Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-17T15:24:00.184Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-17T15:24:06.810Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-17T15:24:06.810Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-17T15:24:06.816Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/mymate-2487:testIamPermissions [none]
+[debug] [2026-02-17T15:24:06.816Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/mymate-2487:testIamPermissions  x-goog-user-project=mymate-2487
+[debug] [2026-02-17T15:24:06.816Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/mymate-2487:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-17T15:24:16.745Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/mymate-2487:testIamPermissions 200
+[debug] [2026-02-17T15:24:16.746Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/mymate-2487:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-17T15:24:16.746Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:16.746Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:16.746Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/mymate-2487 [none]
+[debug] [2026-02-17T15:24:24.423Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/mymate-2487 200
+[debug] [2026-02-17T15:24:24.423Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/mymate-2487 {"projectId":"mymate-2487","projectNumber":"252566323457","displayName":"mymate-2487","name":"projects/mymate-2487","resources":{"hostingSite":"mymate-2487","realtimeDatabaseInstance":"mymate-2487-default-rtdb"},"state":"ACTIVE","etag":"1_cd724370-d589-4a83-821e-9016e589e389"}
+[info] 
+[info] === Deploying to 'mymate-2487'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-02-17T15:24:24.432Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:24.432Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:24.432Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions [none]
+[debug] [2026-02-17T15:24:24.432Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-02-17T15:24:29.445Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions 200
+[debug] [2026-02-17T15:24:29.445Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions {"name":"projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[mymate-2487]: beginning deploy... 
+[info] i  hosting[mymate-2487]: found 3 files in dist 
+[debug] [2026-02-17T15:24:29.458Z] [hosting] uploading with 200 concurrency
+[debug] [2026-02-17T15:24:29.514Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:29.514Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:29.515Z] [hosting] hash cache [ZGlzdA] stored for 3 files
+[debug] [2026-02-17T15:24:29.515Z] [hosting][hash queue][FINAL] {"max":51,"min":2,"avg":19.666666666666668,"active":0,"complete":3,"success":3,"errored":0,"retried":0,"total":3,"elapsed":53}
+[debug] [2026-02-17T15:24:29.515Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e:populateFiles [none]
+[debug] [2026-02-17T15:24:29.516Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e:populateFiles {"files":{"/mymate-logo.png":"9104f79129d72607c63d6c59c810d3e59101d907fd70e55b42e6f3203cc42714","/index.html":"108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f","/assets/index-8UVb5ZGb.js":"45b2c0a3b9e8ace0db8c51df88dcc377808b719a17094d587412bd8916bba7ae"}}
+[debug] [2026-02-17T15:24:31.354Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e:populateFiles 200
+[debug] [2026-02-17T15:24:31.354Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e:populateFiles {"uploadRequiredHashes":["108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/mymate-2487/versions/d5c152caf07d4e7e/files"}
+[debug] [2026-02-17T15:24:31.355Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:31.356Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:31.356Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/mymate-2487/versions/d5c152caf07d4e7e/files/108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f [none]
+[debug] [2026-02-17T15:24:31.356Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/mymate-2487/versions/d5c152caf07d4e7e/files/108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f [stream]
+[debug] [2026-02-17T15:24:31.359Z] [hosting][populate queue][FINAL] {"max":1842,"min":1842,"avg":1842,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":1845}
+[debug] [2026-02-17T15:24:31.360Z] [hosting] uploads queued: 1
+[debug] [2026-02-17T15:24:42.933Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/mymate-2487/versions/d5c152caf07d4e7e/files/108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f 200
+[debug] [2026-02-17T15:24:42.934Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/mymate-2487/versions/d5c152caf07d4e7e/files/108a921b9df90ab5e012ffbcf293c7a0a1cede5029a6cc09bea9321b2c11953f [stream]
+[debug] [2026-02-17T15:24:42.934Z] [hosting][upload queue][FINAL] {"max":11580,"min":11580,"avg":11580,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":11580}
+[info] +  hosting[mymate-2487]: file upload complete 
+[debug] [2026-02-17T15:24:42.935Z] [hosting] deploy completed after 13488ms
+[debug] [2026-02-17T15:24:42.936Z] [
+  {
+    "config": {
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "site": "mymate-2487"
+    },
+    "version": "projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e"
+  }
+]
+[info] i  hosting[mymate-2487]: finalizing version... 
+[debug] [2026-02-17T15:24:42.938Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:42.938Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:42.939Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions/d5c152caf07d4e7e updateMask=status%2Cconfig
+[debug] [2026-02-17T15:24:42.939Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions/d5c152caf07d4e7e {"status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]}}
+[debug] [2026-02-17T15:24:50.829Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions/d5c152caf07d4e7e 200
+[debug] [2026-02-17T15:24:50.829Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/versions/d5c152caf07d4e7e {"name":"projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-02-17T15:24:38.539579Z","createUser":{"email":"perezaderine@gmail.com"},"finalizeTime":"2026-02-17T15:25:00.375652Z","finalizeUser":{"email":"perezaderine@gmail.com"}}
+[debug] [2026-02-17T15:24:50.829Z] [hosting] finalized version for mymate-2487:[object Object]
+[info] +  hosting[mymate-2487]: version finalized 
+[info] i  hosting[mymate-2487]: releasing new version... 
+[debug] [2026-02-17T15:24:50.830Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:50.830Z] Checked if tokens are valid: true, expires at: 1771345445810
+[debug] [2026-02-17T15:24:50.830Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/channels/live/releases versionName=projects%2F252566323457%2Fsites%2Fmymate-2487%2Fversions%2Fd5c152caf07d4e7e
+[debug] [2026-02-17T15:24:50.830Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/channels/live/releases {}
+[debug] [2026-02-17T15:24:55.135Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/channels/live/releases 200
+[debug] [2026-02-17T15:24:55.135Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/mymate-2487/channels/live/releases {"name":"projects/252566323457/sites/mymate-2487/channels/live/releases/1771341903950000","version":{"name":"projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-02-17T15:24:38.539579Z","createUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"},"finalizeTime":"2026-02-17T15:25:00.375652Z","finalizeUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"}},"type":"DEPLOY","releaseTime":"2026-02-17T15:25:03.950Z","releaseUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"}}
+[debug] [2026-02-17T15:24:55.135Z] [hosting] release: {"name":"projects/252566323457/sites/mymate-2487/channels/live/releases/1771341903950000","version":{"name":"projects/252566323457/sites/mymate-2487/versions/d5c152caf07d4e7e","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-02-17T15:24:38.539579Z","createUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"},"finalizeTime":"2026-02-17T15:25:00.375652Z","finalizeUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"}},"type":"DEPLOY","releaseTime":"2026-02-17T15:25:03.950Z","releaseUser":{"email":"perezaderine@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLcXTwCBUtB_So2kj2idC0StAOZQ1j6xAcf1OxPknQcvxZsEovs"}}
+[info] +  hosting[mymate-2487]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/mymate-2487/overview
+[info] Hosting URL: https://mymate-2487.web.app

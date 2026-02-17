@@ -20,10 +20,6 @@ build/
 
 # Firebase
 .firebase/
-.firebaserc
-firebase.json
-firestore.rules
-firestore.indexes.json
 
 # IDE
 .vscode/
