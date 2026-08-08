@@ -12,5 +12,16 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "My Mate",
+        "supportEmail": "support@undefined.firebaseapp.com"
+      }
+    }
   }
 }
