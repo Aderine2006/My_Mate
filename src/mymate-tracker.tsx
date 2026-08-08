@@ -126,7 +126,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-          <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+          <div className="bg-white p-8  shadow-xl max-w-lg w-full">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
             <p className="text-gray-700 mb-4">The application encountered an error. Please try refreshing the page.</p>
             <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-60 text-red-800">
@@ -1398,14 +1398,14 @@ const MYMate = () => {
   if (showAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="bg-white  shadow-xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-2">
               {/* Logo to the left of the name */}
               <img
                 src="/mymate-logo.png"
                 alt="MyMate logo"
-                className="w-10 h-10 rounded-md"
+                className="w-10 h-10 "
               />
               <h1 className="text-4xl font-bold text-indigo-600">MyMate</h1>
             </div>
@@ -1420,7 +1420,7 @@ const MYMate = () => {
                   type="text"
                   value={authForm.name}
                   onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   required={authMode === 'signup'}
                   placeholder="Enter your name"
                   aria-label="Name"
@@ -1434,7 +1434,7 @@ const MYMate = () => {
                 type="email"
                 value={authForm.email}
                 onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 required
                 placeholder="Enter your email"
                 aria-label="Email"
@@ -1447,13 +1447,13 @@ const MYMate = () => {
                 type="password"
                 value={authForm.password}
                 onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 required
                 placeholder="Enter your password"
                 aria-label="Password"
               />
             </div>
-            <button type="submit" className="w-full bg-indigo-600 dark:bg-indigo-700 text-white py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 font-medium">{authMode === 'login' ? 'Login' : 'Sign Up'}</button>
+            <button type="submit" className="w-full bg-indigo-600 dark:bg-indigo-700 text-white py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600 font-medium">{authMode === 'login' ? 'Login' : 'Sign Up'}</button>
           </form>
 
           {/* Auth error message */}
@@ -1472,7 +1472,7 @@ const MYMate = () => {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 py-2  hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             <img
               src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
@@ -1509,7 +1509,7 @@ const MYMate = () => {
             return (
               <div
                 key={i}
-                className="absolute rounded-full"
+                className="absolute "
                 style={{
                   left: `${left}%`,
                   width: `${size}px`,
@@ -1535,7 +1535,7 @@ const MYMate = () => {
             return (
               <div
                 key={i}
-                className="absolute rounded-full"
+                className="absolute "
                 style={{
                   left: `${left}%`,
                   top: `${top}%`,
@@ -1552,7 +1552,7 @@ const MYMate = () => {
 
         {/* Celebration Message */}
         <div className="relative z-10 text-center pointer-events-auto">
-          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-12 py-8 rounded-2xl shadow-2xl transform animate-bounce">
+          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-12 py-8  shadow-2xl transform animate-bounce">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-4xl font-bold mb-2">Congratulations!</h2>
             <p className="text-2xl">You've completed all tasks for today!</p>
@@ -1598,7 +1598,7 @@ const MYMate = () => {
             <img
               src="/mymate-logo.png"
               alt="MyMate logo"
-              className="w-8 h-8 rounded-md bg-white"
+              className="w-8 h-8  bg-white"
             />
             <h1 className="text-2xl font-bold">MyMate</h1>
           </div>
@@ -1614,7 +1614,7 @@ const MYMate = () => {
               { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
               { id: 'analysis', icon: BarChart3, label: 'Analysis' }
             ].map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg ${activeTab === item.id ? 'bg-indigo-700 dark:bg-indigo-600' : 'hover:bg-indigo-800 dark:hover:bg-gray-700'}`}>
+              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3  ${activeTab === item.id ? 'bg-indigo-700 dark:bg-indigo-600' : 'hover:bg-indigo-800 dark:hover:bg-gray-700'}`}>
                 <item.icon size={20} />
                 <span>{item.label}</span>
               </button>
@@ -1628,7 +1628,7 @@ const MYMate = () => {
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  text-gray-700 dark:text-gray-200"
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -1640,7 +1640,7 @@ const MYMate = () => {
             {(() => {
               const timeRemaining = getTimeRemainingInDay();
               return (
-                <div className="inline-flex items-baseline gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md pointer-events-auto">
+                <div className="inline-flex items-baseline gap-2 px-5 py-2  bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md pointer-events-auto">
                   <Clock size={18} className="opacity-80" />
                   <span className="text-lg font-semibold tracking-wide tabular-nums font-mono">
                     {String(timeRemaining.hours).padStart(2, '0')}:
@@ -1655,7 +1655,7 @@ const MYMate = () => {
           <div className="flex items-center gap-4">
             {/* Daily Streak Icon */}
             {user && streak.currentStreak > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-lg border border-orange-200 dark:border-orange-800">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30  border border-orange-200 dark:border-orange-800">
                 <Flame className="text-orange-500 dark:text-orange-400" size={24} fill="currentColor" />
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">{streak.currentStreak}</span>
@@ -1668,7 +1668,7 @@ const MYMate = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-200"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  transition-colors text-gray-700 dark:text-gray-200"
               aria-label="Toggle theme"
             >
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
@@ -1679,10 +1679,10 @@ const MYMate = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  transition-colors flex items-center justify-center"
                   aria-label="Profile menu"
                 >
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center font-semibold">
+                  <div className="w-10 h-10  bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center font-semibold">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 </button>
@@ -1695,7 +1695,7 @@ const MYMate = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setProfileMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-20">
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800  shadow-xl border border-gray-200 dark:border-gray-700 z-20">
                       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                         <p className="font-semibold text-gray-800 dark:text-gray-200">{user.name}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
@@ -1738,7 +1738,7 @@ const MYMate = () => {
               <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Dashboard</h2>
 
               {/* Year End Banner */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 rounded-xl shadow-lg p-6 mb-8 text-white">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700  shadow-lg p-6 mb-8 text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <Calendar className="text-white" size={32} />
@@ -1756,7 +1756,7 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                 {/* Daily Streak Card */}
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 rounded-xl shadow-lg p-6 border-2 border-orange-200 dark:border-orange-800 ring-2 ring-orange-100 dark:ring-orange-900/50">
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30  shadow-lg p-6 border-2 border-orange-200 dark:border-orange-800 ring-2 ring-orange-100 dark:ring-orange-900/50">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-700 dark:text-gray-300 font-medium">Daily Streak</h3>
                     <Flame className="text-orange-500 dark:text-orange-400" size={28} fill="currentColor" />
@@ -1771,7 +1771,7 @@ const MYMate = () => {
                   </p>
                 </div>
                 {/* Completion % Card */}
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 rounded-xl shadow-lg p-6 border-2 border-indigo-200 dark:border-indigo-800 ring-2 ring-indigo-100 dark:ring-indigo-900/50">
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30  shadow-lg p-6 border-2 border-indigo-200 dark:border-indigo-800 ring-2 ring-indigo-100 dark:ring-indigo-900/50">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-700 dark:text-gray-300 font-medium">Completion %</h3>
                     <BarChart3 className="text-indigo-500 dark:text-indigo-400" size={28} />
@@ -1785,7 +1785,7 @@ const MYMate = () => {
                   </p>
                 </div>
                 {/* Total Goals Card */}
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl shadow-lg p-6 border-2 border-purple-200 dark:border-purple-800 ring-2 ring-purple-100 dark:ring-purple-900/50">
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30  shadow-lg p-6 border-2 border-purple-200 dark:border-purple-800 ring-2 ring-purple-100 dark:ring-purple-900/50">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-700 dark:text-gray-300 font-medium">Total Goals</h3>
                     <Target className="text-purple-600 dark:text-purple-400" size={28} />
@@ -1794,7 +1794,7 @@ const MYMate = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{stats.completedGoals} completed</p>
                 </div>
                 {/* Skills Tracked Card */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl shadow-lg p-6 border-2 border-green-200 dark:border-green-800 ring-2 ring-green-100 dark:ring-green-900/50">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30  shadow-lg p-6 border-2 border-green-200 dark:border-green-800 ring-2 ring-green-100 dark:ring-green-900/50">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-700 dark:text-gray-300 font-medium">Skills Tracked</h3>
                     <BookOpen className="text-green-600 dark:text-green-400" size={28} />
@@ -1803,14 +1803,14 @@ const MYMate = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{stats.totalHours.toFixed(1)} hours</p>
                 </div>
                 {/* Achievements Card */}
-                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-xl shadow-lg p-6 border-2 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-100 dark:ring-yellow-900/50">
+                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30  shadow-lg p-6 border-2 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-100 dark:ring-yellow-900/50">
                   <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalHours}</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">Total Hours</div>
                 </div>
               </div>
 
               {/* Daily Schedule Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <ListTodo className="text-indigo-600 dark:text-indigo-400" size={24} />
@@ -1821,7 +1821,7 @@ const MYMate = () => {
                 <div className="space-y-3">
                   {getTodayTasks().length > 0 ? (
                     getTodayTasks().map(task => (
-                      <div key={task.id} className={`flex items-center justify-between p-4 rounded-lg border-2 ${task.completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : task.missed ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'}`}>
+                      <div key={task.id} className={`flex items-center justify-between p-4  border-2 ${task.completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : task.missed ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'}`}>
                         <div className="flex items-center gap-3 flex-1">
                           <button
                             onClick={() => handleToggleTask(task.id)}
@@ -1857,11 +1857,11 @@ const MYMate = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Active Goals</h3>
                   <div className="space-y-3">
                     {goals.filter(g => g.status === 'in-progress').slice(0, 3).map(goal => (
-                      <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 ">
                         <span className="text-gray-700 dark:text-gray-300">{goal.title}</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">{goal.category}</span>
                       </div>
@@ -1878,28 +1878,28 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Career Goals</h2>
-                <button onClick={() => setShowGoalForm(!showGoalForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                <button onClick={() => setShowGoalForm(!showGoalForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                   <Plus size={20} />
                   <span>Add Goal</span>
                 </button>
               </div>
 
               {showGoalForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingGoal ? 'Edit Goal' : 'New Goal'}</h3>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="goal-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="goal-title" type="text" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter goal title" />
+                      <input id="goal-title" type="text" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter goal title" />
                     </div>
                     <div>
                       <label htmlFor="goal-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea id="goal-description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Describe your goal" />
+                      <textarea id="goal-description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Describe your goal" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="goal-category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select id="goal-category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Goal category">
+                        <select id="goal-category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Goal category">
                           <option value="career">Career</option>
                           <option value="learning">Learning</option>
                           <option value="project">Project</option>
@@ -1908,15 +1908,15 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label htmlFor="goal-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
-                        <input id="goal-date" type="date" value={goalForm.targetDate} onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
+                        <input id="goal-date" type="date" value={goalForm.targetDate} onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingGoal ? handleUpdateGoal : handleAddGoal} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingGoal ? handleUpdateGoal : handleAddGoal} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                         <Save size={18} />
                         <span>{editingGoal ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -1924,7 +1924,7 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 gap-4">
                 {goals.map(goal => (
-                  <div key={goal.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                  <div key={goal.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -1935,16 +1935,16 @@ const MYMate = () => {
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{goal.description}</p>
                         <div className="flex items-center space-x-4 ml-9 text-sm">
-                          <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full">{goal.category}</span>
+                          <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 ">{goal.category}</span>
                           {goal.targetDate && <span className="text-gray-500 dark:text-gray-400">Target: {goal.targetDate}</span>}
-                          <span className={`px-3 py-1 rounded-full ${goal.status === 'completed' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300'}`}>{goal.status}</span>
+                          <span className={`px-3 py-1  ${goal.status === 'completed' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300'}`}>{goal.status}</span>
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <button onClick={() => handleEditGoal(goal)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" aria-label="Edit goal">
+                        <button onClick={() => handleEditGoal(goal)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit goal">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteGoal(goal.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete goal">
+                        <button onClick={() => handleDeleteGoal(goal.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete goal">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -1952,7 +1952,7 @@ const MYMate = () => {
                   </div>
                 ))}
                 {goals.length === 0 && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+                  <div className="bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
                     <Target size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No goals yet. Add your first goal!</p>
                   </div>
@@ -1965,24 +1965,24 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Skills Development</h2>
-                <button onClick={() => setShowSkillForm(!showSkillForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                <button onClick={() => setShowSkillForm(!showSkillForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                   <Plus size={20} />
                   <span>Add Skill</span>
                 </button>
               </div>
 
               {showSkillForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingSkill ? 'Edit Skill' : 'New Skill'}</h3>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="skill-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skill Name</label>
-                      <input id="skill-name" type="text" value={skillForm.name} onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., React, Python" />
+                      <input id="skill-name" type="text" value={skillForm.name} onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., React, Python" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="skill-level" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Level</label>
-                        <select id="skill-level" value={skillForm.level} onChange={(e) => setSkillForm({ ...skillForm, level: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Skill level">
+                        <select id="skill-level" value={skillForm.level} onChange={(e) => setSkillForm({ ...skillForm, level: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Skill level">
                           <option value="beginner">Beginner</option>
                           <option value="intermediate">Intermediate</option>
                           <option value="advanced">Advanced</option>
@@ -1991,19 +1991,19 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label htmlFor="skill-hours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours Invested</label>
-                        <input id="skill-hours" type="number" value={skillForm.hoursInvested} onChange={(e) => setSkillForm({ ...skillForm, hoursInvested: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" min="0" aria-label="Hours invested" />
+                        <input id="skill-hours" type="number" value={skillForm.hoursInvested} onChange={(e) => setSkillForm({ ...skillForm, hoursInvested: e.target.value })} className="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-indigo-500" min="0" aria-label="Hours invested" />
                       </div>
                       <div>
                         <label htmlFor="skill-target" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Hours</label>
-                        <input id="skill-target" type="number" value={skillForm.targetHours} onChange={(e) => setSkillForm({ ...skillForm, targetHours: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" min="1" aria-label="Target hours" />
+                        <input id="skill-target" type="number" value={skillForm.targetHours} onChange={(e) => setSkillForm({ ...skillForm, targetHours: e.target.value })} className="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-indigo-500" min="1" aria-label="Target hours" />
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingSkill ? handleUpdateSkill : handleAddSkill} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                      <button onClick={editingSkill ? handleUpdateSkill : handleAddSkill} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                         <Save size={18} />
                         <span>{editingSkill ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowSkillForm(false); setEditingSkill(null); setSkillForm({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowSkillForm(false); setEditingSkill(null); setSkillForm({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2011,14 +2011,14 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {skills.map(skill => (
-                  <div key={skill.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                  <div key={skill.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{skill.name}</h3>
                       <div className="flex space-x-2">
-                        <button onClick={() => handleEditSkill(skill)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" aria-label="Edit skill">
+                        <button onClick={() => handleEditSkill(skill)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit skill">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteSkill(skill.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete skill">
+                        <button onClick={() => handleDeleteSkill(skill.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete skill">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -2026,7 +2026,7 @@ const MYMate = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600 dark:text-gray-300">Level:</span>
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm capitalize">{skill.level}</span>
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300  text-sm capitalize">{skill.level}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600 dark:text-gray-300">Hours Invested:</span>
@@ -2044,9 +2044,9 @@ const MYMate = () => {
                             {Math.min(100, Math.round((skill.hoursInvested / (skill.targetHours || 100)) * 100))}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700  h-2.5">
                           <div
-                            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500"
+                            className="bg-indigo-600 h-2.5  transition-all duration-500"
                             style={{ width: `${Math.min(100, Math.round((skill.hoursInvested / (skill.targetHours || 100)) * 100))}%` }}
                           ></div>
                         </div>
@@ -2055,7 +2055,7 @@ const MYMate = () => {
                   </div>
                 ))}
                 {skills.length === 0 && (
-                  <div className="col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+                  <div className="col-span-2 bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
                     <BookOpen size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No skills tracked yet. Add your first skill!</p>
                   </div>
@@ -2068,32 +2068,32 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Deadline Planner</h2>
-                <button onClick={() => setShowPlanForm(!showPlanForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                <button onClick={() => setShowPlanForm(!showPlanForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                   <Plus size={20} />
                   <span>Add Plan</span>
                 </button>
               </div>
 
               {showPlanForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">New Deadline Plan</h3>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="plan-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="plan-title" type="text" value={planForm.title} onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What needs to be done?" />
+                      <input id="plan-title" type="text" value={planForm.title} onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What needs to be done?" />
                     </div>
                     <div>
                       <label htmlFor="plan-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea id="plan-desc" value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={2} />
+                      <textarea id="plan-desc" value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={2} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label htmlFor="plan-deadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
-                        <input id="plan-deadline" type="datetime-local" value={planForm.deadline} onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                        <input id="plan-deadline" type="datetime-local" value={planForm.deadline} onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
                       </div>
                       <div>
                         <label htmlFor="plan-priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-                        <select id="plan-priority" value={planForm.priority} onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <select id="plan-priority" value={planForm.priority} onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                           <option value="low">Low</option>
                           <option value="medium">Medium</option>
                           <option value="high">High</option>
@@ -2101,7 +2101,7 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label htmlFor="plan-reminder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remind Me</label>
-                        <select id="plan-reminder" value={planForm.reminderOffset} onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <select id="plan-reminder" value={planForm.reminderOffset} onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                           <option value="15">15 minutes before</option>
                           <option value="60">1 hour before</option>
                           <option value="1440">1 day before</option>
@@ -2109,11 +2109,11 @@ const MYMate = () => {
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={handleAddPlan} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                      <button onClick={handleAddPlan} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                         <Save size={18} />
                         <span>Save Plan</span>
                       </button>
-                      <button onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2121,7 +2121,7 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 gap-4">
                 {(deadlinePlans || []).sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
-                  <div key={plan.id} className={`bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-blue-500'} dark:border-gray-700`}>
+                  <div key={plan.id} className={`bg-white dark:bg-gray-800  shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-blue-500'} dark:border-gray-700`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -2132,7 +2132,7 @@ const MYMate = () => {
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{plan.description}</p>
                         <div className="flex items-center space-x-4 ml-9 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs uppercase ${plan.priority === 'high' ? 'bg-red-100 text-red-700' : plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>{plan.priority}</span>
+                          <span className={`px-3 py-1  text-xs uppercase ${plan.priority === 'high' ? 'bg-red-100 text-red-700' : plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>{plan.priority}</span>
                           <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
                             <Clock size={14} />
                             {new Date(plan.deadline).toLocaleString()}
@@ -2140,14 +2140,14 @@ const MYMate = () => {
                           {plan.status === 'overdue' && <span className="text-red-600 font-bold">Overdue</span>}
                         </div>
                       </div>
-                      <button onClick={() => handleDeletePlan(plan.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                      <button onClick={() => handleDeletePlan(plan.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 ">
                         <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
                 ))}
                 {deadlinePlans.length === 0 && (
-                  <div className="p-12 text-center bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700">
+                  <div className="p-12 text-center bg-white dark:bg-gray-800  shadow border border-gray-200 dark:border-gray-700">
                     <Calendar size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No active plans. Add a deadline to get started!</p>
                   </div>
@@ -2162,24 +2162,24 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Content Creation</h2>
-                <button onClick={() => setShowContentForm(!showContentForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                <button onClick={() => setShowContentForm(!showContentForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                   <Plus size={20} />
                   <span>Add Content</span>
                 </button>
               </div>
 
               {showContentForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingContent ? 'Edit Content' : 'New Content'}</h3>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="content-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="content-title" type="text" value={contentForm.title} onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter content title" />
+                      <input id="content-title" type="text" value={contentForm.title} onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter content title" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="content-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content Type</label>
-                        <select id="content-type" value={contentForm.type} onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content type">
+                        <select id="content-type" value={contentForm.type} onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content type">
                           <option value="youtube">YouTube</option>
                           <option value="instagram">Instagram</option>
                           <option value="script">Script</option>
@@ -2188,7 +2188,7 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label htmlFor="content-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="content-status" value={contentForm.status} onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content status">
+                        <select id="content-status" value={contentForm.status} onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content status">
                           <option value="draft">Draft</option>
                           <option value="in-progress">In Progress</option>
                           <option value="completed">Completed</option>
@@ -2198,32 +2198,32 @@ const MYMate = () => {
                     </div>
                     <div>
                       <label htmlFor="content-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Script / Content</label>
-                      <textarea id="content-script" value={contentForm.script} onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your script, roadmap, or content here..." />
+                      <textarea id="content-script" value={contentForm.script} onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your script, roadmap, or content here..." />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="content-target-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
-                        <input id="content-target-date" type="date" value={contentForm.targetDate} onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
+                        <input id="content-target-date" type="date" value={contentForm.targetDate} onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
                       </div>
                       <div>
                         <label htmlFor="content-publish-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Publish Date</label>
-                        <input id="content-publish-date" type="date" value={contentForm.publishDate} onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Publish date" />
+                        <input id="content-publish-date" type="date" value={contentForm.publishDate} onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Publish date" />
                       </div>
                     </div>
                     <div>
                       <label htmlFor="content-tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
-                      <input id="content-tags" type="text" value={contentForm.tags} onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., tech, tutorial, tips" />
+                      <input id="content-tags" type="text" value={contentForm.tags} onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., tech, tutorial, tips" />
                     </div>
                     <div>
                       <label htmlFor="content-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
-                      <textarea id="content-notes" value={contentForm.notes} onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Additional notes or reminders..." />
+                      <textarea id="content-notes" value={contentForm.notes} onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Additional notes or reminders..." />
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingContent ? handleUpdateContent : handleAddContent} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingContent ? handleUpdateContent : handleAddContent} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                         <Save size={18} />
                         <span>{editingContent ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2231,19 +2231,19 @@ const MYMate = () => {
 
               {/* Content Filters */}
               <div className="flex items-center space-x-2 mb-4 flex-wrap gap-2">
-                <button onClick={() => setActiveTab('content')} className={`px-4 py-2 rounded-lg ${true ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
+                <button onClick={() => setActiveTab('content')} className={`px-4 py-2  ${true ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
                   All ({contents.length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   YouTube ({contents.filter(c => c.type === 'youtube').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Instagram ({contents.filter(c => c.type === 'instagram').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Scripts ({contents.filter(c => c.type === 'script').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Roadmaps ({contents.filter(c => c.type === 'roadmap').length})
                 </button>
               </div>
@@ -2264,18 +2264,18 @@ const MYMate = () => {
                     published: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
                   };
                   return (
-                    <div key={content.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                    <div key={content.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
                             <IconComponent className={content.type === 'youtube' ? 'text-red-500 dark:text-red-400' : content.type === 'instagram' ? 'text-pink-500 dark:text-pink-400' : 'text-indigo-500 dark:text-indigo-400'} size={24} />
                             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{content.title}</h3>
-                            <span className={`px-3 py-1 rounded-full text-sm ${statusColors[content.status]}`}>
+                            <span className={`px-3 py-1  text-sm ${statusColors[content.status]}`}>
                               {content.status}
                             </span>
                           </div>
                           <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600 dark:text-gray-300">
-                            <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full capitalize">{content.type}</span>
+                            <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300  capitalize">{content.type}</span>
                             {content.targetDate && <span>Target: {content.targetDate}</span>}
                             {content.publishDate && <span>Published: {content.publishDate}</span>}
                           </div>
@@ -2287,7 +2287,7 @@ const MYMate = () => {
                             </div>
                           )}
                           {content.script && (
-                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-3 max-h-48 overflow-y-auto">
+                            <div className="bg-gray-50 dark:bg-gray-700/50  p-4 mb-3 max-h-48 overflow-y-auto">
                               <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-sm">{content.script}</p>
                             </div>
                           )}
@@ -2296,10 +2296,10 @@ const MYMate = () => {
                           )}
                         </div>
                         <div className="flex space-x-2 ml-4">
-                          <button onClick={() => handleEditContent(content)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" aria-label="Edit content">
+                          <button onClick={() => handleEditContent(content)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit content">
                             <Edit2 size={18} />
                           </button>
-                          <button onClick={() => handleDeleteContent(content.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete content">
+                          <button onClick={() => handleDeleteContent(content.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete content">
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -2308,7 +2308,7 @@ const MYMate = () => {
                   );
                 })}
                 {contents.length === 0 && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+                  <div className="bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
                     <Video size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No content yet. Start creating your scripts and roadmaps!</p>
                   </div>
@@ -2321,23 +2321,23 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Daily Schedule</h2>
-                <button onClick={() => setShowScheduleForm(!showScheduleForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                <button onClick={() => setShowScheduleForm(!showScheduleForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                   <Plus size={20} />
                   <span>Add Schedule Task</span>
                 </button>
               </div>
 
               {showScheduleForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input type="text" value={scheduleForm.title} onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Morning Exercise" />
+                      <input type="text" value={scheduleForm.title} onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Morning Exercise" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea value={scheduleForm.description} onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={2} placeholder="Task description" />
+                      <textarea value={scheduleForm.description} onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={2} placeholder="Task description" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -2350,7 +2350,7 @@ const MYMate = () => {
                               const { minute, period } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(newHour, minute, period) });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                           >
                             {Array.from({ length: 12 }, (_, i) => i + 1).map(h => (
                               <option key={h} value={h}>{h}</option>
@@ -2363,7 +2363,7 @@ const MYMate = () => {
                               const { hour, period } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(hour, e.target.value, period) });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                           >
                             {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
                               <option key={m} value={m}>{m}</option>
@@ -2375,7 +2375,7 @@ const MYMate = () => {
                               const { hour, minute } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(hour, minute, e.target.value as 'AM' | 'PM') });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                           >
                             <option value="AM">AM</option>
                             <option value="PM">PM</option>
@@ -2384,13 +2384,13 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (minutes)</label>
-                        <input type="number" value={scheduleForm.estimatedDuration} onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" min="1" />
+                        <input type="number" value={scheduleForm.estimatedDuration} onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" min="1" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-                        <select value={scheduleForm.priority} onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <select value={scheduleForm.priority} onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                           <option value="low">Low</option>
                           <option value="medium">Medium</option>
                           <option value="high">High</option>
@@ -2398,7 +2398,7 @@ const MYMate = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <input type="text" value={scheduleForm.category} onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Health, Work" />
+                        <input type="text" value={scheduleForm.category} onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Health, Work" />
                       </div>
                     </div>
                     <div>
@@ -2414,7 +2414,7 @@ const MYMate = () => {
                                 : [...scheduleForm.dayOfWeek, index];
                               setScheduleForm({ ...scheduleForm, dayOfWeek: days });
                             }}
-                            className={`px-4 py-2 rounded-lg border-2 ${scheduleForm.dayOfWeek.includes(index)
+                            className={`px-4 py-2  border-2 ${scheduleForm.dayOfWeek.includes(index)
                               ? 'bg-indigo-600 dark:bg-indigo-700 text-white border-indigo-600 dark:border-indigo-700'
                               : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500'
                               }`}
@@ -2425,11 +2425,11 @@ const MYMate = () => {
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                         <Save size={18} />
                         <span>{editingSchedule ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2437,17 +2437,17 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {scheduleTasks.map(schedule => (
-                  <div key={schedule.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                  <div key={schedule.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{schedule.title}</h3>
                         {schedule.description && <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">{schedule.description}</p>}
                       </div>
                       <div className="flex space-x-2">
-                        <button onClick={() => handleEditSchedule(schedule)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" aria-label="Edit schedule">
+                        <button onClick={() => handleEditSchedule(schedule)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit schedule">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteSchedule(schedule.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete schedule">
+                        <button onClick={() => handleDeleteSchedule(schedule.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete schedule">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -2481,7 +2481,7 @@ const MYMate = () => {
                   </div>
                 ))}
                 {scheduleTasks.length === 0 && (
-                  <div className="col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+                  <div className="col-span-2 bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
                     <ListTodo size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No schedule tasks yet. Add your first scheduled task!</p>
                   </div>
@@ -2495,7 +2495,7 @@ const MYMate = () => {
               <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Analysis Dashboard</h2>
 
               {/* Perfection Meter */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <BarChart3 className="text-indigo-600" size={24} />
                   Perfection Meter
@@ -2532,19 +2532,19 @@ const MYMate = () => {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center border border-green-200 dark:border-green-800">
+                  <div className="bg-green-50 dark:bg-green-900/20  p-4 text-center border border-green-200 dark:border-green-800">
                     <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {dailyTasks.filter(t => t.completed).length}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Completed Tasks</div>
                   </div>
-                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center border border-red-200 dark:border-red-800">
+                  <div className="bg-red-50 dark:bg-red-900/20  p-4 text-center border border-red-200 dark:border-red-800">
                     <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                       {dailyTasks.filter(t => t.missed).length}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Missed Tasks</div>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center border border-blue-200 dark:border-blue-800">
+                  <div className="bg-blue-50 dark:bg-blue-900/20  p-4 text-center border border-blue-200 dark:border-blue-800">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {dailyTasks.length}
                     </div>
@@ -2554,7 +2554,7 @@ const MYMate = () => {
               </div>
 
               {/* Task Completion Stats */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Last 7 Days Performance</h3>
                 <div className="space-y-3">
                   {(() => {
@@ -2573,15 +2573,15 @@ const MYMate = () => {
                       const dayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
                       return (
-                        <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 ">
                           <div className="flex items-center gap-3">
                             <div className="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">{dayName}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">{dayDate}</div>
                           </div>
                           <div className="flex items-center gap-3 flex-1 max-w-xs">
-                            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-4">
+                            <div className="flex-1 bg-gray-200 dark:bg-gray-600  h-4">
                               <div
-                                className={`h-4 rounded-full transition-all duration-300 ${percentage === 100 ? 'bg-green-500 dark:bg-green-600' : percentage >= 50 ? 'bg-yellow-500 dark:bg-yellow-600' : 'bg-red-500 dark:bg-red-600'
+                                className={`h-4  transition-all duration-300 ${percentage === 100 ? 'bg-green-500 dark:bg-green-600' : percentage >= 50 ? 'bg-yellow-500 dark:bg-yellow-600' : 'bg-red-500 dark:bg-red-600'
                                   }`}
                                 style={{ width: `${percentage}%` }}
                               />
@@ -2603,40 +2603,40 @@ const MYMate = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Manual Notes</h2>
-                <button onClick={() => setShowNoteForm(!showNoteForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                <button onClick={() => setShowNoteForm(!showNoteForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
                   <Plus size={20} />
                   <span>Add Note</span>
                 </button>
               </div>
 
               {showNoteForm && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingNote ? 'Edit Note' : 'New Note'}</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input type="text" value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Note title" />
+                      <input type="text" value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Note title" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                      <textarea value={noteForm.content} onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your notes here..." />
+                      <textarea value={noteForm.content} onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your notes here..." />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <input type="text" value={noteForm.category} onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Ideas, Reminders" />
+                        <input type="text" value={noteForm.category} onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Ideas, Reminders" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
-                        <input type="text" value={noteForm.tags} onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., important, meeting" />
+                        <input type="text" value={noteForm.tags} onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., important, meeting" />
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingNote ? handleUpdateNote : handleAddNote} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingNote ? handleUpdateNote : handleAddNote} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
                         <Save size={18} />
                         <span>{editingNote ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2644,7 +2644,7 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {manualNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map(note => (
-                  <div key={note.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+                  <div key={note.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">{note.title}</h3>
@@ -2654,10 +2654,10 @@ const MYMate = () => {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <button onClick={() => handleEditNote(note)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" aria-label="Edit note">
+                        <button onClick={() => handleEditNote(note)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit note">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteNote(note.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" aria-label="Delete note">
+                        <button onClick={() => handleDeleteNote(note.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete note">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -2673,7 +2673,7 @@ const MYMate = () => {
                   </div>
                 ))}
                 {manualNotes.length === 0 && (
-                  <div className="col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+                  <div className="col-span-2 bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
                     <StickyNote size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No notes yet. Create your first note!</p>
                   </div>
@@ -2691,11 +2691,11 @@ const MYMate = () => {
       {/* Chatbot Floating Button & Window */}
       <div className="fixed bottom-6 right-6 z-50">
         {chatbotOpen ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800  shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
             {/* Chat Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white p-4 rounded-t-xl flex items-center justify-between">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white p-4  flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-10 h-10  bg-white/20 flex items-center justify-center">
                   <Bot size={24} />
                 </div>
                 <div className="flex-1">
@@ -2720,7 +2720,7 @@ const MYMate = () => {
               </div>
               <button
                 onClick={() => setChatbotOpen(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/20  transition-colors"
                 aria-label="Close chat"
               >
                 <X size={20} />
@@ -2735,7 +2735,7 @@ const MYMate = () => {
                   className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${message.isUser
+                    className={`max-w-[80%]  p-3 ${message.isUser
                       ? 'bg-indigo-600 dark:bg-indigo-700 text-white'
                       : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-600'
                       }`}
@@ -2770,16 +2770,16 @@ const MYMate = () => {
                   }}
                   placeholder={isLoadingResponse ? "AI is thinking..." : "Type your message..."}
                   disabled={isLoadingResponse}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={!chatInput.trim() || isLoadingResponse}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  className="px-4 py-2 bg-indigo-600 text-white  hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                   aria-label="Send message"
                 >
                   {isLoadingResponse ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent  animate-spin" />
                   ) : (
                     <Send size={20} />
                   )}
@@ -2793,7 +2793,7 @@ const MYMate = () => {
         ) : (
           <button
             onClick={() => setChatbotOpen(true)}
-            className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
+            className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white  shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
             aria-label="Open chatbot"
           >
             <MessageCircle size={28} />
