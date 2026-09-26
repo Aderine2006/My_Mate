@@ -1450,7 +1450,7 @@ const MYMate = () => {
 
   if (showAuth) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat p-4" style={{ backgroundImage: "linear-gradient(rgba(206, 206, 209, 0.48), rgba(237, 238, 243, 0.48)), url('/Login%20Page%20Background.png')" }}>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat p-4" style={{ backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.29)), url('/Login%20Page%20Background.png')" }}>
         <div className="absolute inset-0 bg-slate-950/20" aria-hidden="true" />
         <div className="relative z-10 w-full max-w-md bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
           <div className="text-center mb-8">
@@ -2068,7 +2068,7 @@ const MYMate = () => {
       <div className="flex h-screen min-h-0 w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
       <CelebrationOverlay />
       {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/45 md:hidden" />}
-      <div className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-hidden bg-[#3610B6] text-white transition-[transform,width] duration-250 ease-in-out md:relative md:inset-auto md:h-full md:flex-shrink-0 ${sidebarOpen ? 'translate-x-0 md:w-64' : '-translate-x-full md:translate-x-0 md:w-16'}`}>
+      <div className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-hidden bg-[#1c2b75] text-white transition-[transform,width] duration-250 ease-in-out md:relative md:inset-auto md:h-full md:flex-shrink-0 ${sidebarOpen ? 'translate-x-0 md:w-64' : '-translate-x-full md:translate-x-0 md:w-16'}`}>
         <div className={`${sidebarOpen ? 'p-6' : 'p-3'} flex-1 overflow-y-auto`}>
           <div className={`mb-8 flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
             <div className="flex min-w-0 items-center gap-3">
@@ -2093,7 +2093,7 @@ const MYMate = () => {
               { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
               { id: 'analysis', icon: BarChart3, label: 'Analysis' }
             ].map(item => (
-              <button key={item.id} type="button" title={item.label} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === item.id ? 'bg-[#5A1FD8] text-white' : 'hover:bg-[#4816C7] hover:text-white'}`}>
+              <button key={item.id} type="button" title={item.label} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === item.id ? 'bg-[#2f477f] text-white' : 'hover:bg-[#263b70] hover:text-white'}`}>
                 <item.icon size={20} />
                 <span className={sidebarOpen ? '' : 'md:hidden'}>{item.label}</span>
               </button>
@@ -2101,7 +2101,7 @@ const MYMate = () => {
           </nav>
         </div>
         <div className={`border-t border-white/20 ${sidebarOpen ? 'p-3' : 'p-2'}`}>
-          <button type="button" title="Profile" aria-current={activeTab === 'profile' ? 'page' : undefined} onClick={() => { setActiveTab('profile'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === 'profile' ? 'bg-[#5A1FD8] text-white' : 'hover:bg-[#4816C7] hover:text-white'}`}>
+          <button type="button" title="Profile" aria-current={activeTab === 'profile' ? 'page' : undefined} onClick={() => { setActiveTab('profile'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === 'profile' ? 'bg-[#2f477f] text-white' : 'hover:bg-[#263b70] hover:text-white'}`}>
             <User size={20} />
             <span className={sidebarOpen ? '' : 'md:hidden'}>Profile</span>
           </button>
