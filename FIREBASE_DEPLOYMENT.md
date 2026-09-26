@@ -38,8 +38,7 @@ firebase init
 You'll be prompted with several questions:
 
 1. **Select Firebase features**: 
-   - Select `Hosting` (press Space to select, Enter to confirm)
-   - Optionally select `Firestore` for real-time database
+   - Select `Hosting` and `Firestore`
 
 2. **Select a Firebase project**: 
    - Choose "Create a new project" or select an existing one
@@ -71,7 +70,7 @@ This creates a `dist` folder with optimized production files.
 ## Step 5: Deploy to Firebase Hosting
 
 ```bash
-firebase deploy
+firebase deploy --only firestore:rules,hosting
 ```
 
 Or specifically for hosting:
@@ -82,7 +81,7 @@ firebase deploy --only hosting
 
 Your app will be live at: `https://YOUR-PROJECT-ID.web.app` or `https://YOUR-PROJECT-ID.firebaseapp.com`
 
-## Step 6: Set Up Firestore for Real-time Data
+## Step 6: Set Up Firestore and Authentication
 
 ### 6.1 Enable Firestore Database
 
@@ -95,38 +94,17 @@ Your app will be live at: `https://YOUR-PROJECT-ID.web.app` or `https://YOUR-PRO
 7. Click "Enable"
 
 ### 6.2 Set Firestore Security Rules
+The repository's `firestore.rules` limits access to each signed-in user's own documents. Deploy those rules with:
 
-Go to Firestore Database → Rules and update with:
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can only read/write their own data
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    // Allow authenticated users to manage their own data
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
+```bash
+firebase deploy --only firestore:rules
 ```
 
-For testing purposes, you can use:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
+Do not use public test rules. Profile and tracker sync require Firebase Authentication; the email/password form and Google sign-in both use Firebase accounts.
 
-⚠️ **Warning**: The test mode rules allow anyone to read/write. Only use for development!
+### 6.3 Enable Email/Password Sign-In
+
+In Firebase Console → Authentication → Sign-in method, enable **Email/Password**. Google sign-in can remain enabled as well. The local mock login was removed because Firestore correctly rejects requests without a Firebase auth token.
 
 ## Step 7: Update Package.json with Firebase SDK
 
@@ -184,20 +162,7 @@ firebase deploy
 ```
 
 ## Groq RAG Chat
-
-Groq is called from a Firebase callable function so its API key is never included in the browser bundle. The callable requires Google/Firebase Authentication. General questions can use public Wikipedia search results; MyMate records are retrieved separately and are only used for signed-in-user questions.
-
-Firebase Cloud Functions deployment requires the Blaze billing plan. Install the function dependencies and set a new Groq API key as a Firebase secret:
-
-```bash
-cd functions
-npm install
-cd ..
-firebase functions:secrets:set GROQ_API_KEY
-firebase deploy --only functions
-```
-
-The Groq key previously embedded in `src/groq.ts` was exposed to browsers and should be revoked in the Groq console. Create a replacement key and enter it directly at the Firebase CLI prompt; do not commit it or add it to a `VITE_` environment variable. To publish the app and function together, run `npm run build` followed by `firebase deploy`.
+The free Spark plan does not include Cloud Functions. This project therefore deploys Hosting and Firestore rules only. The chatbot uses local Ollama when available and otherwise falls back to built-in responses; Groq/web retrieval is disabled rather than exposing an API key in browser code. Revoke any Groq key previously committed to the repository.
 
 ## Quick Deployment Checklist
 
@@ -205,7 +170,8 @@ The Groq key previously embedded in `src/groq.ts` was exposed to browsers and sh
 - [ ] Logged into Firebase
 - [ ] Project initialized (`firebase init`)
 - [ ] Firestore enabled in Firebase Console
-- [ ] Security rules configured
+- [ ] `firestore.rules` deployed
+- [ ] Email/Password or Google provider enabled
 - [ ] Firebase SDK installed
 - [ ] Firebase config file created with your credentials
 - [ ] Project built (`npm run build`)

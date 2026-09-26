@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
-import { generateGroqResponse, checkGroqConnection, formatRAGContext } from './groq';
-import { indexUserData, semanticSearch } from './vector-db';
 import { saveToFirestore, loadFromFirestore, migrateLocalStorageToFirestore, hasUserMigrated } from './firestore-helpers';
 import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun, Wallet } from 'lucide-react';
 import BudgetPlanner from './components/BudgetPlanner';
@@ -200,7 +198,6 @@ const MYMate = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [ollamaAvailable, setOllamaAvailable] = useState(false);
-  const [groqAvailable, setGroqAvailable] = useState(false);
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -492,18 +489,24 @@ const MYMate = () => {
     }
   };
 
-  // Load user session on mount
+  // Restore only Firebase-authenticated sessions so Firestore rules can verify ownership.
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-        setShowAuth(false);
-      } catch (error) {
-        console.error('Error loading saved user:', error);
+    const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
+      if (!firebaseUser) {
+        localStorage.removeItem('currentUser');
+        setUser(null);
+        setShowAuth(true);
+        return;
       }
-    }
+
+      setUser({
+        id: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'MyMate User',
+      });
+      setShowAuth(false);
+    });
+    return unsubscribe;
   }, []);
 
   // Apply theme to document
@@ -533,57 +536,13 @@ const MYMate = () => {
   useEffect(() => {
     let isCurrent = true;
     const checkAIServices = async () => {
-      const [ollamaStatus, groqStatus] = await Promise.all([
-        checkOllamaConnection(),
-        user ? checkGroqConnection(user.id) : Promise.resolve(false),
-      ]);
+      const ollamaStatus = await checkOllamaConnection();
       if (!isCurrent) return;
       setOllamaAvailable(ollamaStatus);
-      setGroqAvailable(groqStatus);
     };
     void checkAIServices();
     return () => { isCurrent = false; };
   }, [user]);
-
-  // Index user data for RAG when data loads
-  useEffect(() => {
-    if (user && (goals.length > 0 || skills.length > 0 || manualNotes.length > 0 || dailyTasks.length > 0)) {
-      indexUserData(user.id, {
-        goals: goals.map(g => ({
-          id: g.id,
-          title: g.title,
-          description: g.description,
-          category: g.category,
-          status: g.status,
-          progress: g.progress
-        })),
-        tasks: dailyTasks.map(t => ({
-          id: t.id,
-          title: t.title,
-          description: t.description,
-          category: t.category,
-          completed: t.completed,
-          priority: t.priority
-        })),
-        notes: manualNotes.map(n => ({
-          id: n.id,
-          title: n.title,
-          content: n.content,
-          category: n.category,
-          tags: n.tags
-        })),
-        skills: skills.map(s => ({
-          id: s.id,
-          name: s.name,
-          level: s.level,
-          hoursInvested: s.hoursInvested,
-          targetHours: s.targetHours
-        }))
-      }).catch(error => {
-        console.error('Error indexing user data for RAG:', error);
-      });
-    }
-  }, [user, goals, skills, manualNotes, dailyTasks]);
 
   // Load data when user changes
   useEffect(() => {
@@ -910,47 +869,14 @@ const MYMate = () => {
 
     try {
       let botResponseText: string;
-      const conversationHistory = chatMessages.slice(-10).map(msg => ({
-        role: msg.isUser ? 'user' as const : 'assistant' as const,
-        content: msg.text
-      }));
-
-      // Try Groq with RAG first if available
-      if (groqAvailable && user) {
+      if (ollamaAvailable) {
         try {
-          // Perform semantic search to get relevant context
-          const relevantDocs = await semanticSearch(user.id, messageText, 5);
-          const ragContext = formatRAGContext(relevantDocs, messageText);
-          
-          botResponseText = await generateGroqResponse(messageText, ragContext, conversationHistory);
-        } catch (groqError) {
-          console.error('Groq error, falling back to Ollama:', groqError);
-          
-          // Try Ollama as fallback
-          if (ollamaAvailable) {
-            try {
-              const context = getUserContext();
-              botResponseText = await generateOllamaResponse(messageText, context);
-            } catch (ollamaError) {
-              console.error('Ollama error, falling back to rule-based:', ollamaError);
-              botResponseText = generateChatResponse(messageText);
-            }
-          } else {
-            // Use rule-based response
-            botResponseText = generateChatResponse(messageText);
-          }
-        }
-      } else if (ollamaAvailable) {
-        // Try Ollama if Groq is not available
-        try {
-          const context = getUserContext();
-          botResponseText = await generateOllamaResponse(messageText, context);
+          botResponseText = await generateOllamaResponse(messageText, getUserContext());
         } catch (ollamaError) {
           console.error('Ollama error, falling back to rule-based:', ollamaError);
           botResponseText = generateChatResponse(messageText);
         }
       } else {
-        // Use rule-based response
         botResponseText = generateChatResponse(messageText);
       }
 
@@ -1194,23 +1120,36 @@ const MYMate = () => {
       .sort((a, b) => a.time.localeCompare(b.time));
   };
 
-  // Generate unique user ID from email
-  const generateUserId = (email: string): string => {
-    // Create a unique ID by replacing special characters in email
-    // This ensures each email gets its own data storage
-    return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  };
-
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+    try {
+      const email = authForm.email.trim();
+      const credential = authMode === 'signup'
+        ? await createUserWithEmailAndPassword(auth, email, authForm.password)
+        : await signInWithEmailAndPassword(auth, email, authForm.password);
 
-    const userId = generateUserId(authForm.email);
-    const mockUser: User = { id: userId, email: authForm.email, name: authForm.name || 'Career Tracker' };
-    setUser(mockUser);
-    // Save user session to localStorage
-    localStorage.setItem('currentUser', JSON.stringify(mockUser));
-    setShowAuth(false);
+      if (authMode === 'signup' && authForm.name.trim()) {
+        await updateProfile(credential.user, { displayName: authForm.name.trim() });
+      }
+
+      setUser({
+        id: credential.user.uid,
+        email: credential.user.email || email,
+        name: credential.user.displayName || authForm.name.trim() || email.split('@')[0],
+      });
+      setShowAuth(false);
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      const messages: Record<string, string> = {
+        'auth/operation-not-allowed': 'Enable Email/Password sign-in in Firebase Authentication settings, then try again.',
+        'auth/email-already-in-use': 'An account already exists for this email. Log in instead.',
+        'auth/invalid-credential': 'Email or password is incorrect.',
+        'auth/weak-password': 'Choose a password with at least 6 characters.',
+        'auth/too-many-requests': 'Too many attempts. Wait a moment and try again.',
+      };
+      setAuthError(messages[code || ''] || 'Authentication failed. Check your connection and try again.');
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -1227,16 +1166,15 @@ const MYMate = () => {
       };
 
       setUser(appUser);
-      localStorage.setItem('currentUser', JSON.stringify(appUser));
       setShowAuth(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Google sign-in error:', error);
-      setAuthError(error.message || 'Failed to sign in with Google. Please try again.');
+      setAuthError(error instanceof Error ? error.message : 'Failed to sign in with Google. Please try again.');
     }
   };
 
-  const handleLogout = () => {
-    // Clear user session from localStorage
+  const handleLogout = async () => {
+    await signOut(auth);
     localStorage.removeItem('currentUser');
     setUser(null);
     setShowAuth(true);
@@ -3110,12 +3048,7 @@ const MYMate = () => {
                   <div className="flex items-center gap-2">
                     <p className="text-xs opacity-90">Your personal coach</p>
                     <div className="flex items-center gap-1">
-                      {groqAvailable ? (
-                        <>
-                          <Wifi size={12} className="text-green-300" />
-                          <span className="text-xs opacity-75">Personal RAG + web sources</span>
-                        </>
-                      ) : ollamaAvailable ? (
+                      {ollamaAvailable ? (
                         <>
                           <Wifi size={12} className="text-green-300" />
                           <span className="text-xs opacity-75">AI Powered</span>

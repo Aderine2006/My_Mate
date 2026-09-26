@@ -167,6 +167,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   useEffect(() => {
     let active = true;
+    const profileKey = `profile-${user.id}`;
+    const legacyUserId = user.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const legacyProfileKey = `profile-${legacyUserId}`;
+    const localProfile = localStorage.getItem(profileKey)
+      ?? (legacyProfileKey !== profileKey ? localStorage.getItem(legacyProfileKey) : null);
     const loadProfile = async () => {
       setIsLoading(true);
       setProfile(EMPTY_PROFILE);
@@ -178,24 +183,28 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           const normalized = normalizeProfile(stored);
           setProfile(normalized);
           persistedProfile.current = normalized;
-          localStorage.setItem(`profile-${user.id}`, JSON.stringify(normalized));
-        } else {
-          const localProfile = localStorage.getItem(`profile-${user.id}`);
-          if (localProfile) {
-            const normalized = normalizeProfile(JSON.parse(localProfile));
-            setProfile(normalized);
-            persistedProfile.current = normalized;
+          localStorage.setItem(profileKey, JSON.stringify(normalized));
+        } else if (localProfile) {
+          const normalized = normalizeProfile(JSON.parse(localProfile));
+          setProfile(normalized);
+          persistedProfile.current = normalized;
+          localStorage.setItem(profileKey, JSON.stringify(normalized));
+          if (legacyProfileKey !== profileKey) {
+            await saveToFirestore(user.id, 'profile', normalized);
+            if (!active) return;
+            setNotice('Your saved profile was synced to your Firebase account.');
           }
         }
         setError('');
       } catch {
         if (!active) return;
-        const localProfile = localStorage.getItem(`profile-${user.id}`);
         if (localProfile) {
           try {
             const normalized = normalizeProfile(JSON.parse(localProfile));
             setProfile(normalized);
             persistedProfile.current = normalized;
+            localStorage.setItem(profileKey, JSON.stringify(normalized));
+            setError('Your profile is loaded from this device, but Firestore sync failed. Check Firebase sign-in and deploy firestore.rules.');
           } catch {
             setError('Saved profile data could not be read.');
           }
@@ -249,7 +258,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       try {
         localStorage.setItem(`profile-${user.id}`, JSON.stringify(profile));
         persistedProfile.current = profile;
-        setNotice('Saved on this device. Cloud sync will resume when your connection is available.');
+        setNotice('Saved on this device only. Firestore sync failed; check Firebase sign-in and deploy firestore.rules.');
         setIsEditing(false);
       } catch {
         setError('Your profile could not be saved. Check available storage and try again.');
