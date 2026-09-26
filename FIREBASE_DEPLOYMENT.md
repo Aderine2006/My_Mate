@@ -183,6 +183,22 @@ npm run build
 firebase deploy
 ```
 
+## Groq RAG Chat
+
+Groq is called from a Firebase callable function so its API key is never included in the browser bundle. The callable requires Google/Firebase Authentication. General questions can use public Wikipedia search results; MyMate records are retrieved separately and are only used for signed-in-user questions.
+
+Firebase Cloud Functions deployment requires the Blaze billing plan. Install the function dependencies and set a new Groq API key as a Firebase secret:
+
+```bash
+cd functions
+npm install
+cd ..
+firebase functions:secrets:set GROQ_API_KEY
+firebase deploy --only functions
+```
+
+The Groq key previously embedded in `src/groq.ts` was exposed to browsers and should be revoked in the Groq console. Create a replacement key and enter it directly at the Firebase CLI prompt; do not commit it or add it to a `VITE_` environment variable. To publish the app and function together, run `npm run build` followed by `firebase deploy`.
+
 ## Quick Deployment Checklist
 
 - [ ] Firebase CLI installed

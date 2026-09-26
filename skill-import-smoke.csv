@@ -1,0 +1,4 @@
+skill,category,topic,subtopic,priority,current_level,target_level,status,resource,notes
+Python,Programming,Python Basics,"Functions, closures",High,Beginner,Intermediate,In Progress,https://example.com,"Practice, and test"
+Python,Programming,Python Basics,"Functions, closures",High,Beginner,Intermediate,In Progress,https://example.com,Duplicate
+React,Frontend,React Fundamentals,Hooks,Medium,Beginner,Intermediate,Completed,https://example.com,Learn state

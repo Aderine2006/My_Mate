@@ -2,7 +2,7 @@ import { db } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Generic type for all data collections
-export type DataType = 'goals' | 'skills' | 'deadlinePlans' | 'contents' | 'scheduleTasks' | 'dailyTasks' | 'manualNotes' | 'streak' | 'budgetIncomes' | 'budgetExpenses' | 'budgetLimits' | 'budgetGoals';
+export type DataType = 'goals' | 'skills' | 'skillTopics' | 'profile' | 'deadlinePlans' | 'contents' | 'scheduleTasks' | 'dailyTasks' | 'manualNotes' | 'streak' | 'budgetIncomes' | 'budgetExpenses' | 'budgetLimits' | 'budgetGoals';
 
 /**
  * Save data to Firestore for a specific user
@@ -51,7 +51,7 @@ export const loadFromFirestore = async (userId: string, dataType: DataType): Pro
  * @param userId - The user's unique ID
  */
 export const migrateLocalStorageToFirestore = async (userId: string): Promise<void> => {
-    const dataTypes: DataType[] = ['goals', 'skills', 'deadlinePlans', 'contents', 'scheduleTasks', 'dailyTasks', 'manualNotes', 'streak'];
+    const dataTypes: DataType[] = ['goals', 'skills', 'skillTopics', 'profile', 'deadlinePlans', 'contents', 'scheduleTasks', 'dailyTasks', 'manualNotes', 'streak'];
 
     try {
         for (const dataType of dataTypes) {

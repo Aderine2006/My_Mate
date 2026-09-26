@@ -59,7 +59,7 @@ const CHART_COLORS = ['#f59e0b', '#6366f1', '#10b981', '#ef4444', '#8b5cf6', '#6
 
 interface BudgetPlannerProps {
     user: { id: string; email: string; name: string } | null;
-    theme: 'light' | 'dark';
+    theme: 'light' | 'dark' | 'productive';
 }
 
 const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
@@ -463,14 +463,14 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
     // ============ Shared Styles ============
     const cardClass = 'bg-white dark:bg-gray-800  shadow-md border border-gray-200 dark:border-gray-700 p-6';
-    const inputClass = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500';
-    const btnPrimary = 'px-4 py-2 bg-indigo-600 text-white  hover:bg-indigo-700 transition-colors font-medium';
+    const inputClass = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-[#6C2BEF] bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500';
+    const btnPrimary = 'px-4 py-2 bg-[#6C2BEF] text-white  hover:bg-[#5A1FD8] transition-colors font-medium';
     const btnDanger = 'p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20  transition-colors';
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent  animate-spin" />
+                <div className="w-8 h-8 border-4 border-[#6C2BEF] border-t-transparent  animate-spin" />
             </div>
         );
     }
@@ -490,12 +490,12 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
         <div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Budget Planner</h2>
+                    <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100 mb-2">Budget Planner</h2>
                     <p className="text-gray-500 dark:text-gray-400">Track your income, expenses, and savings goals</p>
                 </div>
                 <button
                     onClick={handleExportCSV}
-                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700  hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm font-medium"
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-[#172554] dark:text-gray-200 border border-gray-200 dark:border-gray-700  hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm font-medium"
                 >
                     <Download size={18} />
                     Download Summary (CSV)
@@ -504,9 +504,9 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
             {/* Month Selector */}
             <div className="flex items-center gap-4 mb-6">
-                <button onClick={() => navigateMonth(-1)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors">&larr;</button>
-                <span className="text-lg font-semibold text-gray-800 dark:text-gray-100 min-w-[180px] text-center">{getMonthLabel(selectedMonth)}</span>
-                <button onClick={() => navigateMonth(1)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors">&rarr;</button>
+                <button onClick={() => navigateMonth(-1)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 text-[#172554] dark:text-gray-200 transition-colors">&larr;</button>
+                <span className="text-lg font-semibold text-[#172554] dark:text-gray-100 min-w-[180px] text-center">{getMonthLabel(selectedMonth)}</span>
+                <button onClick={() => navigateMonth(1)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 text-[#172554] dark:text-gray-200 transition-colors">&rarr;</button>
             </div>
 
             {/* Sub-Tab Navigation */}
@@ -516,7 +516,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                         key={tab.id}
                         onClick={() => setActiveSubTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2  text-sm font-medium transition-all ${activeSubTab === tab.id
-                            ? 'bg-indigo-600 text-white shadow-md'
+                            ? 'bg-[#6C2BEF] text-white shadow-md'
                             : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                     >
@@ -563,7 +563,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {/* Category Spending Overview */}
                     <div className={cardClass}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Category Spending</h3>
+                        <h3 className="text-lg font-bold text-[#172554] dark:text-gray-100 mb-4">Category Spending</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {EXPENSE_CATEGORIES.map(cat => {
                                 const spent = getCategoryTotal(cat);
@@ -575,11 +575,11 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-3 h-3 " style={{ backgroundColor: CATEGORY_COLORS[cat] }} />
-                                                <span className="font-medium text-gray-700 dark:text-gray-200">{cat}</span>
+                                                <span className="font-medium text-[#172554] dark:text-gray-200">{cat}</span>
                                             </div>
                                             {isOver && <AlertTriangle className="text-red-500" size={16} />}
                                         </div>
-                                        <p className="text-xl font-bold text-gray-800 dark:text-gray-100">₹{spent.toLocaleString('en-IN')}</p>
+                                        <p className="text-xl font-bold text-[#172554] dark:text-gray-100">₹{spent.toLocaleString('en-IN')}</p>
                                         {limit > 0 && (
                                             <>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-600  h-2 mt-2">
@@ -600,7 +600,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {activeSubTab === 'income' && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Income Sources</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Income Sources</h3>
                         <button onClick={() => { resetIncomeForm(); setShowIncomeForm(true); }} className={btnPrimary}>
                             <span className="flex items-center gap-2"><Plus size={16} /> Add Income</span>
                         </button>
@@ -608,22 +608,22 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {showIncomeForm && (
                         <div className={cardClass}>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">{editingIncomeId ? 'Edit Income' : 'New Income'}</h4>
+                            <h4 className="font-semibold text-[#172554] dark:text-gray-100 mb-4">{editingIncomeId ? 'Edit Income' : 'New Income'}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Source</label>
                                     <input type="text" value={incomeForm.source} onChange={e => setIncomeForm({ ...incomeForm, source: e.target.value })} className={inputClass} placeholder="e.g., Salary, Freelance" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (₹)</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Amount (₹)</label>
                                     <input type="number" value={incomeForm.amount} onChange={e => setIncomeForm({ ...incomeForm, amount: e.target.value })} className={inputClass} placeholder="0" min="0" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Date</label>
                                     <input type="date" value={incomeForm.date} onChange={e => setIncomeForm({ ...incomeForm, date: e.target.value })} className={inputClass} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Notes</label>
                                     <input type="text" value={incomeForm.notes} onChange={e => setIncomeForm({ ...incomeForm, notes: e.target.value })} className={inputClass} placeholder="Optional" />
                                 </div>
                             </div>
@@ -631,7 +631,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                 <button onClick={editingIncomeId ? handleUpdateIncome : handleAddIncome} className={btnPrimary}>
                                     <span className="flex items-center gap-2"><Save size={16} /> {editingIncomeId ? 'Update' : 'Save'}</span>
                                 </button>
-                                <button onClick={resetIncomeForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-colors">Cancel</button>
+                                <button onClick={resetIncomeForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-200 transition-colors">Cancel</button>
                             </div>
                         </div>
                     )}
@@ -646,7 +646,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                             {monthIncomes.sort((a, b) => b.date.localeCompare(a.date)).map(inc => (
                                 <div key={inc.id} className={`${cardClass} flex items-center justify-between`}>
                                     <div>
-                                        <p className="font-semibold text-gray-800 dark:text-gray-100">{inc.source}</p>
+                                        <p className="font-semibold text-[#172554] dark:text-gray-100">{inc.source}</p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(inc.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} {inc.notes && `• ${inc.notes}`}</p>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -665,7 +665,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {activeSubTab === 'expenses' && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Expenses</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Expenses</h3>
                         <button onClick={() => { resetExpenseForm(); setShowExpenseForm(true); }} className={btnPrimary}>
                             <span className="flex items-center gap-2"><Plus size={16} /> Add Expense</span>
                         </button>
@@ -673,24 +673,24 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {showExpenseForm && (
                         <div className={cardClass}>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">{editingExpenseId ? 'Edit Expense' : 'New Expense'}</h4>
+                            <h4 className="font-semibold text-[#172554] dark:text-gray-100 mb-4">{editingExpenseId ? 'Edit Expense' : 'New Expense'}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Category</label>
                                     <select value={expenseForm.category} onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value as ExpenseCategory })} className={inputClass}>
                                         {EXPENSE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (₹)</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Amount (₹)</label>
                                     <input type="number" value={expenseForm.amount} onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })} className={inputClass} placeholder="0" min="0" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Date</label>
                                     <input type="date" value={expenseForm.date} onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })} className={inputClass} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Notes</label>
                                     <input type="text" value={expenseForm.notes} onChange={e => setExpenseForm({ ...expenseForm, notes: e.target.value })} className={inputClass} placeholder="Optional" />
                                 </div>
                             </div>
@@ -698,7 +698,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                 <button onClick={editingExpenseId ? handleUpdateExpense : handleAddExpense} className={btnPrimary}>
                                     <span className="flex items-center gap-2"><Save size={16} /> {editingExpenseId ? 'Update' : 'Save'}</span>
                                 </button>
-                                <button onClick={resetExpenseForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-colors">Cancel</button>
+                                <button onClick={resetExpenseForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-200 transition-colors">Cancel</button>
                             </div>
                         </div>
                     )}
@@ -715,7 +715,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                     <div className="flex items-center gap-3">
                                         <div className="w-3 h-3  flex-shrink-0" style={{ backgroundColor: CATEGORY_COLORS[exp.category] }} />
                                         <div>
-                                            <p className="font-semibold text-gray-800 dark:text-gray-100">{exp.category}</p>
+                                            <p className="font-semibold text-[#172554] dark:text-gray-100">{exp.category}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(exp.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} {exp.notes && `• ${exp.notes}`}</p>
                                         </div>
                                     </div>
@@ -735,7 +735,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {activeSubTab === 'budgets' && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Budget Limits — {getMonthLabel(selectedMonth)}</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Budget Limits — {getMonthLabel(selectedMonth)}</h3>
                         <button onClick={() => setShowBudgetForm(true)} className={btnPrimary}>
                             <span className="flex items-center gap-2"><Plus size={16} /> Set Limit</span>
                         </button>
@@ -743,16 +743,16 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {showBudgetForm && (
                         <div className={cardClass}>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Set Budget Limit</h4>
+                            <h4 className="font-semibold text-[#172554] dark:text-gray-100 mb-4">Set Budget Limit</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Category</label>
                                     <select value={budgetForm.category} onChange={e => setBudgetForm({ ...budgetForm, category: e.target.value as ExpenseCategory })} className={inputClass}>
                                         {EXPENSE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monthly Limit (₹)</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Monthly Limit (₹)</label>
                                     <input type="number" value={budgetForm.limit} onChange={e => setBudgetForm({ ...budgetForm, limit: e.target.value })} className={inputClass} placeholder="0" min="0" />
                                 </div>
                             </div>
@@ -760,7 +760,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                 <button onClick={handleSetBudgetLimit} className={btnPrimary}>
                                     <span className="flex items-center gap-2"><Save size={16} /> Save</span>
                                 </button>
-                                <button onClick={() => setShowBudgetForm(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-colors">Cancel</button>
+                                <button onClick={() => setShowBudgetForm(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-200 transition-colors">Cancel</button>
                             </div>
                         </div>
                     )}
@@ -778,14 +778,14 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-4 h-4 " style={{ backgroundColor: CATEGORY_COLORS[cat] }} />
-                                            <span className="font-bold text-gray-800 dark:text-gray-100">{cat}</span>
+                                            <span className="font-bold text-[#172554] dark:text-gray-100">{cat}</span>
                                         </div>
                                         {limit > 0 && (
                                             <button onClick={() => handleDeleteBudgetLimit(monthLimits.find(b => b.category === cat)?.id || 0)} className={btnDanger}><Trash2 size={14} /></button>
                                         )}
                                     </div>
                                     <div className="flex items-end justify-between mb-2">
-                                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">₹{spent.toLocaleString('en-IN')}</p>
+                                        <p className="text-2xl font-bold text-[#172554] dark:text-gray-100">₹{spent.toLocaleString('en-IN')}</p>
                                         {limit > 0 && <span className="text-sm text-gray-500 dark:text-gray-400">/ ₹{limit.toLocaleString('en-IN')}</span>}
                                     </div>
                                     {limit > 0 ? (
@@ -820,7 +820,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {activeSubTab === 'goals' && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Savings Goals</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Savings Goals</h3>
                         <button onClick={() => { resetGoalForm(); setShowGoalForm(true); }} className={btnPrimary}>
                             <span className="flex items-center gap-2"><Plus size={16} /> Add Goal</span>
                         </button>
@@ -828,22 +828,22 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {showGoalForm && (
                         <div className={cardClass}>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">{editingGoalId ? 'Edit Goal' : 'New Goal'}</h4>
+                            <h4 className="font-semibold text-[#172554] dark:text-gray-100 mb-4">{editingGoalId ? 'Edit Goal' : 'New Goal'}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Goal Title</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Goal Title</label>
                                     <input type="text" value={goalForm.title} onChange={e => setGoalForm({ ...goalForm, title: e.target.value })} className={inputClass} placeholder="e.g., Emergency Fund" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Amount (₹)</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Target Amount (₹)</label>
                                     <input type="number" value={goalForm.targetAmount} onChange={e => setGoalForm({ ...goalForm, targetAmount: e.target.value })} className={inputClass} placeholder="0" min="0" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Saved So Far (₹)</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Saved So Far (₹)</label>
                                     <input type="number" value={goalForm.currentAmount} onChange={e => setGoalForm({ ...goalForm, currentAmount: e.target.value })} className={inputClass} placeholder="0" min="0" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
+                                    <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Target Date</label>
                                     <input type="date" value={goalForm.targetDate} onChange={e => setGoalForm({ ...goalForm, targetDate: e.target.value })} className={inputClass} />
                                 </div>
                             </div>
@@ -851,7 +851,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                 <button onClick={editingGoalId ? handleUpdateGoal : handleAddGoal} className={btnPrimary}>
                                     <span className="flex items-center gap-2"><Save size={16} /> {editingGoalId ? 'Update' : 'Save'}</span>
                                 </button>
-                                <button onClick={resetGoalForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-colors">Cancel</button>
+                                <button onClick={resetGoalForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-200 transition-colors">Cancel</button>
                             </div>
                         </div>
                     )}
@@ -869,7 +869,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
                                 return (
                                     <div key={goal.id} className={cardClass}>
                                         <div className="flex items-center justify-between mb-3">
-                                            <h4 className="font-bold text-gray-800 dark:text-gray-100">{goal.title}</h4>
+                                            <h4 className="font-bold text-[#172554] dark:text-gray-100">{goal.title}</h4>
                                             <div className="flex items-center gap-1">
                                                 <button onClick={() => { setEditingGoalId(goal.id); setGoalForm({ title: goal.title, targetAmount: String(goal.targetAmount), currentAmount: String(goal.currentAmount), targetDate: goal.targetDate }); setShowGoalForm(true); }} className="p-2 text-gray-400 hover:text-indigo-500 transition-colors"><Edit2 size={16} /></button>
                                                 <button onClick={() => handleDeleteGoal(goal.id)} className={btnDanger}><Trash2 size={16} /></button>
@@ -899,12 +899,12 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {/* ========== ANALYTICS TAB ========== */}
             {activeSubTab === 'analytics' && (
                 <div className="space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Analytics</h3>
+                    <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Analytics</h3>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Pie Chart — Category Breakdown */}
                         <div className={cardClass}>
-                            <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Expense Breakdown — {getMonthLabel(selectedMonth)}</h4>
+                            <h4 className="font-bold text-[#172554] dark:text-gray-100 mb-4">Expense Breakdown — {getMonthLabel(selectedMonth)}</h4>
                             {pieData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={300}>
                                     <PieChart>
@@ -921,7 +921,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                         {/* Bar Chart — Monthly Comparison */}
                         <div className={cardClass}>
-                            <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Monthly Comparison (Last 6 Months)</h4>
+                            <h4 className="font-bold text-[#172554] dark:text-gray-100 mb-4">Monthly Comparison (Last 6 Months)</h4>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={getBarData()}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} />
@@ -938,7 +938,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
 
                     {/* Line Chart — Trends */}
                     <div className={cardClass}>
-                        <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Income vs Expense Trend</h4>
+                        <h4 className="font-bold text-[#172554] dark:text-gray-100 mb-4">Income vs Expense Trend</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={getLineData()}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} />
@@ -958,12 +958,12 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({ user, theme }) => {
             {/* ========== INSIGHTS TAB ========== */}
             {activeSubTab === 'insights' && (
                 <div className="space-y-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Smart Insights</h3>
+                    <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">Smart Insights</h3>
                     <div className="space-y-3">
                         {generateInsights().map((insight, i) => (
                             <div key={i} className={`${cardClass} flex items-start gap-3`}>
                                 <Lightbulb className="text-yellow-500 flex-shrink-0 mt-0.5" size={20} />
-                                <p className="text-gray-700 dark:text-gray-200">{insight}</p>
+                                <p className="text-[#172554] dark:text-gray-200">{insight}</p>
                             </div>
                         ))}
                     </div>

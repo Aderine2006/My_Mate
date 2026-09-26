@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
+import { generateGroqResponse, checkGroqConnection, formatRAGContext } from './groq';
+import { indexUserData, semanticSearch } from './vector-db';
 import { saveToFirestore, loadFromFirestore, migrateLocalStorageToFirestore, hasUserMigrated } from './firestore-helpers';
 import { Plus, Target, Clock, TrendingUp, BookOpen, Download, Menu, X, CheckCircle, Circle, Edit2, Trash2, Save, Calendar, Video, Image, FileText, Play, Flame, ListTodo, BarChart3, StickyNote, MessageCircle, Send, Bot, Wifi, WifiOff, User, Moon, Sun, Wallet } from 'lucide-react';
 import BudgetPlanner from './components/BudgetPlanner';
+import SkillsTracker from './components/skills/SkillsTracker';
+import ProfileDashboard from './components/profile/ProfileDashboard';
+import type { SkillTopic } from './types/skill';
 
 interface User {
   id: string;
@@ -128,7 +133,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
           <div className="bg-white p-8  shadow-xl max-w-lg w-full">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
-            <p className="text-gray-700 mb-4">The application encountered an error. Please try refreshing the page.</p>
+            <p className="text-[#172554] mb-4">The application encountered an error. Please try refreshing the page.</p>
             <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-60 text-red-800">
               {this.state.error?.toString()}
             </pre>
@@ -151,8 +156,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const MYMate = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem('mymate-active-tab');
+    return ['dashboard', 'schedule', 'goals', 'skills', 'profile', 'planner', 'budget', 'content', 'notes', 'analysis'].includes(savedTab ?? '') ? savedTab as string : 'dashboard';
+  });
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window === 'undefined' || window.matchMedia('(min-width: 768px)').matches);
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(true);
   const [authMode, setAuthMode] = useState('login');
@@ -162,9 +170,7 @@ const MYMate = () => {
   const [editingGoal, setEditingGoal] = useState<number | null>(null);
   const [goalForm, setGoalForm] = useState({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' });
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [showSkillForm, setShowSkillForm] = useState(false);
-  const [editingSkill, setEditingSkill] = useState<number | null>(null);
-  const [skillForm, setSkillForm] = useState({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' });
+  const [skillTopics, setSkillTopics] = useState<SkillTopic[]>([]);
 
   const [deadlinePlans, setDeadlinePlans] = useState<DeadlinePlan[]>([]);
   const [showPlanForm, setShowPlanForm] = useState(false);
@@ -194,11 +200,12 @@ const MYMate = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [ollamaAvailable, setOllamaAvailable] = useState(false);
+  const [groqAvailable, setGroqAvailable] = useState(false);
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('mymate-theme');
-    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
+    return savedTheme === 'dark' ? 'dark' : 'light';
   });
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [showCelebration, setShowCelebration] = useState(false);
@@ -208,6 +215,7 @@ const MYMate = () => {
   const clearAllData = () => {
     setGoals([]);
     setSkills([]);
+    setSkillTopics([]);
     setDeadlinePlans([]);
     setContents([]);
     setStreak({ lastVisitDate: '', visitDates: [], currentStreak: 0, longestStreak: 0 });
@@ -436,9 +444,10 @@ const MYMate = () => {
       }
 
       // Load from Firestore
-      const [goalsData, skillsData, deadlinePlansData, contentsData, scheduleTasksData, dailyTasksData, manualNotesData] = await Promise.all([
+      const [goalsData, skillsData, skillTopicsData, deadlinePlansData, contentsData, scheduleTasksData, dailyTasksData, manualNotesData] = await Promise.all([
         loadFromFirestore(user.id, 'goals'),
         loadFromFirestore(user.id, 'skills'),
+        loadFromFirestore(user.id, 'skillTopics'),
         loadFromFirestore(user.id, 'deadlinePlans'),
         loadFromFirestore(user.id, 'contents'),
         loadFromFirestore(user.id, 'scheduleTasks'),
@@ -448,6 +457,7 @@ const MYMate = () => {
 
       if (goalsData) setGoals(goalsData);
       if (skillsData) setSkills(skillsData);
+      if (skillTopicsData) setSkillTopics(skillTopicsData);
       if (deadlinePlansData) setDeadlinePlans(deadlinePlansData);
       if (contentsData) setContents(contentsData);
       if (scheduleTasksData) setScheduleTasks(scheduleTasksData);
@@ -460,6 +470,7 @@ const MYMate = () => {
       try {
         const goalsData = localStorage.getItem(`goals-${user.id}`);
         const skillsData = localStorage.getItem(`skills-${user.id}`);
+        const skillTopicsData = localStorage.getItem(`skillTopics-${user.id}`);
         const deadlinePlansData = localStorage.getItem(`deadlinePlans-${user.id}`);
         const contentsData = localStorage.getItem(`contents-${user.id}`);
         const scheduleTasksData = localStorage.getItem(`scheduleTasks-${user.id}`);
@@ -468,6 +479,7 @@ const MYMate = () => {
 
         if (goalsData) setGoals(JSON.parse(goalsData));
         if (skillsData) setSkills(JSON.parse(skillsData));
+        if (skillTopicsData) setSkillTopics(JSON.parse(skillTopicsData));
         if (deadlinePlansData) setDeadlinePlans(JSON.parse(deadlinePlansData));
         if (contentsData) setContents(JSON.parse(contentsData));
         if (scheduleTasksData) setScheduleTasks(JSON.parse(scheduleTasksData));
@@ -497,18 +509,81 @@ const MYMate = () => {
   // Apply theme to document
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    root.classList.remove('light', 'dark', 'productive');
+    root.classList.add(theme);
     localStorage.setItem('mymate-theme', theme);
   }, [theme]);
 
-  // Toggle theme
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
+  useEffect(() => {
+    localStorage.setItem('mymate-active-tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    const closeSidebarOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSidebarOpen(false);
+        setProfileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', closeSidebarOnEscape);
+    return () => window.removeEventListener('keydown', closeSidebarOnEscape);
+  }, []);
+
+  // Check AI service availability on mount
+  useEffect(() => {
+    let isCurrent = true;
+    const checkAIServices = async () => {
+      const [ollamaStatus, groqStatus] = await Promise.all([
+        checkOllamaConnection(),
+        user ? checkGroqConnection(user.id) : Promise.resolve(false),
+      ]);
+      if (!isCurrent) return;
+      setOllamaAvailable(ollamaStatus);
+      setGroqAvailable(groqStatus);
+    };
+    void checkAIServices();
+    return () => { isCurrent = false; };
+  }, [user]);
+
+  // Index user data for RAG when data loads
+  useEffect(() => {
+    if (user && (goals.length > 0 || skills.length > 0 || manualNotes.length > 0 || dailyTasks.length > 0)) {
+      indexUserData(user.id, {
+        goals: goals.map(g => ({
+          id: g.id,
+          title: g.title,
+          description: g.description,
+          category: g.category,
+          status: g.status,
+          progress: g.progress
+        })),
+        tasks: dailyTasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          description: t.description,
+          category: t.category,
+          completed: t.completed,
+          priority: t.priority
+        })),
+        notes: manualNotes.map(n => ({
+          id: n.id,
+          title: n.title,
+          content: n.content,
+          category: n.category,
+          tags: n.tags
+        })),
+        skills: skills.map(s => ({
+          id: s.id,
+          name: s.name,
+          level: s.level,
+          hoursInvested: s.hoursInvested,
+          targetHours: s.targetHours
+        }))
+      }).catch(error => {
+        console.error('Error indexing user data for RAG:', error);
+      });
+    }
+  }, [user, goals, skills, manualNotes, dailyTasks]);
 
   // Load data when user changes
   useEffect(() => {
@@ -834,16 +909,44 @@ const MYMate = () => {
     setChatMessages(prev => [...prev, loadingMessage]);
 
     try {
-      const context = getUserContext();
       let botResponseText: string;
+      const conversationHistory = chatMessages.slice(-10).map(msg => ({
+        role: msg.isUser ? 'user' as const : 'assistant' as const,
+        content: msg.text
+      }));
 
-      // Try Ollama first if available
-      if (ollamaAvailable) {
+      // Try Groq with RAG first if available
+      if (groqAvailable && user) {
         try {
+          // Perform semantic search to get relevant context
+          const relevantDocs = await semanticSearch(user.id, messageText, 5);
+          const ragContext = formatRAGContext(relevantDocs, messageText);
+          
+          botResponseText = await generateGroqResponse(messageText, ragContext, conversationHistory);
+        } catch (groqError) {
+          console.error('Groq error, falling back to Ollama:', groqError);
+          
+          // Try Ollama as fallback
+          if (ollamaAvailable) {
+            try {
+              const context = getUserContext();
+              botResponseText = await generateOllamaResponse(messageText, context);
+            } catch (ollamaError) {
+              console.error('Ollama error, falling back to rule-based:', ollamaError);
+              botResponseText = generateChatResponse(messageText);
+            }
+          } else {
+            // Use rule-based response
+            botResponseText = generateChatResponse(messageText);
+          }
+        }
+      } else if (ollamaAvailable) {
+        // Try Ollama if Groq is not available
+        try {
+          const context = getUserContext();
           botResponseText = await generateOllamaResponse(messageText, context);
         } catch (ollamaError) {
           console.error('Ollama error, falling back to rule-based:', ollamaError);
-          // Fallback to rule-based
           botResponseText = generateChatResponse(messageText);
         }
       } else {
@@ -902,7 +1005,7 @@ const MYMate = () => {
     }
   }, [chatbotOpen, user, ollamaAvailable]);
 
-  const saveData = async (key: string, data: Goal[] | Skill[] | DeadlinePlan[] | Content[] | ScheduleTask[] | DailyTask[] | ManualNote[]) => {
+  const saveData = async (key: string, data: Goal[] | Skill[] | SkillTopic[] | DeadlinePlan[] | Content[] | ScheduleTask[] | DailyTask[] | ManualNote[]) => {
     if (!user) return;
     try {
       // Save to Firestore
@@ -1179,56 +1282,6 @@ const MYMate = () => {
     saveData('goals', updatedGoals);
   };
 
-  const handleAddSkill = () => {
-    if (!skillForm.name) return;
-    const newSkill: Skill = {
-      id: Date.now(),
-      ...skillForm,
-      hoursInvested: parseInt(skillForm.hoursInvested) || 0,
-      targetHours: parseInt(skillForm.targetHours) || 100
-    };
-    const updatedSkills = [...skills, newSkill];
-    setSkills(updatedSkills);
-    saveData('skills', updatedSkills);
-    setSkillForm({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' });
-    setShowSkillForm(false);
-  };
-
-  const handleEditSkill = (skill: Skill) => {
-    setEditingSkill(skill.id);
-    setSkillForm({
-      name: skill.name,
-      level: skill.level,
-      hoursInvested: skill.hoursInvested.toString(),
-      targetHours: (skill.targetHours || 100).toString()
-    });
-    setShowSkillForm(true);
-  };
-
-  const handleUpdateSkill = () => {
-    const updatedSkills = skills.map(s =>
-      s.id === editingSkill
-        ? {
-          ...s,
-          ...skillForm,
-          hoursInvested: parseInt(skillForm.hoursInvested) || 0,
-          targetHours: parseInt(skillForm.targetHours) || 100
-        }
-        : s
-    );
-    setSkills(updatedSkills);
-    saveData('skills', updatedSkills);
-    setEditingSkill(null);
-    setSkillForm({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' });
-    setShowSkillForm(false);
-  };
-
-  const handleDeleteSkill = (id: number) => {
-    const updatedSkills = skills.filter(s => s.id !== id);
-    setSkills(updatedSkills);
-    saveData('skills', updatedSkills);
-  };
-
   const handleAddPlan = () => {
     if (!planForm.title || !planForm.deadline) return;
 
@@ -1397,30 +1450,29 @@ const MYMate = () => {
 
   if (showAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white  shadow-xl p-8 w-full max-w-md">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat p-4" style={{ backgroundImage: "linear-gradient(rgba(206, 206, 209, 0.48), rgba(237, 238, 243, 0.48)), url('/Login%20Page%20Background.png')" }}>
+        <div className="absolute inset-0 bg-slate-950/20" aria-hidden="true" />
+        <div className="relative z-10 w-full max-w-md bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              {/* Logo to the left of the name */}
+            <div className="flex items-center justify-center mb-4">
               <img
                 src="/mymate-logo.png"
                 alt="MyMate logo"
-                className="w-10 h-10 "
+                className="w-32 h-32 "
               />
-              <h1 className="text-4xl font-bold text-indigo-600">MyMate</h1>
             </div>
             <p className="text-gray-600 dark:text-gray-300">Your Personal Career Tracker</p>
           </div>
           <form onSubmit={handleAuth} className="space-y-4">
             {authMode === 'signup' && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label htmlFor="name" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Name</label>
                 <input
                   id="name"
                   type="text"
                   value={authForm.name}
                   onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   required={authMode === 'signup'}
                   placeholder="Enter your name"
                   aria-label="Name"
@@ -1428,32 +1480,32 @@ const MYMate = () => {
               </div>
             )}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Email</label>
               <input
                 id="email"
                 type="email"
                 value={authForm.email}
                 onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 required
                 placeholder="Enter your email"
                 aria-label="Email"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Password</label>
               <input
                 id="password"
                 type="password"
                 value={authForm.password}
                 onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 required
                 placeholder="Enter your password"
                 aria-label="Password"
               />
             </div>
-            <button type="submit" className="w-full bg-indigo-600 dark:bg-indigo-700 text-white py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600 font-medium">{authMode === 'login' ? 'Login' : 'Sign Up'}</button>
+            <button type="submit" className="w-full bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF] font-medium">{authMode === 'login' ? 'Login' : 'Sign Up'}</button>
           </form>
 
           {/* Auth error message */}
@@ -1472,7 +1524,7 @@ const MYMate = () => {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 py-2  hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 py-2  hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium text-[#172554] dark:text-gray-300"
           >
             <img
               src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
@@ -1483,7 +1535,7 @@ const MYMate = () => {
           </button>
 
           <div className="text-center mt-4">
-            <button onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm">{authMode === 'login' ? 'Need an account? Sign up' : 'Have an account? Login'}</button>
+            <button onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} className="text-indigo-600 dark:text-[#6C2BEF] hover:text-indigo-700 dark:hover:text-indigo-300 text-sm">{authMode === 'login' ? 'Need an account? Sign up' : 'Have an account? Login'}</button>
           </div>
         </div>
       </div>
@@ -1552,7 +1604,7 @@ const MYMate = () => {
 
         {/* Celebration Message */}
         <div className="relative z-10 text-center pointer-events-auto">
-          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-12 py-8  shadow-2xl transform animate-bounce">
+          <div className="bg-gradient-to-r from-[#FF9D24] via-[#F43F72] to-[#F43F72] text-white px-12 py-8  shadow-2xl transform animate-bounce">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-4xl font-bold mb-2">Congratulations!</h2>
             <p className="text-2xl">You've completed all tasks for today!</p>
@@ -1560,7 +1612,7 @@ const MYMate = () => {
           </div>
         </div>
 
-        {/* CSS Animations */}
+        {/* CSS Animations and Theme Styles */}
         <style>{`
           @keyframes confetti-fall {
             0% {
@@ -1583,53 +1635,488 @@ const MYMate = () => {
               opacity: 0.8;
             }
           }
+
+          /* Productive/Scifi Theme Styles */
+          .productive {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #0f1428;
+            --bg-card: #121830;
+            --text-primary: #00f0ff;
+            --text-secondary: #a0aec0;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #f43f72;
+            --accent-green: #10b981;
+            --border-glow: 0 0 10px rgba(0, 240, 255, 0.3);
+          }
+
+          .productive body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            color: #00f0ff;
+          }
+
+          .productive .min-h-screen {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            position: relative;
+          }
+
+          .productive .min-h-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+              linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+          }
+
+          .productive .bg-white {
+            background: rgba(18, 24, 48, 0.95) !important;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+          }
+
+          .productive .bg-gray-50 {
+            background: rgba(15, 20, 40, 0.9) !important;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+          }
+
+          .productive .bg-gray-100 {
+            background: rgba(18, 24, 48, 0.8) !important;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+          }
+
+          .productive .bg-gray-200 {
+            background: rgba(0, 240, 255, 0.1) !important;
+          }
+
+          .productive .bg-gray-800 {
+            background: rgba(18, 24, 48, 0.95) !important;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+          }
+
+          .productive .bg-gray-900 {
+            background: rgba(10, 14, 39, 0.98) !important;
+          }
+
+          .productive .bg-gray-700 {
+            background: rgba(26, 31, 58, 0.9) !important;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+          }
+
+          .productive .text-gray-800,
+          .productive .text-gray-700,
+          .productive .text-gray-900,
+          .productive .text-[#172554] {
+            color: #00f0ff !important;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+          }
+
+          .productive .text-gray-600,
+          .productive .text-gray-500 {
+            color: #a0aec0 !important;
+          }
+
+          .productive .text-gray-400,
+          .productive .text-gray-300 {
+            color: #718096 !important;
+          }
+
+          .productive .border-gray-200,
+          .productive .border-gray-300 {
+            border-color: rgba(0, 240, 255, 0.3) !important;
+          }
+
+          .productive .border-gray-600,
+          .productive .border-gray-700 {
+            border-color: rgba(0, 240, 255, 0.2) !important;
+          }
+
+          .productive .shadow-md,
+          .productive .shadow-lg,
+          .productive .shadow-xl {
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), 0 0 60px rgba(139, 92, 246, 0.1) !important;
+          }
+
+          .productive .shadow {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15) !important;
+          }
+
+          .productive button {
+            transition: all 0.3s ease;
+          }
+
+          .productive button:hover {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+          }
+
+          .productive input,
+          .productive textarea,
+          .productive select {
+            background: rgba(18, 24, 48, 0.9) !important;
+            border: 1px solid rgba(0, 240, 255, 0.3) !important;
+            color: #00f0ff !important;
+          }
+
+          .productive input:focus,
+          .productive textarea:focus,
+          .productive select:focus {
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
+          }
+
+          .productive .bg-gradient-to-r {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2), rgba(244, 63, 114, 0.2)) !important;
+          }
+
+          .productive .bg-gradient-to-br {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.15)) !important;
+          }
+
+          /* Neon glow effects for specific elements */
+          .productive .bg-[#6C2BEF] {
+            background: linear-gradient(135deg, #00f0ff, #8b5cf6) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(139, 92, 246, 0.3) !important;
+          }
+
+          .productive .bg-[#5A1FD8] {
+            background: linear-gradient(135deg, #8b5cf6, #6C2BEF) !important;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5) !important;
+          }
+
+          .productive .bg-[#4816C7] {
+            background: linear-gradient(135deg, #6C2BEF, #4816C7) !important;
+          }
+
+          .productive .bg-[#3610B6] {
+            background: linear-gradient(180deg, #0a0e27, #1a1f3a) !important;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+          }
+
+          /* Sidebar in productive mode */
+          .productive .bg-\[\#3610B6\] {
+            background: linear-gradient(180deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.95)) !important;
+            border-right: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+          }
+
+          /* Header in productive mode */
+          .productive header {
+            background: rgba(10, 14, 39, 0.95) !important;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+          }
+
+          /* Progress bars in productive mode */
+          .productive .bg-green-500 {
+            background: linear-gradient(90deg, #00f0ff, #10b981) !important;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+          }
+
+          .productive .bg-yellow-500 {
+            background: linear-gradient(90deg, #f59e0b, #f43f72) !important;
+            box-shadow: 0 0 10px rgba(245, 158,  11, 0.5);
+          }
+
+          .productive .bg-red-500 {
+            background: linear-gradient(90deg, #f43f72, #ef4444) !important;
+            box-shadow: 0 0 10px rgba(244, 63, 114, 0.5);
+          }
+
+          /* Scrollbar styling for productive theme */
+          .productive ::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .productive ::-webkit-scrollbar-track {
+            background: rgba(10, 14, 39, 0.5);
+          }
+
+          .productive ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00f0ff, #8b5cf6);
+            border-radius: 4px;
+          }
+
+          .productive ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #8b5cf6, #f43f72);
+          }
         `}</style>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <>
+      {/* Global Theme Styles */}
+      <style>{`
+        /* Productive/Scifi Theme Styles */
+        html.productive {
+          --bg-primary: #0a0e27;
+          --bg-secondary: #0f1428;
+          --bg-card: #121830;
+          --text-primary: #00f0ff;
+          --text-secondary: #a0aec0;
+          --accent-cyan: #00f0ff;
+          --accent-purple: #8b5cf6;
+          --accent-pink: #f43f72;
+          --accent-green: #10b981;
+          --border-glow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        html.productive body {
+          background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%) !important;
+          color: #00f0ff !important;
+        }
+
+        html.productive .min-h-screen {
+          background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%) !important;
+          position: relative;
+        }
+
+        html.productive .min-h-screen::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-image: 
+            linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        html.productive .bg-white {
+          background: rgba(18, 24, 48, 0.95) !important;
+          border: 1px solid rgba(0, 240, 255, 0.2);
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        html.productive .bg-gray-50 {
+          background: rgba(15, 20, 40, 0.9) !important;
+          border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        html.productive .bg-gray-100 {
+          background: rgba(18, 24, 48, 0.8) !important;
+          border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        html.productive .bg-gray-200 {
+          background: rgba(0, 240, 255, 0.1) !important;
+        }
+
+        html.productive .bg-gray-800 {
+          background: rgba(18, 24, 48, 0.95) !important;
+          border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        html.productive .bg-gray-900 {
+          background: rgba(10, 14, 39, 0.98) !important;
+        }
+
+        html.productive .bg-gray-700 {
+          background: rgba(26, 31, 58, 0.9) !important;
+          border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        html.productive .text-gray-800,
+        html.productive .text-gray-700,
+        html.productive .text-gray-900,
+        html.productive .text-[#172554] {
+          color: #00f0ff !important;
+          text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        html.productive .text-gray-600,
+        html.productive .text-gray-500 {
+          color: #a0aec0 !important;
+        }
+
+        html.productive .text-gray-400,
+        html.productive .text-gray-300 {
+          color: #718096 !important;
+        }
+
+        html.productive .border-gray-200,
+        html.productive .border-gray-300 {
+          border-color: rgba(0, 240, 255, 0.3) !important;
+        }
+
+        html.productive .border-gray-600,
+        html.productive .border-gray-700 {
+          border-color: rgba(0, 240, 255, 0.2) !important;
+        }
+
+        html.productive .shadow-md,
+        html.productive .shadow-lg,
+        html.productive .shadow-xl {
+          box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), 0 0 60px rgba(139, 92, 246, 0.1) !important;
+        }
+
+        html.productive .shadow {
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.15) !important;
+        }
+
+        html.productive button {
+          transition: all 0.3s ease;
+        }
+
+        html.productive button:hover {
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        html.productive input,
+        html.productive textarea,
+        html.productive select {
+          background: rgba(18, 24, 48, 0.9) !important;
+          border: 1px solid rgba(0, 240, 255, 0.3) !important;
+          color: #00f0ff !important;
+        }
+
+        html.productive input:focus,
+        html.productive textarea:focus,
+        html.productive select:focus {
+          border-color: #00f0ff !important;
+          box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
+        }
+
+        html.~ .bg-gradient-to-r {
+          background: linear-gradient(90deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2), rgba(244, 63, 114, 0.2)) !important;
+        }
+
+        html.productive .bg-gradient-to-br {
+          background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.15)) !important;
+        }
+
+        /* Neon glow effects for specific elements */
+        html.productive .bg-[#6C2BEF] {
+          background: linear-gradient(135deg, #00f0ff, #8b5cf6) !important;
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(139, 92, 246, 0.3) !important;
+        }
+
+        html.productive .bg-[#5A1FD8] {
+          background: linear-gradient(135deg, #8b5cf6, #6C2BEF) !important;
+          box-shadow: 0 0 20px rgba(139, 92, 246, 0.5) !important;
+        }
+
+        html.productive .bg-[#4816C7] {
+          background: linear-gradient(135deg, #6C2BEF, #4816C7) !important;
+        }
+
+        html.productive .bg-[#3610B6] {
+          background: linear-gradient(180deg, #0a0e27, #1a1f3a) !important;
+          border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        /* Sidebar in productive mode */
+        html.productive .bg-\[\#3610B6\] {
+          background: linear-gradient(180deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.95)) !important;
+          border-right: 1px solid rgba(0, 240, 255, 0.3);
+          box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Header in productive mode */
+        html.productive header {
+          background: rgba(10, 14, 39, 0.95) !important;
+          border-bottom: 1px solid rgba(0, 240, 255, 0.3) !important;
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Progress bars in productive mode */
+        html.productive .bg-green-500 {
+          background: linear-gradient(90deg, #00f0ff, #10b981) !important;
+          box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        html.productive .bg-yellow-500 {
+          background: linear-gradient(90deg, #f59e0b, #f43f72) !important;
+          box-shadow: 0 0 10px rgba(245, 158,  11, 0.5);
+        }
+
+        html.productive .bg-red-500 {
+          background: linear-gradient(90deg, #f43f72, #ef4444) !important;
+          box-shadow: 0 0 10px rgba(244, 63, 114, 0.5);
+        }
+
+        /* Scrollbar styling for productive theme */
+        html.productive ::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        html.productive ::-webkit-scrollbar-track {
+          background: rgba(10, 14, 39, 0.5);
+        }
+
+        html.productive ::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #00f0ff, #8b5cf6);
+          border-radius: 4px;
+        }
+
+        html.productive ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #8b5cf6, #f43f72);
+        }
+      `}</style>
+
+      <div className="flex h-screen min-h-0 w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
       <CelebrationOverlay />
-      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} h-screen bg-indigo-900 dark:bg-gray-800 text-white transition-all duration-300 overflow-y-auto overflow-x-hidden`}>
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            {/* Logo to the left of the name */}
-            <img
-              src="/mymate-logo.png"
-              alt="MyMate logo"
-              className="w-8 h-8  bg-white"
-            />
-            <h1 className="text-2xl font-bold">MyMate</h1>
+      {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/45 md:hidden" />}
+      <div className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-hidden bg-[#3610B6] text-white transition-[transform,width] duration-250 ease-in-out md:relative md:inset-auto md:h-full md:flex-shrink-0 ${sidebarOpen ? 'translate-x-0 md:w-64' : '-translate-x-full md:translate-x-0 md:w-16'}`}>
+        <div className={`${sidebarOpen ? 'p-6' : 'p-3'} flex-1 overflow-y-auto`}>
+          <div className={`mb-8 flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+            <div className="flex min-w-0 items-center gap-3">
+              <img
+                src="/mymate-logo.png"
+                alt="MyMate logo"
+                className="h-10 w-10 shrink-0 rounded bg-white object-contain p-1"
+              />
+              {sidebarOpen && <h1 className="text-2xl font-bold">MyMate</h1>}
+            </div>
+            {sidebarOpen && <button type="button" onClick={() => setSidebarOpen(false)} aria-label="Close navigation" title="Close navigation" className="rounded-md p-2 text-white hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:hidden"><X size={19} /></button>}
           </div>
           <nav className="space-y-2">
             {[
               { id: 'dashboard', icon: TrendingUp, label: 'Dashboard' },
               { id: 'schedule', icon: ListTodo, label: 'Daily Schedule' },
               { id: 'goals', icon: Target, label: 'Goals' },
-              { id: 'skills', icon: BookOpen, label: 'Skills' },
+              { id: 'skills', icon: BookOpen, label: 'Track sheet' },
               { id: 'planner', icon: Calendar, label: 'Planner' },
               { id: 'budget', icon: Wallet, label: 'Budget Planner' },
               { id: 'content', icon: Video, label: 'Content Creation' },
               { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
               { id: 'analysis', icon: BarChart3, label: 'Analysis' }
             ].map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3  ${activeTab === item.id ? 'bg-indigo-700 dark:bg-indigo-600' : 'hover:bg-indigo-800 dark:hover:bg-gray-700'}`}>
+              <button key={item.id} type="button" title={item.label} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === item.id ? 'bg-[#5A1FD8] text-white' : 'hover:bg-[#4816C7] hover:text-white'}`}>
                 <item.icon size={20} />
-                <span>{item.label}</span>
+                <span className={sidebarOpen ? '' : 'md:hidden'}>{item.label}</span>
               </button>
             ))}
           </nav>
         </div>
+        <div className={`border-t border-white/20 ${sidebarOpen ? 'p-3' : 'p-2'}`}>
+          <button type="button" title="Profile" aria-current={activeTab === 'profile' ? 'page' : undefined} onClick={() => { setActiveTab('profile'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }} className={`flex w-full items-center gap-3 rounded-md py-3 transition-colors ${sidebarOpen ? 'justify-start px-4' : 'justify-center px-2'} ${activeTab === 'profile' ? 'bg-[#5A1FD8] text-white' : 'hover:bg-[#4816C7] hover:text-white'}`}>
+            <User size={20} />
+            <span className={sidebarOpen ? '' : 'md:hidden'}>Profile</span>
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <header className="bg-white dark:bg-gray-800 shadow-sm px-4 py-3 flex items-center justify-between flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  text-gray-700 dark:text-gray-200"
-              aria-label="Toggle sidebar"
+              className="rounded-md p-2 text-[#172554] transition hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              aria-label={sidebarOpen ? 'Collapse sidebar' : 'Open navigation'}
+              aria-expanded={sidebarOpen}
+              title={sidebarOpen ? 'Collapse sidebar' : 'Open navigation'}
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -1656,20 +2143,21 @@ const MYMate = () => {
             {/* Daily Streak Icon */}
             {user && streak.currentStreak > 0 && (
               <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30  border border-orange-200 dark:border-orange-800">
-                <Flame className="text-orange-500 dark:text-orange-400" size={24} fill="currentColor" />
+                <Flame className="text-[#FF9D24] dark:text-orange-400" size={24} fill="currentColor" />
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">{streak.currentStreak}</span>
-                  <span className="text-xs text-orange-600 dark:text-orange-400">Day Streak</span>
+                  <span className="text-xs text-[#FF9D24] dark:text-orange-400">Day Streak</span>
                 </div>
               </div>
             )}
             <div className="text-gray-600 dark:text-gray-300">Welcome, {user && user.name}</div>
 
-            {/* Theme Toggle */}
             <button
-              onClick={toggleTheme}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  transition-colors text-gray-700 dark:text-gray-200"
-              aria-label="Toggle theme"
+              type="button"
+              onClick={() => setTheme(current => current === 'light' ? 'dark' : 'light')}
+              className="rounded-md p-2 text-[#172554] transition-colors hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+              title={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
             >
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
@@ -1682,7 +2170,7 @@ const MYMate = () => {
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700  transition-colors flex items-center justify-center"
                   aria-label="Profile menu"
                 >
-                  <div className="w-10 h-10  bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center font-semibold">
+                  <div className="w-10 h-10  bg-[#6C2BEF] dark:bg-[#6C2BEF] text-white flex items-center justify-center font-semibold">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 </button>
@@ -1697,10 +2185,18 @@ const MYMate = () => {
                     />
                     <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800  shadow-xl border border-gray-200 dark:border-gray-700 z-20">
                       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">{user.name}</p>
+                        <p className="font-semibold text-[#172554] dark:text-gray-200">{user.name}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                       </div>
                       <div className="py-2">
+                        <button
+                          type="button"
+                          onClick={() => { setActiveTab('profile'); setProfileMenuOpen(false); }}
+                          className="flex w-full items-center space-x-3 px-4 py-3 text-left transition-colors hover:bg-orange-50 dark:hover:bg-gray-700"
+                        >
+                          <User size={20} className="text-orange-700 dark:text-orange-300" />
+                          <span className="text-[#172554] dark:text-gray-300">View profile</span>
+                        </button>
                         <button
                           onClick={() => {
                             handleExport();
@@ -1710,7 +2206,7 @@ const MYMate = () => {
                           aria-label="Export data"
                         >
                           <Download size={20} className="text-gray-600 dark:text-gray-400" />
-                          <span className="text-gray-700 dark:text-gray-300">Export Data</span>
+                          <span className="text-[#172554] dark:text-gray-300">Export Data</span>
                         </button>
                         <button
                           onClick={() => {
@@ -1732,10 +2228,10 @@ const MYMate = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50 dark:bg-gray-900">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50 dark:bg-gray-900">
           {activeTab === 'dashboard' && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Dashboard</h2>
+              <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100 mb-6">Dashboard</h2>
 
               {/* Year End Banner */}
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700  shadow-lg p-6 mb-8 text-white">
@@ -1758,10 +2254,10 @@ const MYMate = () => {
                 {/* Daily Streak Card */}
                 <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30  shadow-lg p-6 border-2 border-orange-200 dark:border-orange-800 ring-2 ring-orange-100 dark:ring-orange-900/50">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-700 dark:text-gray-300 font-medium">Daily Streak</h3>
-                    <Flame className="text-orange-500 dark:text-orange-400" size={28} fill="currentColor" />
+                    <h3 className="text-[#172554] dark:text-gray-300 font-medium">Daily Streak</h3>
+                    <Flame className="text-[#FF9D24] dark:text-orange-400" size={28} fill="currentColor" />
                   </div>
-                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{streak.currentStreak}</p>
+                  <p className="text-3xl font-bold text-[#FF9D24] dark:text-orange-400">{streak.currentStreak}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     {streak.currentStreak > 0
                       ? streak.currentStreak === streak.longestStreak
@@ -1771,12 +2267,12 @@ const MYMate = () => {
                   </p>
                 </div>
                 {/* Completion % Card */}
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30  shadow-lg p-6 border-2 border-indigo-200 dark:border-indigo-800 ring-2 ring-indigo-100 dark:ring-indigo-900/50">
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30  shadow-lg p-6 border-2 border-indigo-200 dark:border-[#6C2BEF] ring-2 ring-indigo-100 dark:ring-indigo-900/50">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-700 dark:text-gray-300 font-medium">Completion %</h3>
-                    <BarChart3 className="text-indigo-500 dark:text-indigo-400" size={28} />
+                    <h3 className="text-[#172554] dark:text-gray-300 font-medium">Completion %</h3>
+                    <BarChart3 className="text-indigo-600 dark:text-[#6C2BEF]" size={28} />
                   </div>
-                  <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{calculateTodayCompletion()}%</p>
+                  <p className="text-3xl font-bold text-indigo-600 dark:text-[#6C2BEF]">{calculateTodayCompletion()}%</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     {(() => {
                       const { completed, total } = getTodayCompletionStats();
@@ -1785,9 +2281,9 @@ const MYMate = () => {
                   </p>
                 </div>
                 {/* Total Goals Card */}
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30  shadow-lg p-6 border-2 border-purple-200 dark:border-purple-800 ring-2 ring-purple-100 dark:ring-purple-900/50">
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:bg-[#5A1FD8]/30  shadow-lg p-6 border-2 border-purple-200 dark:border-purple-800 ring-2 ring-purple-100 dark:ring-purple-900/50">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-700 dark:text-gray-300 font-medium">Total Goals</h3>
+                    <h3 className="text-[#172554] dark:text-gray-300 font-medium">Total Goals</h3>
                     <Target className="text-purple-600 dark:text-purple-400" size={28} />
                   </div>
                   <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.totalGoals}</p>
@@ -1796,7 +2292,7 @@ const MYMate = () => {
                 {/* Skills Tracked Card */}
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30  shadow-lg p-6 border-2 border-green-200 dark:border-green-800 ring-2 ring-green-100 dark:ring-green-900/50">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-700 dark:text-gray-300 font-medium">Skills Tracked</h3>
+                    <h3 className="text-[#172554] dark:text-gray-300 font-medium">Skills Tracked</h3>
                     <BookOpen className="text-green-600 dark:text-green-400" size={28} />
                   </div>
                   <p className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.totalSkills}</p>
@@ -1804,7 +2300,7 @@ const MYMate = () => {
                 </div>
                 {/* Achievements Card */}
                 <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30  shadow-lg p-6 border-2 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-100 dark:ring-yellow-900/50">
-                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalHours}</div>
+                  <div className="text-3xl font-bold text-[#172554] dark:text-gray-100">{stats.totalHours}</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">Total Hours</div>
                 </div>
               </div>
@@ -1812,8 +2308,8 @@ const MYMate = () => {
               {/* Daily Schedule Section */}
               <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                    <ListTodo className="text-indigo-600 dark:text-indigo-400" size={24} />
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 flex items-center gap-2">
+                    <ListTodo className="text-indigo-600 dark:text-[#6C2BEF]" size={24} />
                     Today's Schedule
                   </h3>
                   <span className="text-sm text-gray-500 dark:text-gray-400">{formatDateDDMMYYYY(currentDate)}</span>
@@ -1832,8 +2328,8 @@ const MYMate = () => {
                           </button>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-gray-800 dark:text-gray-100">{task.title}</span>
-                              <span className={`px-2 py-1 rounded text-xs ${task.priority === 'high' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : task.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'}`}>
+                              <span className="font-semibold text-[#172554] dark:text-gray-100">{task.title}</span>
+                              <span className={`px-2 py-1 rounded text-xs ${task.priority === 'high' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : task.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' : 'bg-[#2878F0] dark:bg-blue-900/50 text-[#2878F0] dark:text-blue-300'}`}>
                                 {task.priority}
                               </span>
                             </div>
@@ -1858,11 +2354,11 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 gap-6">
                 <div className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Active Goals</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">Active Goals</h3>
                   <div className="space-y-3">
                     {goals.filter(g => g.status === 'in-progress').slice(0, 3).map(goal => (
-                      <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 ">
-                        <span className="text-gray-700 dark:text-gray-300">{goal.title}</span>
+                      <div key={goal.id} className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 `}>
+                        <span className="text-[#172554] dark:text-gray-300">{goal.title}</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">{goal.category}</span>
                       </div>
                     ))}
@@ -1877,8 +2373,8 @@ const MYMate = () => {
           {activeTab === 'goals' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Career Goals</h2>
-                <button onClick={() => setShowGoalForm(!showGoalForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100">Career Goals</h2>
+                <button onClick={() => setShowGoalForm(!showGoalForm)} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                   <Plus size={20} />
                   <span>Add Goal</span>
                 </button>
@@ -1886,20 +2382,20 @@ const MYMate = () => {
 
               {showGoalForm && (
                 <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingGoal ? 'Edit Goal' : 'New Goal'}</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">{editingGoal ? 'Edit Goal' : 'New Goal'}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="goal-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="goal-title" type="text" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter goal title" />
+                      <label htmlFor="goal-title" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Title</label>
+                      <input id="goal-title" type="text" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter goal title" />
                     </div>
                     <div>
-                      <label htmlFor="goal-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea id="goal-description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Describe your goal" />
+                      <label htmlFor="goal-description" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Description</label>
+                      <textarea id="goal-description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Describe your goal" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="goal-category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select id="goal-category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Goal category">
+                        <label htmlFor="goal-category" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Category</label>
+                        <select id="goal-category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Goal category">
                           <option value="career">Career</option>
                           <option value="learning">Learning</option>
                           <option value="project">Project</option>
@@ -1907,16 +2403,16 @@ const MYMate = () => {
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="goal-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
-                        <input id="goal-date" type="date" value={goalForm.targetDate} onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
+                        <label htmlFor="goal-date" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Target Date</label>
+                        <input id="goal-date" type="date" value={goalForm.targetDate} onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Target date" />
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingGoal ? handleUpdateGoal : handleAddGoal} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingGoal ? handleUpdateGoal : handleAddGoal} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                         <Save size={18} />
                         <span>{editingGoal ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -1931,11 +2427,11 @@ const MYMate = () => {
                           <button onClick={() => toggleGoalStatus(goal.id)} className="text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400" aria-label={goal.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}>
                             {goal.status === 'completed' ? <CheckCircle className="text-green-600 dark:text-green-400" size={24} /> : <Circle size={24} />}
                           </button>
-                          <h3 className={`text-xl font-bold ${goal.status === 'completed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-800 dark:text-gray-100'}`}>{goal.title}</h3>
+                          <h3 className={`text-xl font-bold ${goal.status === 'completed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-[#172554] dark:text-gray-100'}`}>{goal.title}</h3>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{goal.description}</p>
                         <div className="flex items-center space-x-4 ml-9 text-sm">
-                          <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 ">{goal.category}</span>
+                          <span className="px-3 py-1 bg-indigo-100 dark:bg-[#3610B6]/50 text-indigo-700 dark:text-[#5A1FD8] ">{goal.category}</span>
                           {goal.targetDate && <span className="text-gray-500 dark:text-gray-400">Target: {goal.targetDate}</span>}
                           <span className={`px-3 py-1  ${goal.status === 'completed' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300'}`}>{goal.status}</span>
                         </div>
@@ -1962,113 +2458,24 @@ const MYMate = () => {
           )}
 
           {activeTab === 'skills' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Skills Development</h2>
-                <button onClick={() => setShowSkillForm(!showSkillForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
-                  <Plus size={20} />
-                  <span>Add Skill</span>
-                </button>
-              </div>
+            <SkillsTracker
+              topics={skillTopics}
+              onTopicsChange={async updatedTopics => {
+                await saveData('skillTopics', updatedTopics);
+                setSkillTopics(updatedTopics);
+              }}
+            />
+          )}
 
-              {showSkillForm && (
-                <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingSkill ? 'Edit Skill' : 'New Skill'}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="skill-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skill Name</label>
-                      <input id="skill-name" type="text" value={skillForm.name} onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., React, Python" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="skill-level" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Level</label>
-                        <select id="skill-level" value={skillForm.level} onChange={(e) => setSkillForm({ ...skillForm, level: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Skill level">
-                          <option value="beginner">Beginner</option>
-                          <option value="intermediate">Intermediate</option>
-                          <option value="advanced">Advanced</option>
-                          <option value="expert">Expert</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="skill-hours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours Invested</label>
-                        <input id="skill-hours" type="number" value={skillForm.hoursInvested} onChange={(e) => setSkillForm({ ...skillForm, hoursInvested: e.target.value })} className="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-indigo-500" min="0" aria-label="Hours invested" />
-                      </div>
-                      <div>
-                        <label htmlFor="skill-target" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Hours</label>
-                        <input id="skill-target" type="number" value={skillForm.targetHours} onChange={(e) => setSkillForm({ ...skillForm, targetHours: e.target.value })} className="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-indigo-500" min="1" aria-label="Target hours" />
-                      </div>
-                    </div>
-                    <div className="flex space-x-3">
-                      <button onClick={editingSkill ? handleUpdateSkill : handleAddSkill} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
-                        <Save size={18} />
-                        <span>{editingSkill ? 'Update' : 'Save'}</span>
-                      </button>
-                      <button onClick={() => { setShowSkillForm(false); setEditingSkill(null); setSkillForm({ name: '', level: 'beginner', hoursInvested: '0', targetHours: '100' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {skills.map(skill => (
-                  <div key={skill.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{skill.name}</h3>
-                      <div className="flex space-x-2">
-                        <button onClick={() => handleEditSkill(skill)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 " aria-label="Edit skill">
-                          <Edit2 size={18} />
-                        </button>
-                        <button onClick={() => handleDeleteSkill(skill.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 " aria-label="Delete skill">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-300">Level:</span>
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300  text-sm capitalize">{skill.level}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-300">Hours Invested:</span>
-                        <div className="text-right">
-                          <span className="font-semibold text-gray-800 dark:text-gray-100">{skill.hoursInvested}h</span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">/ {skill.targetHours || 100}h</span>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mt-3">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-500 dark:text-gray-400">Progress</span>
-                          <span className="text-indigo-600 dark:text-indigo-400 font-medium">
-                            {Math.min(100, Math.round((skill.hoursInvested / (skill.targetHours || 100)) * 100))}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700  h-2.5">
-                          <div
-                            className="bg-indigo-600 h-2.5  transition-all duration-500"
-                            style={{ width: `${Math.min(100, Math.round((skill.hoursInvested / (skill.targetHours || 100)) * 100))}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {skills.length === 0 && (
-                  <div className="col-span-2 bg-white dark:bg-gray-800  shadow p-12 text-center border border-gray-200 dark:border-gray-700">
-                    <BookOpen size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">No skills tracked yet. Add your first skill!</p>
-                  </div>
-                )}
-              </div>
-            </div>
+          {activeTab === 'profile' && user && (
+              <ProfileDashboard user={user} />
           )}
 
           {activeTab === 'planner' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Deadline Planner</h2>
-                <button onClick={() => setShowPlanForm(!showPlanForm)} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100">Deadline Planner</h2>
+                <button onClick={() => setShowPlanForm(!showPlanForm)} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                   <Plus size={20} />
                   <span>Add Plan</span>
                 </button>
@@ -2076,32 +2483,32 @@ const MYMate = () => {
 
               {showPlanForm && (
                 <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">New Deadline Plan</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">New Deadline Plan</h3>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="plan-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="plan-title" type="text" value={planForm.title} onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What needs to be done?" />
+                      <label htmlFor="plan-title" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Title</label>
+                      <input id="plan-title" type="text" value={planForm.title} onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="What needs to be done?" />
                     </div>
                     <div>
-                      <label htmlFor="plan-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea id="plan-desc" value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={2} />
+                      <label htmlFor="plan-desc" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Description</label>
+                      <textarea id="plan-desc" value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" rows={2} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label htmlFor="plan-deadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
-                        <input id="plan-deadline" type="datetime-local" value={planForm.deadline} onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                        <label htmlFor="plan-deadline" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Deadline</label>
+                        <input id="plan-deadline" type="datetime-local" value={planForm.deadline} onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" />
                       </div>
                       <div>
-                        <label htmlFor="plan-priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-                        <select id="plan-priority" value={planForm.priority} onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label htmlFor="plan-priority" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Priority</label>
+                        <select id="plan-priority" value={planForm.priority} onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100">
                           <option value="low">Low</option>
                           <option value="medium">Medium</option>
                           <option value="high">High</option>
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="plan-reminder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remind Me</label>
-                        <select id="plan-reminder" value={planForm.reminderOffset} onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label htmlFor="plan-reminder" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Remind Me</label>
+                        <select id="plan-reminder" value={planForm.reminderOffset} onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100">
                           <option value="15">15 minutes before</option>
                           <option value="60">1 hour before</option>
                           <option value="1440">1 day before</option>
@@ -2109,11 +2516,11 @@ const MYMate = () => {
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={handleAddPlan} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
+                      <button onClick={handleAddPlan} className="flex items-center space-x-2 bg-[#6C2BEF] text-white px-4 py-2  hover:bg-[#5A1FD8]">
                         <Save size={18} />
                         <span>Save Plan</span>
                       </button>
-                      <button onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2121,18 +2528,18 @@ const MYMate = () => {
 
               <div className="grid grid-cols-1 gap-4">
                 {(deadlinePlans || []).sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
-                  <div key={plan.id} className={`bg-white dark:bg-gray-800  shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-blue-500'} dark:border-gray-700`}>
+                  <div key={plan.id} className={`bg-white dark:bg-gray-800  shadow p-6 border-l-4 ${plan.priority === 'high' ? 'border-red-500' : plan.priority === 'medium' ? 'border-yellow-500' : 'border-[#2878F0]'} dark:border-gray-700`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <button onClick={() => handleTogglePlan(plan.id)} className="text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400">
                             {plan.status === 'completed' ? <CheckCircle className="text-green-600 dark:text-green-400" size={24} /> : <Circle size={24} />}
                           </button>
-                          <h3 className={`text-xl font-bold ${plan.status === 'completed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-800 dark:text-gray-100'}`}>{plan.title}</h3>
+                          <h3 className={`text-xl font-bold ${plan.status === 'completed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-[#172554] dark:text-gray-100'}`}>{plan.title}</h3>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 ml-9 mb-3">{plan.description}</p>
                         <div className="flex items-center space-x-4 ml-9 text-sm">
-                          <span className={`px-3 py-1  text-xs uppercase ${plan.priority === 'high' ? 'bg-red-100 text-red-700' : plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>{plan.priority}</span>
+                          <span className={`px-3 py-1  text-xs uppercase ${plan.priority === 'high' ? 'bg-red-100 text-red-700' : plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-[#2878F0] text-[#2878F0]'}`}>{plan.priority}</span>
                           <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
                             <Clock size={14} />
                             {new Date(plan.deadline).toLocaleString()}
@@ -2161,8 +2568,8 @@ const MYMate = () => {
           {activeTab === 'content' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Content Creation</h2>
-                <button onClick={() => setShowContentForm(!showContentForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
+                <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100">Content Creation</h2>
+                <button onClick={() => setShowContentForm(!showContentForm)} className="flex items-center space-x-2 bg-[#6C2BEF] text-white px-4 py-2  hover:bg-[#5A1FD8]">
                   <Plus size={20} />
                   <span>Add Content</span>
                 </button>
@@ -2170,16 +2577,16 @@ const MYMate = () => {
 
               {showContentForm && (
                 <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingContent ? 'Edit Content' : 'New Content'}</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">{editingContent ? 'Edit Content' : 'New Content'}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="content-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input id="content-title" type="text" value={contentForm.title} onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter content title" />
+                      <label htmlFor="content-title" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Title</label>
+                      <input id="content-title" type="text" value={contentForm.title} onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Enter content title" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="content-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content Type</label>
-                        <select id="content-type" value={contentForm.type} onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content type">
+                        <label htmlFor="content-type" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Content Type</label>
+                        <select id="content-type" value={contentForm.type} onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Content type">
                           <option value="youtube">YouTube</option>
                           <option value="instagram">Instagram</option>
                           <option value="script">Script</option>
@@ -2187,8 +2594,8 @@ const MYMate = () => {
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="content-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="content-status" value={contentForm.status} onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Content status">
+                        <label htmlFor="content-status" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Status</label>
+                        <select id="content-status" value={contentForm.status} onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Content status">
                           <option value="draft">Draft</option>
                           <option value="in-progress">In Progress</option>
                           <option value="completed">Completed</option>
@@ -2197,33 +2604,33 @@ const MYMate = () => {
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="content-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Script / Content</label>
-                      <textarea id="content-script" value={contentForm.script} onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your script, roadmap, or content here..." />
+                      <label htmlFor="content-script" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Script / Content</label>
+                      <textarea id="content-script" value={contentForm.script} onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your script, roadmap, or content here..." />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="content-target-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
-                        <input id="content-target-date" type="date" value={contentForm.targetDate} onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Target date" />
+                        <label htmlFor="content-target-date" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Target Date</label>
+                        <input id="content-target-date" type="date" value={contentForm.targetDate} onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Target date" />
                       </div>
                       <div>
-                        <label htmlFor="content-publish-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Publish Date</label>
-                        <input id="content-publish-date" type="date" value={contentForm.publishDate} onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Publish date" />
+                        <label htmlFor="content-publish-date" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Publish Date</label>
+                        <input id="content-publish-date" type="date" value={contentForm.publishDate} onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" aria-label="Publish date" />
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="content-tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
-                      <input id="content-tags" type="text" value={contentForm.tags} onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., tech, tutorial, tips" />
+                      <label htmlFor="content-tags" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Tags (comma separated)</label>
+                      <input id="content-tags" type="text" value={contentForm.tags} onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., tech, tutorial, tips" />
                     </div>
                     <div>
-                      <label htmlFor="content-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
-                      <textarea id="content-notes" value={contentForm.notes} onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Additional notes or reminders..." />
+                      <label htmlFor="content-notes" className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Notes</label>
+                      <textarea id="content-notes" value={contentForm.notes} onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={3} placeholder="Additional notes or reminders..." />
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingContent ? handleUpdateContent : handleAddContent} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingContent ? handleUpdateContent : handleAddContent} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                         <Save size={18} />
                         <span>{editingContent ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2231,19 +2638,19 @@ const MYMate = () => {
 
               {/* Content Filters */}
               <div className="flex items-center space-x-2 mb-4 flex-wrap gap-2">
-                <button onClick={() => setActiveTab('content')} className={`px-4 py-2  ${true ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
+                <button onClick={() => setActiveTab('content')} className={`px-4 py-2  ${true ? 'bg-indigo-100 dark:bg-[#3610B6]/50 text-indigo-700 dark:text-[#5A1FD8]' : 'bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300'}`}>
                   All ({contents.length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   YouTube ({contents.filter(c => c.type === 'youtube').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Instagram ({contents.filter(c => c.type === 'instagram').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Scripts ({contents.filter(c => c.type === 'script').length})
                 </button>
-                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                <button onClick={() => setActiveTab('content')} className="px-4 py-2  bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
                   Roadmaps ({contents.filter(c => c.type === 'roadmap').length})
                 </button>
               </div>
@@ -2258,9 +2665,9 @@ const MYMate = () => {
                   };
                   const IconComponent = typeIcons[content.type] || FileText;
                   const statusColors = {
-                    draft: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                    draft: 'bg-gray-100 dark:bg-gray-700 text-[#172554] dark:text-gray-300',
                     'in-progress': 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
-                    completed: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+                    completed: 'bg-[#2878F0] dark:bg-blue-900/50 text-[#2878F0] dark:text-blue-300',
                     published: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
                   };
                   return (
@@ -2268,14 +2675,14 @@ const MYMate = () => {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
-                            <IconComponent className={content.type === 'youtube' ? 'text-red-500 dark:text-red-400' : content.type === 'instagram' ? 'text-pink-500 dark:text-pink-400' : 'text-indigo-500 dark:text-indigo-400'} size={24} />
-                            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{content.title}</h3>
+                            <IconComponent className={content.type === 'youtube' ? 'text-red-500 dark:text-red-400' : content.type === 'instagram' ? 'text-[#F43F72] dark:text-pink-400' : 'text-indigo-500 dark:text-[#6C2BEF]'} size={24} />
+                            <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">{content.title}</h3>
                             <span className={`px-3 py-1  text-sm ${statusColors[content.status]}`}>
                               {content.status}
                             </span>
                           </div>
                           <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600 dark:text-gray-300">
-                            <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300  capitalize">{content.type}</span>
+                            <span className="px-3 py-1 bg-indigo-100 dark:bg-[#3610B6]/50 text-indigo-700 dark:text-[#5A1FD8]  capitalize">{content.type}</span>
                             {content.targetDate && <span>Target: {content.targetDate}</span>}
                             {content.publishDate && <span>Published: {content.publishDate}</span>}
                           </div>
@@ -2288,7 +2695,7 @@ const MYMate = () => {
                           )}
                           {content.script && (
                             <div className="bg-gray-50 dark:bg-gray-700/50  p-4 mb-3 max-h-48 overflow-y-auto">
-                              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-sm">{content.script}</p>
+                              <p className="text-[#172554] dark:text-gray-300 whitespace-pre-wrap text-sm">{content.script}</p>
                             </div>
                           )}
                           {content.notes && (
@@ -2320,8 +2727,8 @@ const MYMate = () => {
           {activeTab === 'schedule' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Daily Schedule</h2>
-                <button onClick={() => setShowScheduleForm(!showScheduleForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
+                <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100">Daily Schedule</h2>
+                <button onClick={() => setShowScheduleForm(!showScheduleForm)} className="flex items-center space-x-2 bg-[#6C2BEF] text-white px-4 py-2  hover:bg-[#5A1FD8]">
                   <Plus size={20} />
                   <span>Add Schedule Task</span>
                 </button>
@@ -2329,19 +2736,19 @@ const MYMate = () => {
 
               {showScheduleForm && (
                 <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">{editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input type="text" value={scheduleForm.title} onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Morning Exercise" />
+                      <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Title</label>
+                      <input type="text" value={scheduleForm.title} onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Morning Exercise" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                      <textarea value={scheduleForm.description} onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={2} placeholder="Task description" />
+                      <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Description</label>
+                      <textarea value={scheduleForm.description} onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={2} placeholder="Task description" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Time</label>
                         <div className="flex items-center gap-2">
                           <select
                             value={parseTime24To12(scheduleForm.time).hour}
@@ -2350,7 +2757,7 @@ const MYMate = () => {
                               const { minute, period } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(newHour, minute, period) });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100"
                           >
                             {Array.from({ length: 12 }, (_, i) => i + 1).map(h => (
                               <option key={h} value={h}>{h}</option>
@@ -2363,7 +2770,7 @@ const MYMate = () => {
                               const { hour, period } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(hour, e.target.value, period) });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100"
                           >
                             {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
                               <option key={m} value={m}>{m}</option>
@@ -2375,7 +2782,7 @@ const MYMate = () => {
                               const { hour, minute } = parseTime24To12(scheduleForm.time);
                               setScheduleForm({ ...scheduleForm, time: convert12To24(hour, minute, e.target.value as 'AM' | 'PM') });
                             }}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100"
                           >
                             <option value="AM">AM</option>
                             <option value="PM">PM</option>
@@ -2383,26 +2790,26 @@ const MYMate = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (minutes)</label>
-                        <input type="number" value={scheduleForm.estimatedDuration} onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" min="1" />
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Duration (minutes)</label>
+                        <input type="number" value={scheduleForm.estimatedDuration} onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100" min="1" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-                        <select value={scheduleForm.priority} onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Priority</label>
+                        <select value={scheduleForm.priority} onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100">
                           <option value="low">Low</option>
                           <option value="medium">Medium</option>
                           <option value="high">High</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <input type="text" value={scheduleForm.category} onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Health, Work" />
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Category</label>
+                        <input type="text" value={scheduleForm.category} onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Health, Work" />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Days of Week</label>
+                      <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-2">Days of Week</label>
                       <div className="flex flex-wrap gap-2">
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
                           <button
@@ -2415,8 +2822,8 @@ const MYMate = () => {
                               setScheduleForm({ ...scheduleForm, dayOfWeek: days });
                             }}
                             className={`px-4 py-2  border-2 ${scheduleForm.dayOfWeek.includes(index)
-                              ? 'bg-indigo-600 dark:bg-indigo-700 text-white border-indigo-600 dark:border-indigo-700'
-                              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500'
+                              ? 'bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white border-indigo-600 dark:border-[#4816C7]'
+                              : 'bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500'
                               }`}
                           >
                             {day}
@@ -2425,22 +2832,22 @@ const MYMate = () => {
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                         <Save size={18} />
                         <span>{editingSchedule ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {scheduleTasks.map(schedule => (
                   <div key={schedule.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{schedule.title}</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100">{schedule.title}</h3>
                         {schedule.description && <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">{schedule.description}</p>}
                       </div>
                       <div className="flex space-x-2">
@@ -2455,15 +2862,15 @@ const MYMate = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-300">Time:</span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-100">{formatTime12Hour(schedule.time)}</span>
+                        <span className="font-semibold text-[#172554] dark:text-gray-100">{formatTime12Hour(schedule.time)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-300">Duration:</span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-100">{schedule.estimatedDuration} min</span>
+                        <span className="font-semibold text-[#172554] dark:text-gray-100">{schedule.estimatedDuration} min</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-300">Priority:</span>
-                        <span className={`px-2 py-1 rounded text-xs ${schedule.priority === 'high' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : schedule.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'}`}>
+                        <span className={`px-2 py-1 rounded text-xs ${schedule.priority === 'high' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : schedule.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' : 'bg-[#2878F0] dark:bg-blue-900/50 text-[#2878F0] dark:text-blue-300'}`}>
                           {schedule.priority}
                         </span>
                       </div>
@@ -2472,7 +2879,7 @@ const MYMate = () => {
                         <div className="flex gap-1">
                           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
                             schedule.dayOfWeek.includes(index) && (
-                              <span key={index} className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded text-xs">{day}</span>
+                              <span key={index} className="px-2 py-1 bg-indigo-100 dark:bg-[#3610B6]/50 text-indigo-700 dark:text-[#5A1FD8] rounded text-xs">{day}</span>
                             )
                           ))}
                         </div>
@@ -2492,11 +2899,11 @@ const MYMate = () => {
 
           {activeTab === 'analysis' && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Analysis Dashboard</h2>
+              <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100 mb-6">Analysis Dashboard</h2>
 
               {/* Perfection Meter */}
               <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4 flex items-center gap-2">
                   <BarChart3 className="text-indigo-600" size={24} />
                   Perfection Meter
                 </h3>
@@ -2545,7 +2952,7 @@ const MYMate = () => {
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Missed Tasks</div>
                   </div>
                   <div className="bg-blue-50 dark:bg-blue-900/20  p-4 text-center border border-blue-200 dark:border-blue-800">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    <div className="text-2xl font-bold text-[#2878F0] dark:text-blue-400">
                       {dailyTasks.length}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Total Tasks</div>
@@ -2555,7 +2962,7 @@ const MYMate = () => {
 
               {/* Task Completion Stats */}
               <div className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Last 7 Days Performance</h3>
+                <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">Last 7 Days Performance</h3>
                 <div className="space-y-3">
                   {(() => {
                     const last7Days: string[] = [];
@@ -2575,7 +2982,7 @@ const MYMate = () => {
                       return (
                         <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 ">
                           <div className="flex items-center gap-3">
-                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">{dayName}</div>
+                            <div className="text-sm font-medium text-[#172554] dark:text-gray-300 w-20">{dayName}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">{dayDate}</div>
                           </div>
                           <div className="flex items-center gap-3 flex-1 max-w-xs">
@@ -2586,7 +2993,7 @@ const MYMate = () => {
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
-                            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 w-16 text-right">
+                            <div className="text-sm font-semibold text-[#172554] dark:text-gray-300 w-16 text-right">
                               {completed}/{total}
                             </div>
                           </div>
@@ -2602,8 +3009,8 @@ const MYMate = () => {
           {activeTab === 'notes' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Manual Notes</h2>
-                <button onClick={() => setShowNoteForm(!showNoteForm)} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2  hover:bg-indigo-700">
+                <h2 className="text-3xl font-bold text-[#172554] dark:text-gray-100">Manual Notes</h2>
+                <button onClick={() => setShowNoteForm(!showNoteForm)} className="flex items-center space-x-2 bg-[#6C2BEF] text-white px-4 py-2  hover:bg-[#5A1FD8]">
                   <Plus size={20} />
                   <span>Add Note</span>
                 </button>
@@ -2611,32 +3018,32 @@ const MYMate = () => {
 
               {showNoteForm && (
                 <div className="bg-white dark:bg-gray-800  shadow p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">{editingNote ? 'Edit Note' : 'New Note'}</h3>
+                  <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-4">{editingNote ? 'Edit Note' : 'New Note'}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                      <input type="text" value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Note title" />
+                      <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Title</label>
+                      <input type="text" value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Note title" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                      <textarea value={noteForm.content} onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your notes here..." />
+                      <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Content</label>
+                      <textarea value={noteForm.content} onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" rows={8} placeholder="Write your notes here..." />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <input type="text" value={noteForm.category} onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Ideas, Reminders" />
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Category</label>
+                        <input type="text" value={noteForm.category} onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., Ideas, Reminders" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
-                        <input type="text" value={noteForm.tags} onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., important, meeting" />
+                        <label className="block text-sm font-medium text-[#172554] dark:text-gray-300 mb-1">Tags (comma separated)</label>
+                        <input type="text" value={noteForm.tags} onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" placeholder="e.g., important, meeting" />
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button onClick={editingNote ? handleUpdateNote : handleAddNote} className="flex items-center space-x-2 bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2  hover:bg-indigo-700 dark:hover:bg-indigo-600">
+                      <button onClick={editingNote ? handleUpdateNote : handleAddNote} className="flex items-center space-x-2 bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white px-4 py-2  hover:bg-[#5A1FD8] dark:hover:bg-[#6C2BEF]">
                         <Save size={18} />
                         <span>{editingNote ? 'Update' : 'Save'}</span>
                       </button>
-                      <button onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600  hover:bg-gray-50 dark:hover:bg-gray-700 text-[#172554] dark:text-gray-300">Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -2647,9 +3054,9 @@ const MYMate = () => {
                   <div key={note.id} className="bg-white dark:bg-gray-800  shadow p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">{note.title}</h3>
+                        <h3 className="text-xl font-bold text-[#172554] dark:text-gray-100 mb-1">{note.title}</h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded text-xs">{note.category}</span>
+                          <span className="px-2 py-1 bg-indigo-100 dark:bg-[#3610B6]/50 text-indigo-700 dark:text-[#5A1FD8] rounded text-xs">{note.category}</span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
                         </div>
                       </div>
@@ -2703,7 +3110,12 @@ const MYMate = () => {
                   <div className="flex items-center gap-2">
                     <p className="text-xs opacity-90">Your personal coach</p>
                     <div className="flex items-center gap-1">
-                      {ollamaAvailable ? (
+                      {groqAvailable ? (
+                        <>
+                          <Wifi size={12} className="text-green-300" />
+                          <span className="text-xs opacity-75">Personal RAG + web sources</span>
+                        </>
+                      ) : ollamaAvailable ? (
                         <>
                           <Wifi size={12} className="text-green-300" />
                           <span className="text-xs opacity-75">AI Powered</span>
@@ -2736,8 +3148,8 @@ const MYMate = () => {
                 >
                   <div
                     className={`max-w-[80%]  p-3 ${message.isUser
-                      ? 'bg-indigo-600 dark:bg-indigo-700 text-white'
-                      : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-600'
+                      ? 'bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white'
+                      : 'bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 border border-gray-200 dark:border-gray-600'
                       }`}
                   >
                     {!message.isUser && (
@@ -2770,12 +3182,12 @@ const MYMate = () => {
                   }}
                   placeholder={isLoadingResponse ? "AI is thinking..." : "Type your message..."}
                   disabled={isLoadingResponse}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={!chatInput.trim() || isLoadingResponse}
-                  className="px-4 py-2 bg-indigo-600 text-white  hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  className="px-4 py-2 bg-[#6C2BEF] text-white  hover:bg-[#5A1FD8] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                   aria-label="Send message"
                 >
                   {isLoadingResponse ? (
@@ -2800,7 +3212,8 @@ const MYMate = () => {
           </button>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
