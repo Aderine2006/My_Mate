@@ -37,6 +37,13 @@ const SAMPLE_CSV = [
 
 const priorityRank: Record<SkillPriority, number> = { High: 0, Medium: 1, Low: 2 };
 const statusRank: Record<SkillTopicStatus, number> = { 'In Progress': 0, 'Not Started': 1, Completed: 2 };
+const daysOfMonth = Array.from({ length: 31 }, (_, index) => `Day ${String(index + 1).padStart(2, '0')}`);
+const getTopicDay = (topic: SkillTopic): string | undefined => {
+  const dayMatch = [topic.skill, topic.topic, topic.subtopic, topic.category]
+    .map(value => value.match(/\bday\s*0*(\d{1,2})\b/i))
+    .find(match => match && Number(match[1]) >= 1 && Number(match[1]) <= 31);
+  return dayMatch ? `Day ${String(Number(dayMatch[1])).padStart(2, '0')}` : undefined;
+};
 const levelRank = (level: string): number => ({ beginner: 0, intermediate: 1, advanced: 2, expert: 3 }[level.toLowerCase()] ?? 2);
 
 const formatBytes = (bytes: number): string => {
@@ -63,6 +70,7 @@ const SkillsTracker = ({ topics, onTopicsChange }: SkillsTrackerProps) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [currentLevelFilter, setCurrentLevelFilter] = useState('');
   const [targetLevelFilter, setTargetLevelFilter] = useState('');
+  const [dayFilter, setDayFilter] = useState('');
 
   const categories = useMemo(() => [...new Set(topics.map(topic => topic.category))].sort(), [topics]);
   const skills = useMemo(() => [...new Set(topics.map(topic => topic.skill))].sort(), [topics]);
@@ -76,7 +84,9 @@ const SkillsTracker = ({ topics, onTopicsChange }: SkillsTrackerProps) => {
     return topics.filter(topic => {
       const matchesSearch = !normalizedSearch || [topic.skill, topic.topic, topic.subtopic, topic.category]
         .some(value => value.toLocaleLowerCase().includes(normalizedSearch));
+      const matchesDay = !dayFilter || getTopicDay(topic) === dayFilter;
       return matchesSearch
+        && matchesDay
         && (!categoryFilter || topic.category === categoryFilter)
         && (!skillFilter || topic.skill === skillFilter)
         && (!priorityFilter || topic.priority === priorityFilter)
@@ -84,7 +94,7 @@ const SkillsTracker = ({ topics, onTopicsChange }: SkillsTrackerProps) => {
         && (!currentLevelFilter || topic.currentLevel === currentLevelFilter)
         && (!targetLevelFilter || topic.targetLevel === targetLevelFilter);
     });
-  }, [topics, search, categoryFilter, skillFilter, priorityFilter, statusFilter, currentLevelFilter, targetLevelFilter]);
+  }, [topics, search, dayFilter, categoryFilter, skillFilter, priorityFilter, statusFilter, currentLevelFilter, targetLevelFilter]);
 
   const groupedTopics = useMemo(() => {
     const groups = new Map<string, Map<string, SkillTopic[]>>();
@@ -199,9 +209,10 @@ const SkillsTracker = ({ topics, onTopicsChange }: SkillsTrackerProps) => {
     setStatusFilter('');
     setCurrentLevelFilter('');
     setTargetLevelFilter('');
+    setDayFilter('');
   };
 
-  const hasFilters = Boolean(search || categoryFilter || skillFilter || priorityFilter || statusFilter || currentLevelFilter || targetLevelFilter);
+  const hasFilters = Boolean(search || dayFilter || categoryFilter || skillFilter || priorityFilter || statusFilter || currentLevelFilter || targetLevelFilter);
 
   return (
     <section className="space-y-6" aria-labelledby="skills-title">
@@ -323,6 +334,7 @@ const SkillsTracker = ({ topics, onTopicsChange }: SkillsTrackerProps) => {
               <label className="relative sm:col-span-2 xl:col-span-1"><span className="sr-only">Search skills and topics</span><Search size={16} className="absolute left-3 top-3 text-slate-400" aria-hidden="true" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search skill, topic…" className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-indigo-900" /></label>
               <FilterSelect label="Category" value={categoryFilter} onChange={setCategoryFilter} options={categories} />
               <FilterSelect label="Skill" value={skillFilter} onChange={setSkillFilter} options={skills} />
+              <FilterSelect label="Day" value={dayFilter} onChange={setDayFilter} options={daysOfMonth} />
               <FilterSelect label="Priority" value={priorityFilter} onChange={setPriorityFilter} options={['High', 'Medium', 'Low']} />
               <FilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={['Not Started', 'In Progress', 'Completed']} />
               <FilterSelect label="Current level" value={currentLevelFilter} onChange={setCurrentLevelFilter} options={[...new Set(topics.map(topic => topic.currentLevel))].sort()} />
