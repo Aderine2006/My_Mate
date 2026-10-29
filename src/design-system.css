@@ -1,0 +1,188 @@
+/* ==========================================================================
+   MyMate Design System Tokens & Global Styles
+   ========================================================================== */
+
+:root {
+  /* Brand Colors */
+  --color-primary-blue: #315EFB;
+  --color-secondary-purple: #7857E8;
+  --color-accent-pink: #EC4899;
+  --color-accent-orange: #F97316;
+
+  /* Surfaces & Text - Light Theme */
+  --color-bg-main: #F8FAFC;
+  --color-bg-card: #FFFFFF;
+  --color-bg-card-muted: #F1F5F9;
+  --color-text-primary: #17233C;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-subtle: #F1F5F9;
+
+  /* Functional */
+  --color-success: #16A34A;
+  --color-success-bg: #DCFCE7;
+  --color-error: #DC2626;
+  --color-error-bg: #FEE2E2;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FEF3C7;
+  --color-info: #0284C7;
+  --color-info-bg: #E0F2FE;
+
+  /* Brand Signature Gradient */
+  --gradient-brand: linear-gradient(135deg, #315EFB 0%, #7857E8 60%, #EC4899 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(49, 94, 251, 0.08) 0%, rgba(120, 87, 232, 0.08) 60%, rgba(236, 72, 153, 0.08) 100%);
+  --gradient-orange-pink: linear-gradient(135deg, #F97316 0%, #EC4899 100%);
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-glow-blue: 0 0 20px rgba(49, 94, 251, 0.25);
+  --shadow-glow-purple: 0 0 20px rgba(120, 87, 232, 0.25);
+
+  /* Radius - Sharp Edges */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-full: 0px;
+}
+
+/* Force sharp edges on elements by default, preserving styled indicators */
+*, *::before, *::after {
+  border-radius: 0;
+}
+
+.nav-sliding-indicator {
+  border-radius: 10px !important;
+}
+
+html.dark {
+  /* Surfaces & Text - Dark Theme */
+  --color-bg-main: #0B1120;
+  --color-bg-card: #151F32;
+  --color-bg-card-muted: #1E293B;
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-border: #22324F;
+  --color-border-subtle: #19243A;
+
+  --color-success-bg: rgba(22, 163, 74, 0.15);
+  --color-error-bg: rgba(220, 38, 38, 0.15);
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-info-bg: rgba(2, 132, 199, 0.15);
+
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(49, 94, 251, 0.16) 0%, rgba(120, 87, 232, 0.16) 60%, rgba(236, 72, 153, 0.16) 100%);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Base Body Styles */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: var(--radius-full);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Accessible focus outline */
+:focus-visible {
+  outline: 2px solid var(--color-primary-blue);
+  outline-offset: 2px;
+}
+
+/* Smooth Gliding Active Indicator Specification */
+.nav-sliding-indicator {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              width 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              height 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 200ms ease;
+  will-change: transform, width, height;
+}
+
+/* Nav Item Styling & Transitions */
+.nav-tab-item {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  transition: color 200ms ease;
+}
+
+.nav-tab-item .nav-icon {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 200ms ease;
+}
+
+.nav-tab-item .nav-label {
+  transition: color 200ms ease;
+}
+
+.nav-tab-item:hover .nav-icon {
+  transform: scale(1.08);
+}
+
+.nav-tab-item[aria-current="page"] .nav-icon {
+  transform: scale(1.08);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-sliding-indicator {
+    transition: opacity 150ms ease !important;
+  }
+  .nav-tab-item .nav-icon {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Smooth Page Content Float In */
+@keyframes sectionFloatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-section-float {
+  animation: sectionFloatIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

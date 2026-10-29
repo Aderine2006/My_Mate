@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './design-system.css';
 import MYMate from './mymate-tracker';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
