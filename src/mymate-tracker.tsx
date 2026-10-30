@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
 import { auth } from './firebase';
 import { generateOllamaResponse, checkOllamaConnection, type UserContext } from './ollama';
@@ -161,6 +161,11 @@ const MYMate = () => {
   });
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window === 'undefined' || window.matchMedia('(min-width: 768px)').matches);
 
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuth, setShowAuth] = useState(true);
+  const [authMode, setAuthMode] = useState('login');
+  const [authForm, setAuthForm] = useState({ email: '', password: '', name: '' });
+
   // Smooth gliding indicator for left sidebar navigation
   const sidebarNavContainerRef = useRef<HTMLDivElement | null>(null);
   const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -172,7 +177,7 @@ const MYMate = () => {
     opacity: 0,
   });
 
-  const updateNavIndicator = () => {
+  const updateNavIndicator = useCallback(() => {
     const container = sidebarNavContainerRef.current;
     const currentBtn = tabButtonRefs.current[activeTab];
     if (!container || !currentBtn) {
@@ -181,6 +186,9 @@ const MYMate = () => {
     }
     const containerRect = container.getBoundingClientRect();
     const btnRect = currentBtn.getBoundingClientRect();
+    if (btnRect.width === 0 || btnRect.height === 0) {
+      return;
+    }
     setNavIndicator({
       top: btnRect.top - containerRect.top + container.scrollTop,
       left: btnRect.left - containerRect.left,
@@ -188,18 +196,44 @@ const MYMate = () => {
       height: btnRect.height,
       opacity: 1,
     });
-  };
+  }, [activeTab]);
 
   useLayoutEffect(() => {
+    // Initial immediate update
     updateNavIndicator();
+
+    // In case fonts, CSS layout, or auth transitions take a frame or two
+    const r1 = requestAnimationFrame(updateNavIndicator);
+    const r2 = requestAnimationFrame(() => {
+      requestAnimationFrame(updateNavIndicator);
+    });
+    const t1 = setTimeout(updateNavIndicator, 50);
+    const t2 = setTimeout(updateNavIndicator, 200);
+
     const handleResize = () => updateNavIndicator();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeTab, sidebarOpen]);
-  const [user, setUser] = useState<User | null>(null);
-  const [showAuth, setShowAuth] = useState(true);
-  const [authMode, setAuthMode] = useState('login');
-  const [authForm, setAuthForm] = useState({ email: '', password: '', name: '' });
+
+    // Also observe container resize if supported
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && sidebarNavContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updateNavIndicator();
+      });
+      resizeObserver.observe(sidebarNavContainerRef.current);
+    }
+
+    return () => {
+      cancelAnimationFrame(r1);
+      cancelAnimationFrame(r2);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('resize', handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [activeTab, sidebarOpen, showAuth, updateNavIndicator]);
+
   const [goals, setGoals] = useState<Goal[]>([]);
   const [showGoalForm, setShowGoalForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<number | null>(null);
@@ -209,6 +243,7 @@ const MYMate = () => {
 
   const [deadlinePlans, setDeadlinePlans] = useState<DeadlinePlan[]>([]);
   const [showPlanForm, setShowPlanForm] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<number | null>(null);
   const [planForm, setPlanForm] = useState({
     title: '',
     description: '',
@@ -1323,6 +1358,62 @@ const MYMate = () => {
     );
     setDeadlinePlans(updated);
     saveData('deadlinePlans', updated);
+  };
+
+  const handleEditPlan = (plan: DeadlinePlan) => {
+    setEditingPlan(plan.id);
+    let reminderOffset = '15';
+    if (plan.reminderTime && plan.deadline) {
+      const diffMs = new Date(plan.deadline).getTime() - new Date(plan.reminderTime).getTime();
+      const diffMins = Math.round(diffMs / 60000);
+      if (diffMins === 60 || diffMins === 1440 || diffMins === 15) {
+        reminderOffset = diffMins.toString();
+      }
+    }
+    let formattedDeadline = plan.deadline;
+    try {
+      const d = new Date(plan.deadline);
+      if (!isNaN(d.getTime())) {
+        const offset = d.getTimezoneOffset() * 60000;
+        formattedDeadline = new Date(d.getTime() - offset).toISOString().slice(0, 16);
+      }
+    } catch (e) {}
+
+    setPlanForm({
+      title: plan.title,
+      description: plan.description || '',
+      deadline: formattedDeadline,
+      priority: plan.priority,
+      reminderOffset
+    });
+    setShowPlanForm(true);
+  };
+
+  const handleUpdatePlan = () => {
+    if (!planForm.title || !planForm.deadline || editingPlan === null) return;
+    const deadlineDate = new Date(planForm.deadline);
+    const reminderDate = new Date(deadlineDate.getTime() - parseInt(planForm.reminderOffset) * 60000);
+
+    const updated = deadlinePlans.map(p => {
+      if (p.id === editingPlan) {
+        return {
+          ...p,
+          title: planForm.title,
+          description: planForm.description,
+          deadline: planForm.deadline,
+          priority: planForm.priority,
+          reminderTime: reminderDate.toISOString(),
+          notificationSent: false
+        };
+      }
+      return p;
+    });
+
+    setDeadlinePlans(updated);
+    saveData('deadlinePlans', updated);
+    setEditingPlan(null);
+    setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+    setShowPlanForm(false);
   };
 
 
@@ -2833,7 +2924,17 @@ const MYMate = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => setShowPlanForm(!showPlanForm)}
+                    onClick={() => {
+                      if (showPlanForm) {
+                        setShowPlanForm(false);
+                        setEditingPlan(null);
+                        setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+                      } else {
+                        setEditingPlan(null);
+                        setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+                        setShowPlanForm(true);
+                      }
+                    }}
                     className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
                   >
                     <Plus size={16} />
@@ -2844,7 +2945,7 @@ const MYMate = () => {
                 {showPlanForm && (
                   <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
                     <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      New Deadline Plan
+                      {editingPlan ? 'Edit Deadline Plan' : 'New Deadline Plan'}
                     </h3>
                     <div className="space-y-4">
                       <div>
@@ -2909,14 +3010,14 @@ const MYMate = () => {
                       </div>
                       <div className="flex items-center gap-3 pt-2">
                         <button
-                          onClick={handleAddPlan}
+                          onClick={editingPlan ? handleUpdatePlan : handleAddPlan}
                           className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
                         >
                           <Save size={16} />
-                          <span>Save Plan</span>
+                          <span>{editingPlan ? 'Update Plan' : 'Save Plan'}</span>
                         </button>
                         <button
-                          onClick={() => { setShowPlanForm(false); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }}
+                          onClick={() => { setShowPlanForm(false); setEditingPlan(null); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }}
                           className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
                         >
                           Cancel
@@ -2977,13 +3078,24 @@ const MYMate = () => {
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDeletePlan(plan.id)}
-                        className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition flex-shrink-0"
-                        aria-label="Delete plan"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => handleEditPlan(plan)}
+                          className="p-1.5 rounded-lg text-[#64748B] hover:text-[#315EFB] hover:bg-blue-50 dark:hover:bg-blue-950/30 transition"
+                          aria-label="Edit plan"
+                          title="Edit plan"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlan(plan.id)}
+                          className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                          aria-label="Delete plan"
+                          title="Delete plan"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))}
 
