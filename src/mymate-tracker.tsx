@@ -1377,7 +1377,7 @@ const MYMate = () => {
         const offset = d.getTimezoneOffset() * 60000;
         formattedDeadline = new Date(d.getTime() - offset).toISOString().slice(0, 16);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     setPlanForm({
       title: plan.title,
@@ -1547,132 +1547,139 @@ const MYMate = () => {
 
   if (showAuth) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F8FAFC] dark:bg-[#0B1120] p-4">
+      <div
+        className="light relative flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat p-4"
+        style={{ colorScheme: 'light', backgroundImage: "url('/Login%20Page%20Background.png')" }}
+      >
+        {/* Soft overlay for contrast and text legibility */}
+        <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px] pointer-events-none" />
         {/* Subtle background glow */}
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#315EFB]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#EC4899]/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-md bg-white dark:bg-[#151F32] p-8 sm:p-10 rounded-2xl shadow-xl border border-[#E2E8F0] dark:border-[#22324F] transition-all">
+        <div className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-2xl shadow-2xl border border-white/60 transition-all text-[#17233C]">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F] mb-4 shadow-sm">
-              <img
-                src="/mymate-logo.png"
-                alt="MyMate logo"
-                className="w-14 h-14 object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">Welcome to MyMate</h1>
-            <p className="text-sm text-[#64748B] dark:text-[#94A3B8] mt-1.5">
-              {authMode === 'login' ? 'Sign in to your personal growth dashboard' : 'Start your journey to organized daily growth'}
-            </p>
-          </div>
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            {authMode === 'signup' && (
-              <div>
-                <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={authForm.name}
-                  onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                  required={authMode === 'signup'}
-                  placeholder="Alex Morgan"
-                  aria-label="Full Name"
+            <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] mb-4 shadow-sm">
+              <div className="inline-flex items-center justify-center mb-4">
+                <img
+                  src="/mymate-logo.png"
+                  alt="MyMate logo"
+                  className="w-14 h-14 object-contain"
+                  className="w-20 h-20 object-contain drop-shadow-md"
                 />
               </div>
+              <h1 className="text-2xl font-bold text-[#17233C] tracking-tight">Welcome to MyMate</h1>
+              <p className="text-sm text-[#64748B] mt-1.5">
+                {authMode === 'login' ? 'Sign in to your personal growth dashboard' : 'Start your journey to organized daily growth'}
+              </p>
+            </div>
+
+            <form onSubmit={handleAuth} className="space-y-4">
+              {authMode === 'signup' && (
+                <div>
+                  <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={authForm.name}
+                    onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                    required={authMode === 'signup'}
+                    placeholder="Alex Morgan"
+                    aria-label="Full Name"
+                  />
+                </div>
+              )}
+              <div>
+                <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={authForm.email}
+                  onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                  required
+                  placeholder="name@example.com"
+                  aria-label="Email Address"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] mb-1.5">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                  required
+                  placeholder="••••••••"
+                  aria-label="Password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#315EFB] hover:bg-[#274cd0] text-white font-medium text-sm transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-2"
+              >
+                <span>{authMode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                <ArrowRight size={16} />
+              </button>
+            </form>
+
+            {/* Auth error message */}
+            {authError && (
+              <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 text-center font-medium">
+                {authError}
+              </div>
             )}
-            <div>
-              <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={authForm.email}
-                onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                required
-                placeholder="name@example.com"
-                aria-label="Email Address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={authForm.password}
-                onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                required
-                placeholder="••••••••"
-                aria-label="Password"
-              />
+
+            {/* Divider */}
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t border-[#E2E8F0]" />
+              <span className="mx-3 text-[#94A3B8] text-xs font-medium uppercase tracking-wider">or</span>
+              <div className="flex-grow border-t border-[#E2E8F0]" />
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2.5 px-4 rounded-xl bg-[#315EFB] hover:bg-[#274cd0] text-white font-medium text-sm transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-2"
-            >
-              <span>{authMode === 'login' ? 'Sign In' : 'Create Account'}</span>
-              <ArrowRight size={16} />
-            </button>
-          </form>
-
-          {/* Auth error message */}
-          {authError && (
-            <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-600 dark:text-red-400 text-center font-medium">
-              {authError}
-            </div>
-          )}
-
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-[#E2E8F0] dark:border-[#22324F]" />
-            <span className="mx-3 text-[#94A3B8] text-xs font-medium uppercase tracking-wider">or</span>
-            <div className="flex-grow border-t border-[#E2E8F0] dark:border-[#22324F]" />
-          </div>
-
-          {/* Google Sign-In Button */}
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center gap-2.5 border border-[#E2E8F0] dark:border-[#22324F] py-2.5 px-4 rounded-xl hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-sm font-medium text-[#17233C] dark:text-[#F8FAFC] transition shadow-sm"
-          >
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google logo"
-              className="w-4 h-4"
-            />
-            <span>Continue with Google</span>
-          </button>
-
-          <div className="text-center mt-6">
+            {/* Google Sign-In Button */}
             <button
               type="button"
-              onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-              className="text-[#315EFB] dark:text-[#7857E8] hover:underline text-sm font-medium transition"
+              onClick={handleGoogleSignIn}
+              className="w-full flex items-center justify-center gap-2.5 border border-[#E2E8F0] py-2.5 px-4 rounded-xl hover:bg-[#F8FAFC] text-sm font-medium text-[#17233C] transition shadow-sm"
             >
-              {authMode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google logo"
+                className="w-4 h-4"
+              />
+              <span>Continue with Google</span>
             </button>
+
+            <div className="text-center mt-6">
+              <button
+                type="button"
+                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                className="text-[#315EFB] hover:underline text-sm font-medium transition"
+              >
+                {authMode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    );
+        );
   }
 
-  // Celebration component is now imported from ./components/CelebrationOverlay
+        // Celebration component is now imported from ./components/CelebrationOverlay
 
-  return (
-    <>
-      {/* Global Theme Styles */}
-      <style>{`
+        return (
+        <>
+          {/* Global Theme Styles */}
+          <style>{`
         /* Productive/Scifi Theme Styles */
         html.productive {
           --bg-primary: #0a0e27;
@@ -1884,2166 +1891,2166 @@ const MYMate = () => {
         }
       `}</style>
 
-      <div className="flex h-screen min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-[#0B1120] text-[#17233C] dark:text-[#F8FAFC]">
-        <CelebrationOverlay
-          show={showCelebration}
-          scenario={celebrationScenario}
-          stats={celebrationStats}
-          userName={user?.name}
-          onDismiss={() => setShowCelebration(false)}
-          animKey={celebrationAnimKey}
-        />
-        <MicroCheck show={showMicroCheck} />
-        {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm md:hidden" />}
-
-        {/* Modern Collapsible Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-40 flex flex-col overflow-hidden bg-white dark:bg-[#151F32] border-r border-[#E2E8F0] dark:border-[#22324F] transition-all duration-300 ease-in-out md:relative md:inset-auto md:h-full md:flex-shrink-0 ${sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
-          {/* Brand Header */}
-          <div className={`h-16 flex items-center border-b border-[#E2E8F0] dark:border-[#22324F] px-4 ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
-            <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => { setActiveTab('dashboard'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#315EFB] to-[#7857E8] p-0.5 flex-shrink-0 shadow-sm flex items-center justify-center">
-                <img
-                  src="/mymate-logo.png"
-                  alt="MyMate logo"
-                  className="w-full h-full rounded-[10px] bg-white object-contain p-1"
-                />
-              </div>
-              {sidebarOpen && (
-                <div className="flex flex-col min-w-0">
-                  <span className="font-bold text-base tracking-tight text-[#17233C] dark:text-[#F8FAFC]">MyMate</span>
-                  <span className="text-[10px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider"></span>
-                </div>
-              )}
-            </div>
-            {sidebarOpen && (
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(false)}
-                aria-label="Close navigation"
-                className="rounded-lg p-1.5 text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition md:hidden"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-
-          {/* Grouped Navigation Links with Shared Sliding Indicator */}
-          <div
-            ref={sidebarNavContainerRef}
-            onScroll={updateNavIndicator}
-            className="relative flex-1 overflow-y-auto px-3 py-4 space-y-6"
-          >
-            {/* Single Shared Animated Active Indicator */}
-            <div
-              className="nav-sliding-indicator bg-slate-900 dark:bg-slate-800 shadow-md"
-              style={{
-                transform: `translate3d(${navIndicator.left}px, ${navIndicator.top}px, 0)`,
-                width: `${navIndicator.width}px`,
-                height: `${navIndicator.height}px`,
-                opacity: navIndicator.opacity,
-                top: 0,
-                left: 0,
-              }}
-              aria-hidden="true"
+          <div className="flex h-screen min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-[#0B1120] text-[#17233C] dark:text-[#F8FAFC]">
+            <CelebrationOverlay
+              show={showCelebration}
+              scenario={celebrationScenario}
+              stats={celebrationStats}
+              userName={user?.name}
+              onDismiss={() => setShowCelebration(false)}
+              animKey={celebrationAnimKey}
             />
+            <MicroCheck show={showMicroCheck} />
+            {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm md:hidden" />}
 
-            {/* Home Section */}
-            <div>
-              {sidebarOpen && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
-                  Overview
+            {/* Modern Collapsible Sidebar */}
+            <aside className={`fixed inset-y-0 left-0 z-40 flex flex-col overflow-hidden bg-white dark:bg-[#151F32] border-r border-[#E2E8F0] dark:border-[#22324F] transition-all duration-300 ease-in-out md:relative md:inset-auto md:h-full md:flex-shrink-0 ${sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
+              {/* Brand Header */}
+              <div className={`h-16 flex items-center border-b border-[#E2E8F0] dark:border-[#22324F] px-4 ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+                <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => { setActiveTab('dashboard'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#315EFB] to-[#7857E8] p-0.5 flex-shrink-0 shadow-sm flex items-center justify-center">
+                    <img
+                      src="/mymate-logo.png"
+                      alt="MyMate logo"
+                      className="w-full h-full rounded-[10px] bg-white object-contain p-1"
+                    />
+                  </div>
+                  {sidebarOpen && (
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-bold text-base tracking-tight text-[#17233C] dark:text-[#F8FAFC]">MyMate</span>
+                      <span className="text-[10px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider"></span>
+                    </div>
+                  )}
                 </div>
-              )}
-              <button
-                ref={el => { tabButtonRefs.current['dashboard'] = el; }}
-                type="button"
-                title="Dashboard"
-                aria-current={activeTab === 'dashboard' ? 'page' : undefined}
-                onClick={() => { setActiveTab('dashboard'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
-                className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-                  } ${activeTab === 'dashboard'
-                    ? 'text-white'
-                    : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
-                  }`}
+                {sidebarOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Close navigation"
+                    className="rounded-lg p-1.5 text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition md:hidden"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
+              </div>
+
+              {/* Grouped Navigation Links with Shared Sliding Indicator */}
+              <div
+                ref={sidebarNavContainerRef}
+                onScroll={updateNavIndicator}
+                className="relative flex-1 overflow-y-auto px-3 py-4 space-y-6"
               >
-                <TrendingUp size={18} className={`nav-icon flex-shrink-0 ${activeTab === 'dashboard' ? 'text-white' : 'text-[#315EFB]'}`} />
-                {sidebarOpen && <span className="nav-label">Dashboard</span>}
-              </button>
-            </div>
+                {/* Single Shared Animated Active Indicator */}
+                <div
+                  className="nav-sliding-indicator bg-slate-900 dark:bg-slate-800 shadow-md"
+                  style={{
+                    transform: `translate3d(${navIndicator.left}px, ${navIndicator.top}px, 0)`,
+                    width: `${navIndicator.width}px`,
+                    height: `${navIndicator.height}px`,
+                    opacity: navIndicator.opacity,
+                    top: 0,
+                    left: 0,
+                  }}
+                  aria-hidden="true"
+                />
 
-            {/* My Day Section */}
-            <div>
-              {sidebarOpen && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
-                  My Day
-                </div>
-              )}
-              <div className="space-y-1">
-                {[
-                  { id: 'schedule', icon: ListTodo, label: 'Daily Schedule' },
-                  { id: 'planner', icon: Calendar, label: 'Planner' },
-                ].map(item => (
+                {/* Home Section */}
+                <div>
+                  {sidebarOpen && (
+                    <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
+                      Overview
+                    </div>
+                  )}
                   <button
-                    key={item.id}
-                    ref={el => { tabButtonRefs.current[item.id] = el; }}
+                    ref={el => { tabButtonRefs.current['dashboard'] = el; }}
                     type="button"
-                    title={item.label}
-                    aria-current={activeTab === item.id ? 'page' : undefined}
-                    onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                    title="Dashboard"
+                    aria-current={activeTab === 'dashboard' ? 'page' : undefined}
+                    onClick={() => { setActiveTab('dashboard'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
                     className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-                      } ${activeTab === item.id
+                      } ${activeTab === 'dashboard'
                         ? 'text-white'
                         : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
                       }`}
                   >
-                    <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
-                    {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                    <TrendingUp size={18} className={`nav-icon flex-shrink-0 ${activeTab === 'dashboard' ? 'text-white' : 'text-[#315EFB]'}`} />
+                    {sidebarOpen && <span className="nav-label">Dashboard</span>}
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Goals & Growth Section */}
-            <div>
-              {sidebarOpen && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
-                  Goals & Growth
                 </div>
-              )}
-              <div className="space-y-1">
-                {[
-                  { id: 'goals', icon: Target, label: 'Goals' },
-                  { id: 'skills', icon: BookOpen, label: 'Track Sheet' },
-                ].map(item => (
+
+                {/* My Day Section */}
+                <div>
+                  {sidebarOpen && (
+                    <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
+                      My Day
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {[
+                      { id: 'schedule', icon: ListTodo, label: 'Daily Schedule' },
+                      { id: 'planner', icon: Calendar, label: 'Planner' },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        ref={el => { tabButtonRefs.current[item.id] = el; }}
+                        type="button"
+                        title={item.label}
+                        aria-current={activeTab === item.id ? 'page' : undefined}
+                        onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                        className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
+                          } ${activeTab === item.id
+                            ? 'text-white'
+                            : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
+                          }`}
+                      >
+                        <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
+                        {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Goals & Growth Section */}
+                <div>
+                  {sidebarOpen && (
+                    <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
+                      Goals & Growth
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {[
+                      { id: 'goals', icon: Target, label: 'Goals' },
+                      { id: 'skills', icon: BookOpen, label: 'Track Sheet' },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        ref={el => { tabButtonRefs.current[item.id] = el; }}
+                        type="button"
+                        title={item.label}
+                        aria-current={activeTab === item.id ? 'page' : undefined}
+                        onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                        className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
+                          } ${activeTab === item.id
+                            ? 'text-white'
+                            : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
+                          }`}
+                      >
+                        <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
+                        {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Insights & Money Section */}
+                <div>
+                  {sidebarOpen && (
+                    <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
+                      Insights & Money
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {[
+                      { id: 'analysis', icon: BarChart3, label: 'Insights & Analysis' },
+                      { id: 'budget', icon: Wallet, label: 'Budget Planner' },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        ref={el => { tabButtonRefs.current[item.id] = el; }}
+                        type="button"
+                        title={item.label}
+                        aria-current={activeTab === item.id ? 'page' : undefined}
+                        onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                        className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
+                          } ${activeTab === item.id
+                            ? 'text-white'
+                            : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
+                          }`}
+                      >
+                        <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
+                        {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* My Space Section */}
+                <div>
+                  {sidebarOpen && (
+                    <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
+                      My Space
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {[
+                      { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
+                      { id: 'content', icon: Video, label: 'Content Creation' },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        ref={el => { tabButtonRefs.current[item.id] = el; }}
+                        type="button"
+                        title={item.label}
+                        aria-current={activeTab === item.id ? 'page' : undefined}
+                        onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                        className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
+                          } ${activeTab === item.id
+                            ? 'text-white'
+                            : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
+                          }`}
+                      >
+                        <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
+                        {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Footer Quick Profile */}
+              <div className="p-3 border-t border-[#E2E8F0] dark:border-[#22324F] bg-white dark:bg-[#151F32]">
+                <button
+                  ref={el => { tabButtonRefs.current['profile'] = el; }}
+                  type="button"
+                  title="Profile"
+                  aria-current={activeTab === 'profile' ? 'page' : undefined}
+                  onClick={() => { setActiveTab('profile'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
+                  className={`flex w-full items-center gap-3 p-2 transition-all ${activeTab === 'profile' ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-sm' : 'hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B]/60'
+                    }`}
+                >
+                  <div className="w-8 h-8 bg-gradient-to-tr from-[#315EFB] to-[#7857E8] text-white flex items-center justify-center font-semibold text-xs flex-shrink-0 shadow-sm">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  {sidebarOpen && (
+                    <div className="flex flex-col text-left overflow-hidden min-w-0">
+                      <span className={`text-xs font-semibold truncate ${activeTab === 'profile' ? 'text-white' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>{user?.name || 'User'}</span>
+                      <span className={`text-[11px] truncate ${activeTab === 'profile' ? 'text-slate-300' : 'text-[#64748B] dark:text-[#94A3B8]'}`}>{user?.email || 'Settings'}</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              {/* Modern Top Header */}
+              <header className="h-16 bg-white dark:bg-[#151F32] border-b border-[#E2E8F0] dark:border-[#22324F] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-20">
+                <div className="flex items-center gap-3">
                   <button
-                    key={item.id}
-                    ref={el => { tabButtonRefs.current[item.id] = el; }}
-                    type="button"
-                    title={item.label}
-                    aria-current={activeTab === item.id ? 'page' : undefined}
-                    onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
-                    className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-                      } ${activeTab === item.id
-                        ? 'text-white'
-                        : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
-                      }`}
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="rounded-xl p-2 text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
+                    aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand navigation'}
+                    title={sidebarOpen ? 'Collapse sidebar' : 'Expand navigation'}
                   >
-                    <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
-                    {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                    <Menu size={20} />
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Insights & Money Section */}
-            <div>
-              {sidebarOpen && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
-                  Insights & Money
-                </div>
-              )}
-              <div className="space-y-1">
-                {[
-                  { id: 'analysis', icon: BarChart3, label: 'Insights & Analysis' },
-                  { id: 'budget', icon: Wallet, label: 'Budget Planner' },
-                ].map(item => (
-                  <button
-                    key={item.id}
-                    ref={el => { tabButtonRefs.current[item.id] = el; }}
-                    type="button"
-                    title={item.label}
-                    aria-current={activeTab === item.id ? 'page' : undefined}
-                    onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
-                    className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-                      } ${activeTab === item.id
-                        ? 'text-white'
-                        : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
-                      }`}
-                  >
-                    <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
-                    {sidebarOpen && <span className="nav-label">{item.label}</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* My Space Section */}
-            <div>
-              {sidebarOpen && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] dark:text-[#64748B]">
-                  My Space
-                </div>
-              )}
-              <div className="space-y-1">
-                {[
-                  { id: 'notes', icon: StickyNote, label: 'Manual Notes' },
-                  { id: 'content', icon: Video, label: 'Content Creation' },
-                ].map(item => (
-                  <button
-                    key={item.id}
-                    ref={el => { tabButtonRefs.current[item.id] = el; }}
-                    type="button"
-                    title={item.label}
-                    aria-current={activeTab === item.id ? 'page' : undefined}
-                    onClick={() => { setActiveTab(item.id); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
-                    className={`nav-tab-item flex w-full items-center gap-3 py-2.5 text-sm font-medium ${sidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-                      } ${activeTab === item.id
-                        ? 'text-white'
-                        : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC]'
-                      }`}
-                  >
-                    <item.icon size={18} className={`nav-icon flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`} />
-                    {sidebarOpen && <span className="nav-label">{item.label}</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar Footer Quick Profile */}
-          <div className="p-3 border-t border-[#E2E8F0] dark:border-[#22324F] bg-white dark:bg-[#151F32]">
-            <button
-              ref={el => { tabButtonRefs.current['profile'] = el; }}
-              type="button"
-              title="Profile"
-              aria-current={activeTab === 'profile' ? 'page' : undefined}
-              onClick={() => { setActiveTab('profile'); if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false); }}
-              className={`flex w-full items-center gap-3 p-2 transition-all ${activeTab === 'profile' ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-sm' : 'hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B]/60'
-                }`}
-            >
-              <div className="w-8 h-8 bg-gradient-to-tr from-[#315EFB] to-[#7857E8] text-white flex items-center justify-center font-semibold text-xs flex-shrink-0 shadow-sm">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </div>
-              {sidebarOpen && (
-                <div className="flex flex-col text-left overflow-hidden min-w-0">
-                  <span className={`text-xs font-semibold truncate ${activeTab === 'profile' ? 'text-white' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>{user?.name || 'User'}</span>
-                  <span className={`text-[11px] truncate ${activeTab === 'profile' ? 'text-slate-300' : 'text-[#64748B] dark:text-[#94A3B8]'}`}>{user?.email || 'Settings'}</span>
-                </div>
-              )}
-            </button>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          {/* Modern Top Header */}
-          <header className="h-16 bg-white dark:bg-[#151F32] border-b border-[#E2E8F0] dark:border-[#22324F] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-20">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="rounded-xl p-2 text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
-                aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand navigation'}
-                title={sidebarOpen ? 'Collapse sidebar' : 'Expand navigation'}
-              >
-                <Menu size={20} />
-              </button>
-              <div className="hidden sm:flex items-center gap-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                <span>MyMate</span>
-                <ChevronRight size={14} className="text-[#94A3B8]" />
-                <span className="capitalize font-medium text-[#17233C] dark:text-[#F8FAFC]">
-                  {activeTab === 'skills' ? 'Track Sheet' : activeTab === 'analysis' ? 'Insights' : activeTab}
-                </span>
-              </div>
-            </div>
-
-            {/* Center Remaining Time in Day Pill */}
-            <div className="flex items-center">
-              {(() => {
-                const timeRemaining = getTimeRemainingInDay();
-                return (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F] text-[#17233C] dark:text-[#F8FAFC] text-xs font-medium shadow-xs">
-                    <Clock size={14} className="text-[#315EFB]" />
-                    <span className="hidden sm:inline text-[#64748B] dark:text-[#94A3B8]">Today left:</span>
-                    <span className="tabular-nums font-mono font-semibold text-[#17233C] dark:text-[#F8FAFC]">
-                      {String(timeRemaining.hours).padStart(2, '0')}:
-                      {String(timeRemaining.minutes).padStart(2, '0')}:
-                      {String(timeRemaining.seconds).padStart(2, '0')}
+                  <div className="hidden sm:flex items-center gap-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                    <span>MyMate</span>
+                    <ChevronRight size={14} className="text-[#94A3B8]" />
+                    <span className="capitalize font-medium text-[#17233C] dark:text-[#F8FAFC]">
+                      {activeTab === 'skills' ? 'Track Sheet' : activeTab === 'analysis' ? 'Insights' : activeTab}
                     </span>
                   </div>
-                );
-              })()}
-            </div>
-
-            {/* Right Header Actions */}
-            <div className="flex items-center gap-3">
-              {/* Streak Pill */}
-              {user && streak.currentStreak > 0 && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-xs font-semibold text-[#F97316]">
-                  <Flame size={15} fill="currentColor" className="text-[#F97316]" />
-                  <span>{streak.currentStreak}d</span>
-                </div>
-              )}
-
-              {/* Theme Toggle */}
-              <button
-                type="button"
-                onClick={() => setTheme(current => current === 'light' ? 'dark' : 'light')}
-                className="rounded-xl p-2 text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
-                aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-                title={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-              >
-                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-              </button>
-
-              {/* User Profile Menu */}
-              {user && (
-                <div className="relative">
-                  <button
-                    onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                    className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#315EFB] to-[#7857E8] text-white flex items-center justify-center font-semibold text-xs shadow-sm hover:opacity-95 transition"
-                    aria-label="Profile menu"
-                  >
-                    {user.name.charAt(0).toUpperCase()}
-                  </button>
-
-                  {profileMenuOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setProfileMenuOpen(false)}
-                      />
-                      <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-[#151F32] rounded-2xl shadow-xl border border-[#E2E8F0] dark:border-[#22324F] z-20 py-1 overflow-hidden">
-                        <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#22324F]">
-                          <p className="font-semibold text-sm text-[#17233C] dark:text-[#F8FAFC] truncate">{user.name}</p>
-                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate">{user.email}</p>
-                        </div>
-                        <div className="p-1">
-                          <button
-                            type="button"
-                            onClick={() => { setActiveTab('profile'); setProfileMenuOpen(false); }}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
-                          >
-                            <User size={15} className="text-[#315EFB]" />
-                            <span>View Profile & Growth</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleExport();
-                              setProfileMenuOpen(false);
-                            }}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
-                            aria-label="Export data"
-                          >
-                            <Download size={15} className="text-[#64748B] dark:text-[#94A3B8]" />
-                            <span>Export Backup (JSON)</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleLogout();
-                              setProfileMenuOpen(false);
-                            }}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                            aria-label="Logout"
-                          >
-                            <X size={15} className="text-red-600 dark:text-red-400" />
-                            <span>Sign Out</span>
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </header>
-
-          <main key={activeTab} className="animate-section-float min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50 dark:bg-gray-900">
-            {activeTab === 'dashboard' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                {/* A. Header: Personalized greeting based on actual user profile */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
-                        {(() => {
-                          const hour = currentTime.getHours();
-                          if (hour < 12) return 'Good morning';
-                          if (hour < 18) return 'Good afternoon';
-                          return 'Good evening';
-                        })()}, {user?.name || 'Explorer'}
-                      </span>
-                      <span className="inline-flex items-center justify-center text-lg animate-pulse-subtle">✨</span>
-                    </div>
-                    <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">
-                      {streak.currentStreak > 0
-                        ? `You are on an active ${streak.currentStreak}-day streak. Keep your momentum strong today!`
-                        : "Ready to make today count? Review your focus tasks and take action."}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 self-start sm:self-auto">
-                    <button
-                      onClick={() => setActiveTab('schedule')}
-                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
-                    >
-                      <Plus size={15} />
-                      <span>Plan Task</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('goals')}
-                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F1F5F9] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-[#22324F] transition"
-                    >
-                      <Target size={15} className="text-[#7857E8]" />
-                      <span>New Goal</span>
-                    </button>
-                  </div>
                 </div>
 
-                {/* B. Weekly Progress Section & Year Countdown */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* 7-Day Performance & Progress Ring */}
-                  <div className="lg:col-span-2 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
-                          <TrendingUp size={18} className="text-[#315EFB]" />
-                          <span>7-Day Productivity & Completion</span>
-                        </h3>
-                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                          Performance calculated across your actual completed schedule tasks
-                        </p>
-                      </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
-                        Rolling 7 Days
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-6 py-2">
-                      {/* Ring Meter */}
-                      <div className="flex items-center justify-center">
-                        <div className="relative w-32 h-32">
-                          <svg className="w-32 h-32 transform -rotate-90">
-                            <circle
-                              cx="64"
-                              cy="64"
-                              r="52"
-                              stroke="currentColor"
-                              strokeWidth="10"
-                              fill="transparent"
-                              className="text-[#E2E8F0] dark:text-[#1E293B]"
-                            />
-                            <circle
-                              cx="64"
-                              cy="64"
-                              r="52"
-                              stroke="url(#bluePurpleGradient)"
-                              strokeWidth="10"
-                              strokeLinecap="round"
-                              fill="transparent"
-                              strokeDasharray={`${(calculatePerfection() / 100) * 326.7} 326.7`}
-                              className="transition-all duration-700 ease-out"
-                            />
-                            <defs>
-                              <linearGradient id="bluePurpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#315EFB" />
-                                <stop offset="100%" stopColor="#7857E8" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="text-2xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
-                              {calculatePerfection()}%
-                            </span>
-                            <span className="text-[10px] uppercase font-semibold tracking-wider text-[#64748B] dark:text-[#94A3B8]">
-                              Consistency
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Quick Stats Grid */}
-                      <div className="sm:col-span-2 grid grid-cols-2 gap-3">
-                        <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60">
-                          <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Today's Completed</span>
-                          <div className="text-xl font-bold text-[#17233C] dark:text-[#F8FAFC] mt-0.5">
-                            {getTodayCompletionStats().completed} / {getTodayCompletionStats().total}
-                          </div>
-                          <span className="text-[11px] text-[#16A34A] font-medium mt-1 inline-block">
-                            {calculateTodayCompletion()}% achieved today
-                          </span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60">
-                          <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">7-Day Total Done</span>
-                          <div className="text-xl font-bold text-[#17233C] dark:text-[#F8FAFC] mt-0.5">
-                            {(() => {
-                              const today = getTodayDate();
-                              const last7Days: string[] = [];
-                              for (let i = 0; i < 7; i++) {
-                                const date = new Date(today);
-                                date.setDate(date.getDate() - i);
-                                last7Days.push(date.toISOString().split('T')[0]);
-                              }
-                              return dailyTasks.filter(t => last7Days.includes(t.date) && t.completed).length;
-                            })()} tasks
-                          </div>
-                          <span className="text-[11px] text-[#7857E8] font-medium mt-1 inline-block">
-                            Verified application data
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Days remaining in year card */}
-                  <div className="bg-gradient-to-br from-[#315EFB] via-[#7857E8] to-[#EC4899] p-6 rounded-2xl text-white shadow-md flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-white/80">Year Momentum</span>
-                      <Calendar size={18} className="text-white/80" />
-                    </div>
-                    <div className="my-4">
-                      <div className="text-5xl font-extrabold tracking-tight tabular-nums">
-                        {getDaysRemainingInYear()}
-                      </div>
-                      <p className="text-sm font-medium text-white/90 mt-1">Days left in {new Date().getFullYear()}</p>
-                    </div>
-                    <div className="pt-3 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
-                      <span>Make every single day matter</span>
-                      <button
-                        onClick={() => setActiveTab('planner')}
-                        className="underline font-semibold hover:text-white"
-                      >
-                        View Planner →
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* C. Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* 1. Tasks Completed Today */}
-                  <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/40 transition group">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                        Tasks Completed
-                      </span>
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] flex items-center justify-center">
-                        <CheckCircle size={18} />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
-                      {getTodayCompletionStats().completed}
-                    </div>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
-                      {getTodayCompletionStats().total > 0
-                        ? `Out of ${getTodayCompletionStats().total} scheduled for today`
-                        : 'No scheduled tasks today'}
-                    </p>
-                  </div>
-
-                  {/* 2. Active Goals */}
-                  <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#7857E8]/40 transition group">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                        Active Goals
-                      </span>
-                      <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] flex items-center justify-center">
-                        <Target size={18} />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
-                      {stats.activeGoals}
-                    </div>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
-                      {stats.completedGoals} accomplished goals so far
-                    </p>
-                  </div>
-
-                  {/* 3. Skills Tracked */}
-                  <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#EC4899]/40 transition group">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                        Track Sheet Topics
-                      </span>
-                      <div className="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#EC4899] flex items-center justify-center">
-                        <BookOpen size={18} />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
-                      {skillTopics.length > 0 ? skillTopics.length : stats.totalSkills}
-                    </div>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
-                      {skillTopics.length > 0
-                        ? `${skillTopics.filter(t => t.status === 'Completed').length} topics mastered`
-                        : `${stats.totalHours.toFixed(1)} verified hours`}
-                    </p>
-                  </div>
-
-                  {/* 4. Current Streak */}
-                  <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#F97316]/40 transition group">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                        Current Streak
-                      </span>
-                      <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center">
-                        <Flame size={18} fill="currentColor" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-[#F97316] tracking-tight">
-                      {streak.currentStreak} <span className="text-base font-normal text-[#64748B]">days</span>
-                    </div>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
-                      {streak.longestStreak > 0 ? `Best record: ${streak.longestStreak} days` : 'Begin your journey today'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* D. Today's Focus Section */}
-                <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#315EFB]" />
-                      <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC]">
-                        Today's Focus
-                      </h3>
-                      <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
-                        ({formatDateDDMMYYYY(currentDate)})
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('schedule')}
-                      className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
-                    >
-                      Manage Schedule →
-                    </button>
-                  </div>
-
-                  <div className="divide-y divide-[#E2E8F0] dark:divide-[#22324F]">
-                    {getTodayTasks().length > 0 ? (
-                      getTodayTasks().map(task => (
-                        <div
-                          key={task.id}
-                          className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4 transition hover:bg-[#F8FAFC]/60 dark:hover:bg-[#1E293B]/40 px-2 rounded-xl"
-                        >
-                          <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleTask(task.id)}
-                              className={`w-6 h-6 rounded-lg flex items-center justify-center transition border ${task.completed
-                                  ? 'bg-[#16A34A] border-[#16A34A] text-white shadow-xs'
-                                  : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
-                                }`}
-                              aria-label={task.completed ? 'Mark task incomplete' : 'Mark task complete'}
-                            >
-                              <Check size={14} className={task.completed ? 'stroke-[3]' : 'opacity-0'} />
-                            </button>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span
-                                  className={`text-sm font-medium truncate ${task.completed
-                                      ? 'line-through text-[#94A3B8] dark:text-[#64748B]'
-                                      : 'text-[#17233C] dark:text-[#F8FAFC]'
-                                    }`}
-                                >
-                                  {task.title}
-                                </span>
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${task.priority === 'high'
-                                      ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/60'
-                                      : task.priority === 'medium'
-                                        ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/60'
-                                        : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/60'
-                                    }`}
-                                >
-                                  {task.priority}
-                                </span>
-                                {task.category && (
-                                  <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8] px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B]">
-                                    {task.category}
-                                  </span>
-                                )}
-                              </div>
-                              {task.description && (
-                                <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5 truncate">
-                                  {task.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-xs font-mono font-medium text-[#64748B] dark:text-[#94A3B8] flex-shrink-0">
-                            {formatTime12Hour(task.time)}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      /* Meaningful Empty State */
-                      <div className="py-12 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                          <ListTodo size={24} />
-                        </div>
-                        <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No tasks scheduled for today</h4>
-                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                          Build your regular schedule routines or add quick daily tasks to keep your growth on track.
-                        </p>
-                        <button
-                          onClick={() => setActiveTab('schedule')}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
-                        >
-                          <Plus size={15} />
-                          <span>Add Task to Daily Schedule</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* E. Additional Dashboard Content: Active Goals & Upcoming Deadlines */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Active Goals Preview */}
-                  <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
-                          <Target size={18} className="text-[#7857E8]" />
-                          <span>Active Growth Goals</span>
-                        </h3>
-                        <button
-                          onClick={() => setActiveTab('goals')}
-                          className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
-                        >
-                          All Goals ({goals.length}) →
-                        </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        {goals.filter(g => g.status === 'in-progress').slice(0, 3).map(goal => (
-                          <div
-                            key={goal.id}
-                            className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/70 flex items-center justify-between gap-3"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <span className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC] truncate block">
-                                {goal.title}
-                              </span>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                                <span className="capitalize">{goal.category}</span>
-                                {goal.targetDate && (
-                                  <>
-                                    <span>•</span>
-                                    <span>Target: {goal.targetDate}</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] border border-purple-200 dark:border-purple-900/50 flex-shrink-0">
-                              In Progress
-                            </span>
-                          </div>
-                        ))}
-
-                        {goals.filter(g => g.status === 'in-progress').length === 0 && (
-                          <div className="text-center py-6 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                            <p>No active goals currently in progress.</p>
-                            <button
-                              onClick={() => setActiveTab('goals')}
-                              className="mt-2 text-[#315EFB] font-semibold hover:underline"
-                            >
-                              + Set your first career or life goal
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Upcoming Deadlines from Planner */}
-                  <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
-                          <Calendar size={18} className="text-[#F97316]" />
-                          <span>Upcoming Deadlines</span>
-                        </h3>
-                        <button
-                          onClick={() => setActiveTab('planner')}
-                          className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
-                        >
-                          All Plans ({deadlinePlans.length}) →
-                        </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        {deadlinePlans
-                          .filter(p => p.status === 'pending')
-                          .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
-                          .slice(0, 3)
-                          .map(plan => (
-                            <div
-                              key={plan.id}
-                              className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/70 flex items-center justify-between gap-3"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <span className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC] truncate block">
-                                  {plan.title}
-                                </span>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                                  <Clock size={12} className="text-[#F97316]" />
-                                  <span>{new Date(plan.deadline).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                                </div>
-                              </div>
-                              <span
-                                className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 ${plan.priority === 'high'
-                                    ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/50'
-                                    : plan.priority === 'medium'
-                                      ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/50'
-                                      : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50'
-                                  }`}
-                              >
-                                {plan.priority}
-                              </span>
-                            </div>
-                          ))}
-
-                        {deadlinePlans.filter(p => p.status === 'pending').length === 0 && (
-                          <div className="text-center py-6 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                            <p>All deadlines completed! Great work.</p>
-                            <button
-                              onClick={() => setActiveTab('planner')}
-                              className="mt-2 text-[#315EFB] font-semibold hover:underline"
-                            >
-                              + Schedule a new deadline
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'goals' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Goals & Milestones</h2>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                      Set clear objectives, track achievement status, and turn ambitions into measurable realities.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowGoalForm(!showGoalForm)}
-                    className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
-                  >
-                    <Plus size={16} />
-                    <span>{showGoalForm ? 'Close Form' : 'Add New Goal'}</span>
-                  </button>
-                </div>
-
-                {showGoalForm && (
-                  <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      {editingGoal ? 'Edit Goal' : 'Create New Goal'}
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="goal-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
-                        <input
-                          id="goal-title"
-                          type="text"
-                          value={goalForm.title}
-                          onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., Master Full-Stack Architecture"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="goal-description" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
-                        <textarea
-                          id="goal-description"
-                          value={goalForm.description}
-                          onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={3}
-                          placeholder="Detail the exact outcomes you want to achieve"
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="goal-category" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
-                          <select
-                            id="goal-category"
-                            value={goalForm.category}
-                            onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Goal category"
-                          >
-                            <option value="career">Career</option>
-                            <option value="learning">Learning</option>
-                            <option value="project">Project</option>
-                            <option value="networking">Networking</option>
-                            <option value="health">Health & Wellness</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="goal-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Date</label>
-                          <input
-                            id="goal-date"
-                            type="date"
-                            value={goalForm.targetDate}
-                            onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Target date"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          onClick={editingGoal ? handleUpdateGoal : handleAddGoal}
-                          className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
-                        >
-                          <Save size={16} />
-                          <span>{editingGoal ? 'Update Goal' : 'Save Goal'}</span>
-                        </button>
-                        <button
-                          onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }}
-                          className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {goals.map(goal => (
-                    <div
-                      key={goal.id}
-                      className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <button
-                              onClick={() => toggleGoalStatus(goal.id)}
-                              className={`w-6 h-6 rounded-lg flex items-center justify-center transition border mt-0.5 flex-shrink-0 ${goal.status === 'completed'
-                                  ? 'bg-[#16A34A] border-[#16A34A] text-white'
-                                  : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
-                                }`}
-                              aria-label={goal.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}
-                            >
-                              <Check size={14} className={goal.status === 'completed' ? 'stroke-[3]' : 'opacity-0'} />
-                            </button>
-                            <div className="min-w-0 flex-1">
-                              <h3 className={`text-base font-bold truncate ${goal.status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>
-                                {goal.title}
-                              </h3>
-                              {goal.description && (
-                                <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1 line-clamp-2">
-                                  {goal.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button
-                              onClick={() => handleEditGoal(goal)}
-                              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
-                              aria-label="Edit goal"
-                            >
-                              <Edit2 size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteGoal(goal.id)}
-                              className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                              aria-label="Delete goal"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F] text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] capitalize font-medium">
-                            {goal.category}
-                          </span>
-                          {goal.targetDate && (
-                            <span className="text-[#64748B] dark:text-[#94A3B8]">
-                              Due: {goal.targetDate}
-                            </span>
-                          )}
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${goal.status === 'completed'
-                              ? 'bg-green-50 dark:bg-green-950/40 text-[#16A34A] border border-green-200 dark:border-green-900/50'
-                              : 'bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] border border-purple-200 dark:border-purple-900/50'
-                            }`}
-                        >
-                          {goal.status}
+                {/* Center Remaining Time in Day Pill */}
+                <div className="flex items-center">
+                  {(() => {
+                    const timeRemaining = getTimeRemainingInDay();
+                    return (
+                      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F] text-[#17233C] dark:text-[#F8FAFC] text-xs font-medium shadow-xs">
+                        <Clock size={14} className="text-[#315EFB]" />
+                        <span className="hidden sm:inline text-[#64748B] dark:text-[#94A3B8]">Today left:</span>
+                        <span className="tabular-nums font-mono font-semibold text-[#17233C] dark:text-[#F8FAFC]">
+                          {String(timeRemaining.hours).padStart(2, '0')}:
+                          {String(timeRemaining.minutes).padStart(2, '0')}:
+                          {String(timeRemaining.seconds).padStart(2, '0')}
                         </span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })()}
+                </div>
 
-                  {goals.length === 0 && (
-                    <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                      <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                        <Target size={24} />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No goals set yet</h4>
-                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                        Define career landmarks, fitness milestones, or skill learning checkpoints to focus your efforts.
-                      </p>
+                {/* Right Header Actions */}
+                <div className="flex items-center gap-3">
+                  {/* Streak Pill */}
+                  {user && streak.currentStreak > 0 && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-xs font-semibold text-[#F97316]">
+                      <Flame size={15} fill="currentColor" className="text-[#F97316]" />
+                      <span>{streak.currentStreak}d</span>
+                    </div>
+                  )}
+
+                  {/* Theme Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setTheme(current => current === 'light' ? 'dark' : 'light')}
+                    className="rounded-xl p-2 text-[#64748B] dark:text-[#94A3B8] hover:text-[#17233C] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
+                    aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+                    title={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+                  >
+                    {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                  </button>
+
+                  {/* User Profile Menu */}
+                  {user && (
+                    <div className="relative">
                       <button
-                        onClick={() => setShowGoalForm(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                        onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                        className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#315EFB] to-[#7857E8] text-white flex items-center justify-center font-semibold text-xs shadow-sm hover:opacity-95 transition"
+                        aria-label="Profile menu"
                       >
-                        <Plus size={15} />
-                        <span>Set Your First Goal</span>
+                        {user.name.charAt(0).toUpperCase()}
                       </button>
+
+                      {profileMenuOpen && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setProfileMenuOpen(false)}
+                          />
+                          <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-[#151F32] rounded-2xl shadow-xl border border-[#E2E8F0] dark:border-[#22324F] z-20 py-1 overflow-hidden">
+                            <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#22324F]">
+                              <p className="font-semibold text-sm text-[#17233C] dark:text-[#F8FAFC] truncate">{user.name}</p>
+                              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate">{user.email}</p>
+                            </div>
+                            <div className="p-1">
+                              <button
+                                type="button"
+                                onClick={() => { setActiveTab('profile'); setProfileMenuOpen(false); }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
+                              >
+                                <User size={15} className="text-[#315EFB]" />
+                                <span>View Profile & Growth</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleExport();
+                                  setProfileMenuOpen(false);
+                                }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition"
+                                aria-label="Export data"
+                              >
+                                <Download size={15} className="text-[#64748B] dark:text-[#94A3B8]" />
+                                <span>Export Backup (JSON)</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleLogout();
+                                  setProfileMenuOpen(false);
+                                }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                                aria-label="Logout"
+                              >
+                                <X size={15} className="text-red-600 dark:text-red-400" />
+                                <span>Sign Out</span>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              </header>
 
-            {activeTab === 'skills' && (
-              <SkillsTracker
-                topics={skillTopics}
-                onTopicsChange={async updatedTopics => {
-                  await saveData('skillTopics', updatedTopics);
-                  setSkillTopics(updatedTopics);
-                }}
-              />
-            )}
-
-            {activeTab === 'profile' && user && (
-              <ProfileDashboard user={user} />
-            )}
-
-            {activeTab === 'planner' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Deadline Planner</h2>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                      Track critical project deadlines, setup reminders, and ensure key targets never slip through.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (showPlanForm) {
-                        setShowPlanForm(false);
-                        setEditingPlan(null);
-                        setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
-                      } else {
-                        setEditingPlan(null);
-                        setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
-                        setShowPlanForm(true);
-                      }
-                    }}
-                    className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
-                  >
-                    <Plus size={16} />
-                    <span>{showPlanForm ? 'Close Form' : 'Add New Plan'}</span>
-                  </button>
-                </div>
-
-                {showPlanForm && (
-                  <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      {editingPlan ? 'Edit Deadline Plan' : 'New Deadline Plan'}
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="plan-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
-                        <input
-                          id="plan-title"
-                          type="text"
-                          value={planForm.title}
-                          onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., Deliver Quarterly Portfolio Update"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="plan-desc" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
-                        <textarea
-                          id="plan-desc"
-                          value={planForm.description}
-                          onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={2}
-                          placeholder="Context or notes regarding this milestone"
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label htmlFor="plan-deadline" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Deadline</label>
-                          <input
-                            id="plan-deadline"
-                            type="datetime-local"
-                            value={planForm.deadline}
-                            onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                          />
+              <main key={activeTab} className="animate-section-float min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50 dark:bg-gray-900">
+                {activeTab === 'dashboard' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    {/* A. Header: Personalized greeting based on actual user profile */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
+                            {(() => {
+                              const hour = currentTime.getHours();
+                              if (hour < 12) return 'Good morning';
+                              if (hour < 18) return 'Good afternoon';
+                              return 'Good evening';
+                            })()}, {user?.name || 'Explorer'}
+                          </span>
+                          <span className="inline-flex items-center justify-center text-lg animate-pulse-subtle">✨</span>
                         </div>
-                        <div>
-                          <label htmlFor="plan-priority" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Priority</label>
-                          <select
-                            id="plan-priority"
-                            value={planForm.priority}
-                            onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                          >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="plan-reminder" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Notification Reminder</label>
-                          <select
-                            id="plan-reminder"
-                            value={planForm.reminderOffset}
-                            onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                          >
-                            <option value="15">15 minutes before</option>
-                            <option value="60">1 hour before</option>
-                            <option value="1440">1 day before</option>
-                          </select>
-                        </div>
+                        <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">
+                          {streak.currentStreak > 0
+                            ? `You are on an active ${streak.currentStreak}-day streak. Keep your momentum strong today!`
+                            : "Ready to make today count? Review your focus tasks and take action."}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-3 pt-2">
+                      <div className="flex items-center gap-3 self-start sm:self-auto">
                         <button
-                          onClick={editingPlan ? handleUpdatePlan : handleAddPlan}
-                          className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                          onClick={() => setActiveTab('schedule')}
+                          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
                         >
-                          <Save size={16} />
-                          <span>{editingPlan ? 'Update Plan' : 'Save Plan'}</span>
+                          <Plus size={15} />
+                          <span>Plan Task</span>
                         </button>
                         <button
-                          onClick={() => { setShowPlanForm(false); setEditingPlan(null); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }}
-                          className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                          onClick={() => setActiveTab('goals')}
+                          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F1F5F9] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-[#22324F] transition"
                         >
-                          Cancel
+                          <Target size={15} className="text-[#7857E8]" />
+                          <span>New Goal</span>
                         </button>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                <div className="space-y-3">
-                  {(deadlinePlans || []).sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
-                    <div
-                      key={plan.id}
-                      className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex items-start justify-between gap-4"
-                    >
-                      <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                        <button
-                          onClick={() => handleTogglePlan(plan.id)}
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center transition border mt-0.5 flex-shrink-0 ${plan.status === 'completed'
-                              ? 'bg-[#16A34A] border-[#16A34A] text-white'
-                              : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
-                            }`}
-                          aria-label={plan.status === 'completed' ? 'Mark plan pending' : 'Mark plan completed'}
-                        >
-                          <Check size={14} className={plan.status === 'completed' ? 'stroke-[3]' : 'opacity-0'} />
-                        </button>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <h3 className={`text-base font-bold truncate ${plan.status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>
-                              {plan.title}
+                    {/* B. Weekly Progress Section & Year Countdown */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* 7-Day Performance & Progress Ring */}
+                      <div className="lg:col-span-2 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
+                              <TrendingUp size={18} className="text-[#315EFB]" />
+                              <span>7-Day Productivity & Completion</span>
                             </h3>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${plan.priority === 'high'
-                                  ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/60'
-                                  : plan.priority === 'medium'
-                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/60'
-                                    : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/60'
-                                }`}
-                            >
-                              {plan.priority}
-                            </span>
-                            {plan.status === 'overdue' && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
-                                Overdue
-                              </span>
-                            )}
-                          </div>
-                          {plan.description && (
-                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mb-2">
-                              {plan.description}
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
+                              Performance calculated across your actual completed schedule tasks
                             </p>
-                          )}
-                          <div className="flex items-center gap-3 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                            <span className="flex items-center gap-1.5 font-medium">
-                              <Clock size={13} className="text-[#F97316]" />
-                              {new Date(plan.deadline).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                            </span>
+                          </div>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
+                            Rolling 7 Days
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-6 py-2">
+                          {/* Ring Meter */}
+                          <div className="flex items-center justify-center">
+                            <div className="relative w-32 h-32">
+                              <svg className="w-32 h-32 transform -rotate-90">
+                                <circle
+                                  cx="64"
+                                  cy="64"
+                                  r="52"
+                                  stroke="currentColor"
+                                  strokeWidth="10"
+                                  fill="transparent"
+                                  className="text-[#E2E8F0] dark:text-[#1E293B]"
+                                />
+                                <circle
+                                  cx="64"
+                                  cy="64"
+                                  r="52"
+                                  stroke="url(#bluePurpleGradient)"
+                                  strokeWidth="10"
+                                  strokeLinecap="round"
+                                  fill="transparent"
+                                  strokeDasharray={`${(calculatePerfection() / 100) * 326.7} 326.7`}
+                                  className="transition-all duration-700 ease-out"
+                                />
+                                <defs>
+                                  <linearGradient id="bluePurpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#315EFB" />
+                                    <stop offset="100%" stopColor="#7857E8" />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <span className="text-2xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
+                                  {calculatePerfection()}%
+                                </span>
+                                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#64748B] dark:text-[#94A3B8]">
+                                  Consistency
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quick Stats Grid */}
+                          <div className="sm:col-span-2 grid grid-cols-2 gap-3">
+                            <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60">
+                              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Today's Completed</span>
+                              <div className="text-xl font-bold text-[#17233C] dark:text-[#F8FAFC] mt-0.5">
+                                {getTodayCompletionStats().completed} / {getTodayCompletionStats().total}
+                              </div>
+                              <span className="text-[11px] text-[#16A34A] font-medium mt-1 inline-block">
+                                {calculateTodayCompletion()}% achieved today
+                              </span>
+                            </div>
+                            <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60">
+                              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">7-Day Total Done</span>
+                              <div className="text-xl font-bold text-[#17233C] dark:text-[#F8FAFC] mt-0.5">
+                                {(() => {
+                                  const today = getTodayDate();
+                                  const last7Days: string[] = [];
+                                  for (let i = 0; i < 7; i++) {
+                                    const date = new Date(today);
+                                    date.setDate(date.getDate() - i);
+                                    last7Days.push(date.toISOString().split('T')[0]);
+                                  }
+                                  return dailyTasks.filter(t => last7Days.includes(t.date) && t.completed).length;
+                                })()} tasks
+                              </div>
+                              <span className="text-[11px] text-[#7857E8] font-medium mt-1 inline-block">
+                                Verified application data
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button
-                          onClick={() => handleEditPlan(plan)}
-                          className="p-1.5 rounded-lg text-[#64748B] hover:text-[#315EFB] hover:bg-blue-50 dark:hover:bg-blue-950/30 transition"
-                          aria-label="Edit plan"
-                          title="Edit plan"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePlan(plan.id)}
-                          className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                          aria-label="Delete plan"
-                          title="Delete plan"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
 
-                  {deadlinePlans.length === 0 && (
-                    <div className="bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                      <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                        <Calendar size={24} />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No active plans scheduled</h4>
-                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                        Keep your commitments on time by scheduling target dates and notification triggers.
-                      </p>
-                      <button
-                        onClick={() => setShowPlanForm(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
-                      >
-                        <Plus size={15} />
-                        <span>Add First Plan</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-
-
-            {activeTab === 'content' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Content Creation & Scripts</h2>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                      Draft, organize and execute video roadmaps, social posts, and creative outlines.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowContentForm(!showContentForm)}
-                    className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
-                  >
-                    <Plus size={16} />
-                    <span>{showContentForm ? 'Close Form' : 'New Content Item'}</span>
-                  </button>
-                </div>
-
-                {showContentForm && (
-                  <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      {editingContent ? 'Edit Content Item' : 'New Content Item'}
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="content-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
-                        <input
-                          id="content-title"
-                          type="text"
-                          value={contentForm.title}
-                          onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., Complete Guide to Modern Web Architecture"
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="content-type" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Content Type</label>
-                          <select
-                            id="content-type"
-                            value={contentForm.type}
-                            onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Content type"
+                      {/* Days remaining in year card */}
+                      <div className="bg-gradient-to-br from-[#315EFB] via-[#7857E8] to-[#EC4899] p-6 rounded-2xl text-white shadow-md flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold uppercase tracking-wider text-white/80">Year Momentum</span>
+                          <Calendar size={18} className="text-white/80" />
+                        </div>
+                        <div className="my-4">
+                          <div className="text-5xl font-extrabold tracking-tight tabular-nums">
+                            {getDaysRemainingInYear()}
+                          </div>
+                          <p className="text-sm font-medium text-white/90 mt-1">Days left in {new Date().getFullYear()}</p>
+                        </div>
+                        <div className="pt-3 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
+                          <span>Make every single day matter</span>
+                          <button
+                            onClick={() => setActiveTab('planner')}
+                            className="underline font-semibold hover:text-white"
                           >
-                            <option value="youtube">YouTube Video</option>
-                            <option value="instagram">Instagram Reel / Post</option>
-                            <option value="script">Written Script</option>
-                            <option value="roadmap">Strategic Roadmap</option>
-                          </select>
+                            View Planner →
+                          </button>
                         </div>
-                        <div>
-                          <label htmlFor="content-status" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Status</label>
-                          <select
-                            id="content-status"
-                            value={contentForm.status}
-                            onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Content status"
-                          >
-                            <option value="draft">Draft</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="published">Published</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="content-script" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Script / Content Outline</label>
-                        <textarea
-                          id="content-script"
-                          value={contentForm.script}
-                          onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={6}
-                          placeholder="Write your outline, talking points, key steps or full script..."
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="content-target-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Completion Date</label>
-                          <input
-                            id="content-target-date"
-                            type="date"
-                            value={contentForm.targetDate}
-                            onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Target date"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="content-publish-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Publish Date</label>
-                          <input
-                            id="content-publish-date"
-                            type="date"
-                            value={contentForm.publishDate}
-                            onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
-                            aria-label="Publish date"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="content-tags" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Tags (comma separated)</label>
-                        <input
-                          id="content-tags"
-                          type="text"
-                          value={contentForm.tags}
-                          onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., productivity, tutorial, react"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="content-notes" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Production Notes</label>
-                        <textarea
-                          id="content-notes"
-                          value={contentForm.notes}
-                          onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={2}
-                          placeholder="Extra notes or gear checklist..."
-                        />
-                      </div>
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          onClick={editingContent ? handleUpdateContent : handleAddContent}
-                          className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
-                        >
-                          <Save size={16} />
-                          <span>{editingContent ? 'Update Item' : 'Save Content'}</span>
-                        </button>
-                        <button
-                          onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }}
-                          className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
-                        >
-                          Cancel
-                        </button>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {contents.map(content => {
-                    const typeIcons = {
-                      youtube: Video,
-                      instagram: Image,
-                      script: FileText,
-                      roadmap: Play
-                    };
-                    const IconComponent = typeIcons[content.type] || FileText;
-                    return (
-                      <div
-                        key={content.id}
-                        className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <div className="w-8 h-8 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F] flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <IconComponent className={content.type === 'youtube' ? 'text-red-500' : content.type === 'instagram' ? 'text-[#EC4899]' : 'text-[#315EFB]'} size={16} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
-                                  {content.title}
-                                </h3>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                                  <span className="capitalize">{content.type}</span>
-                                  {content.targetDate && (
-                                    <>
-                                      <span>•</span>
-                                      <span>Target: {content.targetDate}</span>
-                                    </>
+                    {/* C. Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* 1. Tasks Completed Today */}
+                      <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/40 transition group">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
+                            Tasks Completed
+                          </span>
+                          <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] flex items-center justify-center">
+                            <CheckCircle size={18} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
+                          {getTodayCompletionStats().completed}
+                        </div>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
+                          {getTodayCompletionStats().total > 0
+                            ? `Out of ${getTodayCompletionStats().total} scheduled for today`
+                            : 'No scheduled tasks today'}
+                        </p>
+                      </div>
+
+                      {/* 2. Active Goals */}
+                      <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#7857E8]/40 transition group">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
+                            Active Goals
+                          </span>
+                          <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] flex items-center justify-center">
+                            <Target size={18} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
+                          {stats.activeGoals}
+                        </div>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
+                          {stats.completedGoals} accomplished goals so far
+                        </p>
+                      </div>
+
+                      {/* 3. Skills Tracked */}
+                      <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#EC4899]/40 transition group">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
+                            Track Sheet Topics
+                          </span>
+                          <div className="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#EC4899] flex items-center justify-center">
+                            <BookOpen size={18} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-bold text-[#17233C] dark:text-[#F8FAFC] tracking-tight">
+                          {skillTopics.length > 0 ? skillTopics.length : stats.totalSkills}
+                        </div>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
+                          {skillTopics.length > 0
+                            ? `${skillTopics.filter(t => t.status === 'Completed').length} topics mastered`
+                            : `${stats.totalHours.toFixed(1)} verified hours`}
+                        </p>
+                      </div>
+
+                      {/* 4. Current Streak */}
+                      <div className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#F97316]/40 transition group">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
+                            Current Streak
+                          </span>
+                          <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center">
+                            <Flame size={18} fill="currentColor" />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-bold text-[#F97316] tracking-tight">
+                          {streak.currentStreak} <span className="text-base font-normal text-[#64748B]">days</span>
+                        </div>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1.5">
+                          {streak.longestStreak > 0 ? `Best record: ${streak.longestStreak} days` : 'Begin your journey today'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* D. Today's Focus Section */}
+                    <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#315EFB]" />
+                          <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC]">
+                            Today's Focus
+                          </h3>
+                          <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
+                            ({formatDateDDMMYYYY(currentDate)})
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => setActiveTab('schedule')}
+                          className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
+                        >
+                          Manage Schedule →
+                        </button>
+                      </div>
+
+                      <div className="divide-y divide-[#E2E8F0] dark:divide-[#22324F]">
+                        {getTodayTasks().length > 0 ? (
+                          getTodayTasks().map(task => (
+                            <div
+                              key={task.id}
+                              className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4 transition hover:bg-[#F8FAFC]/60 dark:hover:bg-[#1E293B]/40 px-2 rounded-xl"
+                            >
+                              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleTask(task.id)}
+                                  className={`w-6 h-6 rounded-lg flex items-center justify-center transition border ${task.completed
+                                    ? 'bg-[#16A34A] border-[#16A34A] text-white shadow-xs'
+                                    : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
+                                    }`}
+                                  aria-label={task.completed ? 'Mark task incomplete' : 'Mark task complete'}
+                                >
+                                  <Check size={14} className={task.completed ? 'stroke-[3]' : 'opacity-0'} />
+                                </button>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span
+                                      className={`text-sm font-medium truncate ${task.completed
+                                        ? 'line-through text-[#94A3B8] dark:text-[#64748B]'
+                                        : 'text-[#17233C] dark:text-[#F8FAFC]'
+                                        }`}
+                                    >
+                                      {task.title}
+                                    </span>
+                                    <span
+                                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${task.priority === 'high'
+                                        ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/60'
+                                        : task.priority === 'medium'
+                                          ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/60'
+                                          : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/60'
+                                        }`}
+                                    >
+                                      {task.priority}
+                                    </span>
+                                    {task.category && (
+                                      <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8] px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B]">
+                                        {task.category}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {task.description && (
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5 truncate">
+                                      {task.description}
+                                    </p>
                                   )}
                                 </div>
                               </div>
+                              <div className="text-xs font-mono font-medium text-[#64748B] dark:text-[#94A3B8] flex-shrink-0">
+                                {formatTime12Hour(task.time)}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                              <button
-                                onClick={() => handleEditContent(content)}
-                                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
-                                aria-label="Edit content"
-                              >
-                                <Edit2 size={15} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteContent(content.id)}
-                                className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                                aria-label="Delete content"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                          ))
+                        ) : (
+                          /* Meaningful Empty State */
+                          <div className="py-12 text-center">
+                            <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                              <ListTodo size={24} />
                             </div>
-                          </div>
-
-                          {content.script && (
-                            <div className="mt-3 p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60 text-xs text-[#17233C] dark:text-[#F8FAFC] max-h-32 overflow-y-auto whitespace-pre-wrap">
-                              {content.script}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F] text-xs">
-                          <div className="flex flex-wrap gap-1">
-                            {content.tags.slice(0, 3).map((tag, idx) => (
-                              <span key={idx} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[11px] text-[#64748B] dark:text-[#94A3B8]">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
-                            {content.status}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {contents.length === 0 && (
-                    <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                      <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                        <Video size={24} />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No content projects yet</h4>
-                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                        Create scripts, plan video roadmaps, or draft social media posts to grow your audience.
-                      </p>
-                      <button
-                        onClick={() => setShowContentForm(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
-                      >
-                        <Plus size={15} />
-                        <span>Start Content Item</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'schedule' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Daily Schedule & Routines</h2>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                      Design recurring weekly habits, morning rituals, and focused work blocks.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowScheduleForm(!showScheduleForm)}
-                    className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
-                  >
-                    <Plus size={16} />
-                    <span>{showScheduleForm ? 'Close Form' : 'Add Routine Task'}</span>
-                  </button>
-                </div>
-
-                {showScheduleForm && (
-                  <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      {editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Task Title</label>
-                        <input
-                          type="text"
-                          value={scheduleForm.title}
-                          onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., Morning Deep Work Session"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
-                        <textarea
-                          value={scheduleForm.description}
-                          onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={2}
-                          placeholder="What will you focus on during this block?"
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Schedule Time</label>
-                          <div className="flex items-center gap-2">
-                            <select
-                              value={parseTime24To12(scheduleForm.time).hour}
-                              onChange={(e) => {
-                                const newHour = parseInt(e.target.value, 10);
-                                const { minute, period } = parseTime24To12(scheduleForm.time);
-                                setScheduleForm({ ...scheduleForm, time: convert12To24(newHour, minute, period) });
-                              }}
-                              className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                            >
-                              {Array.from({ length: 12 }, (_, i) => i + 1).map(h => (
-                                <option key={h} value={h}>{h}</option>
-                              ))}
-                            </select>
-                            <span className="text-[#64748B] dark:text-[#94A3B8] font-bold">:</span>
-                            <select
-                              value={parseTime24To12(scheduleForm.time).minute}
-                              onChange={(e) => {
-                                const { hour, period } = parseTime24To12(scheduleForm.time);
-                                setScheduleForm({ ...scheduleForm, time: convert12To24(hour, e.target.value, period) });
-                              }}
-                              className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                            >
-                              {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
-                                <option key={m} value={m}>{m}</option>
-                              ))}
-                            </select>
-                            <select
-                              value={parseTime24To12(scheduleForm.time).period}
-                              onChange={(e) => {
-                                const { hour, minute } = parseTime24To12(scheduleForm.time);
-                                setScheduleForm({ ...scheduleForm, time: convert12To24(hour, minute, e.target.value as 'AM' | 'PM') });
-                              }}
-                              className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                            >
-                              <option value="AM">AM</option>
-                              <option value="PM">PM</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Duration (minutes)</label>
-                          <input
-                            type="number"
-                            value={scheduleForm.estimatedDuration}
-                            onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })}
-                            className="w-full px-3.5 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                            min="1"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Priority</label>
-                          <select
-                            value={scheduleForm.priority}
-                            onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                          >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
-                          <input
-                            type="text"
-                            value={scheduleForm.category}
-                            onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm outline-none"
-                            placeholder="e.g., Deep Work, Health, Reading"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-2">Repeats On Days</label>
-                        <div className="flex flex-wrap gap-2">
-                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                            <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No tasks scheduled for today</h4>
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                              Build your regular schedule routines or add quick daily tasks to keep your growth on track.
+                            </p>
                             <button
-                              key={index}
-                              type="button"
-                              onClick={() => {
-                                const days = scheduleForm.dayOfWeek.includes(index)
-                                  ? scheduleForm.dayOfWeek.filter(d => d !== index)
-                                  : [...scheduleForm.dayOfWeek, index];
-                                setScheduleForm({ ...scheduleForm, dayOfWeek: days });
-                              }}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition ${scheduleForm.dayOfWeek.includes(index)
-                                  ? 'bg-[#315EFB] text-white border-[#315EFB] shadow-xs'
-                                  : 'bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] border-[#E2E8F0] dark:border-[#22324F] hover:border-[#315EFB]/40'
-                                }`}
+                              onClick={() => setActiveTab('schedule')}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
                             >
-                              {day}
+                              <Plus size={15} />
+                              <span>Add Task to Daily Schedule</span>
                             </button>
-                          ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* E. Additional Dashboard Content: Active Goals & Upcoming Deadlines */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Active Goals Preview */}
+                      <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
+                              <Target size={18} className="text-[#7857E8]" />
+                              <span>Active Growth Goals</span>
+                            </h3>
+                            <button
+                              onClick={() => setActiveTab('goals')}
+                              className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
+                            >
+                              All Goals ({goals.length}) →
+                            </button>
+                          </div>
+
+                          <div className="space-y-3">
+                            {goals.filter(g => g.status === 'in-progress').slice(0, 3).map(goal => (
+                              <div
+                                key={goal.id}
+                                className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/70 flex items-center justify-between gap-3"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC] truncate block">
+                                    {goal.title}
+                                  </span>
+                                  <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                    <span className="capitalize">{goal.category}</span>
+                                    {goal.targetDate && (
+                                      <>
+                                        <span>•</span>
+                                        <span>Target: {goal.targetDate}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] border border-purple-200 dark:border-purple-900/50 flex-shrink-0">
+                                  In Progress
+                                </span>
+                              </div>
+                            ))}
+
+                            {goals.filter(g => g.status === 'in-progress').length === 0 && (
+                              <div className="text-center py-6 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                <p>No active goals currently in progress.</p>
+                                <button
+                                  onClick={() => setActiveTab('goals')}
+                                  className="mt-2 text-[#315EFB] font-semibold hover:underline"
+                                >
+                                  + Set your first career or life goal
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule}
-                          className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
-                        >
-                          <Save size={16} />
-                          <span>{editingSchedule ? 'Update Task' : 'Save Task'}</span>
-                        </button>
-                        <button
-                          onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }}
-                          className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
-                        >
-                          Cancel
-                        </button>
+
+                      {/* Upcoming Deadlines from Planner */}
+                      <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
+                              <Calendar size={18} className="text-[#F97316]" />
+                              <span>Upcoming Deadlines</span>
+                            </h3>
+                            <button
+                              onClick={() => setActiveTab('planner')}
+                              className="text-xs font-semibold text-[#315EFB] dark:text-[#7857E8] hover:underline"
+                            >
+                              All Plans ({deadlinePlans.length}) →
+                            </button>
+                          </div>
+
+                          <div className="space-y-3">
+                            {deadlinePlans
+                              .filter(p => p.status === 'pending')
+                              .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+                              .slice(0, 3)
+                              .map(plan => (
+                                <div
+                                  key={plan.id}
+                                  className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/70 flex items-center justify-between gap-3"
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <span className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC] truncate block">
+                                      {plan.title}
+                                    </span>
+                                    <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                      <Clock size={12} className="text-[#F97316]" />
+                                      <span>{new Date(plan.deadline).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                                    </div>
+                                  </div>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 ${plan.priority === 'high'
+                                      ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/50'
+                                      : plan.priority === 'medium'
+                                        ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/50'
+                                        : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50'
+                                      }`}
+                                  >
+                                    {plan.priority}
+                                  </span>
+                                </div>
+                              ))}
+
+                            {deadlinePlans.filter(p => p.status === 'pending').length === 0 && (
+                              <div className="text-center py-6 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                <p>All deadlines completed! Great work.</p>
+                                <button
+                                  onClick={() => setActiveTab('planner')}
+                                  className="mt-2 text-[#315EFB] font-semibold hover:underline"
+                                >
+                                  + Schedule a new deadline
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {scheduleTasks.map(schedule => (
-                    <div
-                      key={schedule.id}
-                      className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
-                    >
+                {activeTab === 'goals' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
                       <div>
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
-                                {schedule.title}
-                              </h3>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${schedule.priority === 'high'
+                        <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Goals & Milestones</h2>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                          Set clear objectives, track achievement status, and turn ambitions into measurable realities.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowGoalForm(!showGoalForm)}
+                        className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
+                      >
+                        <Plus size={16} />
+                        <span>{showGoalForm ? 'Close Form' : 'Add New Goal'}</span>
+                      </button>
+                    </div>
+
+                    {showGoalForm && (
+                      <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                          {editingGoal ? 'Edit Goal' : 'Create New Goal'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="goal-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
+                            <input
+                              id="goal-title"
+                              type="text"
+                              value={goalForm.title}
+                              onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., Master Full-Stack Architecture"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="goal-description" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
+                            <textarea
+                              id="goal-description"
+                              value={goalForm.description}
+                              onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={3}
+                              placeholder="Detail the exact outcomes you want to achieve"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="goal-category" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
+                              <select
+                                id="goal-category"
+                                value={goalForm.category}
+                                onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Goal category"
+                              >
+                                <option value="career">Career</option>
+                                <option value="learning">Learning</option>
+                                <option value="project">Project</option>
+                                <option value="networking">Networking</option>
+                                <option value="health">Health & Wellness</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor="goal-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Date</label>
+                              <input
+                                id="goal-date"
+                                type="date"
+                                value={goalForm.targetDate}
+                                onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Target date"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 pt-2">
+                            <button
+                              onClick={editingGoal ? handleUpdateGoal : handleAddGoal}
+                              className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                            >
+                              <Save size={16} />
+                              <span>{editingGoal ? 'Update Goal' : 'Save Goal'}</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowGoalForm(false); setEditingGoal(null); setGoalForm({ title: '', description: '', category: 'career', targetDate: '', status: 'in-progress' }); }}
+                              className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {goals.map(goal => (
+                        <div
+                          key={goal.id}
+                          className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="flex items-start gap-3 flex-1 min-w-0">
+                                <button
+                                  onClick={() => toggleGoalStatus(goal.id)}
+                                  className={`w-6 h-6 rounded-lg flex items-center justify-center transition border mt-0.5 flex-shrink-0 ${goal.status === 'completed'
+                                    ? 'bg-[#16A34A] border-[#16A34A] text-white'
+                                    : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
+                                    }`}
+                                  aria-label={goal.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}
+                                >
+                                  <Check size={14} className={goal.status === 'completed' ? 'stroke-[3]' : 'opacity-0'} />
+                                </button>
+                                <div className="min-w-0 flex-1">
+                                  <h3 className={`text-base font-bold truncate ${goal.status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>
+                                    {goal.title}
+                                  </h3>
+                                  {goal.description && (
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1 line-clamp-2">
+                                      {goal.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  onClick={() => handleEditGoal(goal)}
+                                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
+                                  aria-label="Edit goal"
+                                >
+                                  <Edit2 size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteGoal(goal.id)}
+                                  className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                                  aria-label="Delete goal"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F] text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] capitalize font-medium">
+                                {goal.category}
+                              </span>
+                              {goal.targetDate && (
+                                <span className="text-[#64748B] dark:text-[#94A3B8]">
+                                  Due: {goal.targetDate}
+                                </span>
+                              )}
+                            </div>
+                            <span
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${goal.status === 'completed'
+                                ? 'bg-green-50 dark:bg-green-950/40 text-[#16A34A] border border-green-200 dark:border-green-900/50'
+                                : 'bg-purple-50 dark:bg-purple-950/40 text-[#7857E8] border border-purple-200 dark:border-purple-900/50'
+                                }`}
+                            >
+                              {goal.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                      {goals.length === 0 && (
+                        <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                            <Target size={24} />
+                          </div>
+                          <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No goals set yet</h4>
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                            Define career landmarks, fitness milestones, or skill learning checkpoints to focus your efforts.
+                          </p>
+                          <button
+                            onClick={() => setShowGoalForm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                          >
+                            <Plus size={15} />
+                            <span>Set Your First Goal</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'skills' && (
+                  <SkillsTracker
+                    topics={skillTopics}
+                    onTopicsChange={async updatedTopics => {
+                      await saveData('skillTopics', updatedTopics);
+                      setSkillTopics(updatedTopics);
+                    }}
+                  />
+                )}
+
+                {activeTab === 'profile' && user && (
+                  <ProfileDashboard user={user} />
+                )}
+
+                {activeTab === 'planner' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Deadline Planner</h2>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                          Track critical project deadlines, setup reminders, and ensure key targets never slip through.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (showPlanForm) {
+                            setShowPlanForm(false);
+                            setEditingPlan(null);
+                            setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+                          } else {
+                            setEditingPlan(null);
+                            setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' });
+                            setShowPlanForm(true);
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
+                      >
+                        <Plus size={16} />
+                        <span>{showPlanForm ? 'Close Form' : 'Add New Plan'}</span>
+                      </button>
+                    </div>
+
+                    {showPlanForm && (
+                      <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                          {editingPlan ? 'Edit Deadline Plan' : 'New Deadline Plan'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="plan-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
+                            <input
+                              id="plan-title"
+                              type="text"
+                              value={planForm.title}
+                              onChange={(e) => setPlanForm({ ...planForm, title: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., Deliver Quarterly Portfolio Update"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="plan-desc" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
+                            <textarea
+                              id="plan-desc"
+                              value={planForm.description}
+                              onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={2}
+                              placeholder="Context or notes regarding this milestone"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <label htmlFor="plan-deadline" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Deadline</label>
+                              <input
+                                id="plan-deadline"
+                                type="datetime-local"
+                                value={planForm.deadline}
+                                onChange={(e) => setPlanForm({ ...planForm, deadline: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="plan-priority" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Priority</label>
+                              <select
+                                id="plan-priority"
+                                value={planForm.priority}
+                                onChange={(e) => setPlanForm({ ...planForm, priority: e.target.value as 'low' | 'medium' | 'high' })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                              >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor="plan-reminder" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Notification Reminder</label>
+                              <select
+                                id="plan-reminder"
+                                value={planForm.reminderOffset}
+                                onChange={(e) => setPlanForm({ ...planForm, reminderOffset: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                              >
+                                <option value="15">15 minutes before</option>
+                                <option value="60">1 hour before</option>
+                                <option value="1440">1 day before</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 pt-2">
+                            <button
+                              onClick={editingPlan ? handleUpdatePlan : handleAddPlan}
+                              className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                            >
+                              <Save size={16} />
+                              <span>{editingPlan ? 'Update Plan' : 'Save Plan'}</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowPlanForm(false); setEditingPlan(null); setPlanForm({ title: '', description: '', deadline: '', priority: 'medium', reminderOffset: '15' }); }}
+                              className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      {(deadlinePlans || []).sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()).map(plan => (
+                        <div
+                          key={plan.id}
+                          className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex items-start justify-between gap-4"
+                        >
+                          <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                            <button
+                              onClick={() => handleTogglePlan(plan.id)}
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center transition border mt-0.5 flex-shrink-0 ${plan.status === 'completed'
+                                ? 'bg-[#16A34A] border-[#16A34A] text-white'
+                                : 'border-[#CBD5E1] dark:border-[#475569] text-transparent hover:border-[#315EFB]'
+                                }`}
+                              aria-label={plan.status === 'completed' ? 'Mark plan pending' : 'Mark plan completed'}
+                            >
+                              <Check size={14} className={plan.status === 'completed' ? 'stroke-[3]' : 'opacity-0'} />
+                            </button>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <h3 className={`text-base font-bold truncate ${plan.status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#17233C] dark:text-[#F8FAFC]'}`}>
+                                  {plan.title}
+                                </h3>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${plan.priority === 'high'
                                     ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/60'
-                                    : schedule.priority === 'medium'
+                                    : plan.priority === 'medium'
                                       ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/60'
                                       : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/60'
-                                  }`}
-                              >
-                                {schedule.priority}
-                              </span>
+                                    }`}
+                                >
+                                  {plan.priority}
+                                </span>
+                                {plan.status === 'overdue' && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                    Overdue
+                                  </span>
+                                )}
+                              </div>
+                              {plan.description && (
+                                <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mb-2">
+                                  {plan.description}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-3 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                <span className="flex items-center gap-1.5 font-medium">
+                                  <Clock size={13} className="text-[#F97316]" />
+                                  {new Date(plan.deadline).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                </span>
+                              </div>
                             </div>
-                            {schedule.description && (
-                              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mb-2">
-                                {schedule.description}
-                              </p>
-                            )}
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <button
-                              onClick={() => handleEditSchedule(schedule)}
-                              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
-                              aria-label="Edit schedule"
+                              onClick={() => handleEditPlan(plan)}
+                              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#315EFB] hover:bg-blue-50 dark:hover:bg-blue-950/30 transition"
+                              aria-label="Edit plan"
+                              title="Edit plan"
                             >
-                              <Edit2 size={15} />
+                              <Edit2 size={16} />
                             </button>
                             <button
-                              onClick={() => handleDeleteSchedule(schedule.id)}
+                              onClick={() => handleDeletePlan(plan.id)}
                               className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                              aria-label="Delete schedule"
+                              aria-label="Delete plan"
+                              title="Delete plan"
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {deadlinePlans.length === 0 && (
+                        <div className="bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                            <Calendar size={24} />
+                          </div>
+                          <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No active plans scheduled</h4>
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                            Keep your commitments on time by scheduling target dates and notification triggers.
+                          </p>
+                          <button
+                            onClick={() => setShowPlanForm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                          >
+                            <Plus size={15} />
+                            <span>Add First Plan</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+
+
+                {activeTab === 'content' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Content Creation & Scripts</h2>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                          Draft, organize and execute video roadmaps, social posts, and creative outlines.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowContentForm(!showContentForm)}
+                        className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
+                      >
+                        <Plus size={16} />
+                        <span>{showContentForm ? 'Close Form' : 'New Content Item'}</span>
+                      </button>
+                    </div>
+
+                    {showContentForm && (
+                      <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                          {editingContent ? 'Edit Content Item' : 'New Content Item'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="content-title" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Title</label>
+                            <input
+                              id="content-title"
+                              type="text"
+                              value={contentForm.title}
+                              onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., Complete Guide to Modern Web Architecture"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="content-type" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Content Type</label>
+                              <select
+                                id="content-type"
+                                value={contentForm.type}
+                                onChange={(e) => setContentForm({ ...contentForm, type: e.target.value as 'youtube' | 'instagram' | 'script' | 'roadmap', platform: e.target.value === 'youtube' ? 'youtube' : e.target.value === 'instagram' ? 'instagram' : 'general' })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Content type"
+                              >
+                                <option value="youtube">YouTube Video</option>
+                                <option value="instagram">Instagram Reel / Post</option>
+                                <option value="script">Written Script</option>
+                                <option value="roadmap">Strategic Roadmap</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor="content-status" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Status</label>
+                              <select
+                                id="content-status"
+                                value={contentForm.status}
+                                onChange={(e) => setContentForm({ ...contentForm, status: e.target.value as 'draft' | 'in-progress' | 'completed' | 'published' })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Content status"
+                              >
+                                <option value="draft">Draft</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="published">Published</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="content-script" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Script / Content Outline</label>
+                            <textarea
+                              id="content-script"
+                              value={contentForm.script}
+                              onChange={(e) => setContentForm({ ...contentForm, script: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={6}
+                              placeholder="Write your outline, talking points, key steps or full script..."
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="content-target-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Target Completion Date</label>
+                              <input
+                                id="content-target-date"
+                                type="date"
+                                value={contentForm.targetDate}
+                                onChange={(e) => setContentForm({ ...contentForm, targetDate: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Target date"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="content-publish-date" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Publish Date</label>
+                              <input
+                                id="content-publish-date"
+                                type="date"
+                                value={contentForm.publishDate}
+                                onChange={(e) => setContentForm({ ...contentForm, publishDate: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm transition outline-none"
+                                aria-label="Publish date"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="content-tags" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Tags (comma separated)</label>
+                            <input
+                              id="content-tags"
+                              type="text"
+                              value={contentForm.tags}
+                              onChange={(e) => setContentForm({ ...contentForm, tags: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., productivity, tutorial, react"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="content-notes" className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Production Notes</label>
+                            <textarea
+                              id="content-notes"
+                              value={contentForm.notes}
+                              onChange={(e) => setContentForm({ ...contentForm, notes: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={2}
+                              placeholder="Extra notes or gear checklist..."
+                            />
+                          </div>
+                          <div className="flex items-center gap-3 pt-2">
+                            <button
+                              onClick={editingContent ? handleUpdateContent : handleAddContent}
+                              className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                            >
+                              <Save size={16} />
+                              <span>{editingContent ? 'Update Item' : 'Save Content'}</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowContentForm(false); setEditingContent(null); setContentForm({ title: '', type: 'youtube', platform: 'youtube', script: '', status: 'draft', publishDate: '', targetDate: '', tags: '', notes: '' }); }}
+                              className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                            >
+                              Cancel
                             </button>
                           </div>
                         </div>
                       </div>
+                    )}
 
-                      <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#22324F] flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
-                          <span className="font-semibold text-[#17233C] dark:text-[#F8FAFC]">
-                            🕐 {formatTime12Hour(schedule.time)} ({schedule.estimatedDuration} min)
-                          </span>
-                          <span className="capitalize">{schedule.category}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                            schedule.dayOfWeek.includes(index) && (
-                              <span key={index} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[10px] font-medium text-[#315EFB]">
-                                {day}
-                              </span>
-                            )
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {scheduleTasks.length === 0 && (
-                    <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                      <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                        <ListTodo size={24} />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No schedule routines defined</h4>
-                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                        Create scheduled routines that repeat on chosen days of the week to populate your daily focus automatically.
-                      </p>
-                      <button
-                        onClick={() => setShowScheduleForm(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
-                      >
-                        <Plus size={15} />
-                        <span>Add First Scheduled Task</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'analysis' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Insights & Performance Analysis</h2>
-                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                    Track completion accuracy, weekly adherence trends, and growth metrics.
-                  </p>
-                </div>
-
-                {/* Perfection Meter Card */}
-                <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
-                      <BarChart3 size={18} className="text-[#315EFB]" />
-                      <span>Perfection & Consistency Index</span>
-                    </h3>
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
-                      Rolling 7-Day Window
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-center my-6">
-                    <div className="relative w-44 h-44">
-                      <svg className="w-44 h-44 transform -rotate-90">
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="72"
-                          stroke="currentColor"
-                          strokeWidth="12"
-                          fill="transparent"
-                          className="text-[#E2E8F0] dark:text-[#1E293B]"
-                        />
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="72"
-                          stroke="url(#analysisGradient)"
-                          strokeWidth="12"
-                          strokeLinecap="round"
-                          fill="transparent"
-                          strokeDasharray={`${(calculatePerfection() / 100) * 452.4} 452.4`}
-                          className="transition-all duration-700 ease-out"
-                        />
-                        <defs>
-                          <linearGradient id="analysisGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#315EFB" />
-                            <stop offset="60%" stopColor="#7857E8" />
-                            <stop offset="100%" stopColor="#EC4899" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <div className="text-3xl font-extrabold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
-                          {calculatePerfection()}%
-                        </div>
-                        <div className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                          Adherence
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#E2E8F0] dark:border-[#22324F]">
-                    <div className="p-4 rounded-xl bg-green-50/60 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 text-center">
-                      <div className="text-2xl font-bold text-[#16A34A]">
-                        {dailyTasks.filter(t => t.completed).length}
-                      </div>
-                      <div className="text-xs font-medium text-[#16A34A] mt-1">Completed Tasks</div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-center">
-                      <div className="text-2xl font-bold text-[#DC2626]">
-                        {dailyTasks.filter(t => t.missed).length}
-                      </div>
-                      <div className="text-xs font-medium text-[#DC2626] mt-1">Missed Tasks</div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-center">
-                      <div className="text-2xl font-bold text-[#315EFB]">
-                        {dailyTasks.length}
-                      </div>
-                      <div className="text-xs font-medium text-[#315EFB] mt-1">Total Tracked</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 7-Day Performance Breakdown */}
-                <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                    Past 7 Days History
-                  </h3>
-                  <div className="space-y-2.5">
-                    {(() => {
-                      const last7Days: string[] = [];
-                      for (let i = 6; i >= 0; i--) {
-                        const date = new Date();
-                        date.setDate(date.getDate() - i);
-                        last7Days.push(date.toISOString().split('T')[0]);
-                      }
-                      return last7Days.map(date => {
-                        const dayTasks = dailyTasks.filter(t => t.date === date);
-                        const completed = dayTasks.filter(t => t.completed).length;
-                        const total = dayTasks.length;
-                        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-                        const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-                        const dayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {contents.map(content => {
+                        const typeIcons = {
+                          youtube: Video,
+                          instagram: Image,
+                          script: FileText,
+                          roadmap: Play
+                        };
+                        const IconComponent = typeIcons[content.type] || FileText;
                         return (
                           <div
-                            key={date}
-                            className="flex items-center justify-between p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60"
+                            key={content.id}
+                            className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
                           >
-                            <div className="flex items-center gap-3 w-28">
-                              <span className="text-xs font-bold text-[#17233C] dark:text-[#F8FAFC]">{dayName}</span>
-                              <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{dayDate}</span>
-                            </div>
-                            <div className="flex items-center gap-3 flex-1 max-w-sm">
-                              <div className="flex-1 bg-[#E2E8F0] dark:bg-[#22324F] h-2 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-2 rounded-full transition-all duration-300 ${percentage === 100 ? 'bg-[#16A34A]' : percentage >= 50 ? 'bg-[#F97316]' : 'bg-[#315EFB]'
-                                    }`}
-                                  style={{ width: `${percentage}%` }}
-                                />
+                            <div>
+                              <div className="flex items-start justify-between gap-3 mb-2">
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                  <div className="w-8 h-8 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <IconComponent className={content.type === 'youtube' ? 'text-red-500' : content.type === 'instagram' ? 'text-[#EC4899]' : 'text-[#315EFB]'} size={16} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
+                                      {content.title}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                      <span className="capitalize">{content.type}</span>
+                                      {content.targetDate && (
+                                        <>
+                                          <span>•</span>
+                                          <span>Target: {content.targetDate}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                  <button
+                                    onClick={() => handleEditContent(content)}
+                                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
+                                    aria-label="Edit content"
+                                  >
+                                    <Edit2 size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteContent(content.id)}
+                                    className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                                    aria-label="Delete content"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </div>
                               </div>
-                              <span className="text-xs font-mono font-medium text-[#17233C] dark:text-[#F8FAFC] w-14 text-right">
-                                {completed}/{total}
+
+                              {content.script && (
+                                <div className="mt-3 p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60 text-xs text-[#17233C] dark:text-[#F8FAFC] max-h-32 overflow-y-auto whitespace-pre-wrap">
+                                  {content.script}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F] text-xs">
+                              <div className="flex flex-wrap gap-1">
+                                {content.tags.slice(0, 3).map((tag, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
+                                {content.status}
                               </span>
                             </div>
                           </div>
                         );
-                      });
-                    })()}
-                  </div>
-                </div>
-              </div>
-            )}
+                      })}
 
-            {activeTab === 'notes' && (
-              <div className="space-y-6 max-w-7xl mx-auto pb-10">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Manual Notes & Ideas</h2>
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
-                      Quickly jot reflections, meeting notes, project plans, and insights.
-                    </p>
+                      {contents.length === 0 && (
+                        <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                            <Video size={24} />
+                          </div>
+                          <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No content projects yet</h4>
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                            Create scripts, plan video roadmaps, or draft social media posts to grow your audience.
+                          </p>
+                          <button
+                            onClick={() => setShowContentForm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                          >
+                            <Plus size={15} />
+                            <span>Start Content Item</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setShowNoteForm(!showNoteForm)}
-                    className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
-                  >
-                    <Plus size={16} />
-                    <span>{showNoteForm ? 'Close Form' : 'New Note'}</span>
-                  </button>
-                </div>
+                )}
 
-                {showNoteForm && (
-                  <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                    <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
-                      {editingNote ? 'Edit Note' : 'Create New Note'}
-                    </h3>
-                    <div className="space-y-4">
+                {activeTab === 'schedule' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
                       <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Note Title</label>
-                        <input
-                          type="text"
-                          value={noteForm.title}
-                          onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          placeholder="e.g., Weekly Retrospective"
-                        />
+                        <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Daily Schedule & Routines</h2>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                          Design recurring weekly habits, morning rituals, and focused work blocks.
+                        </p>
                       </div>
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Content</label>
-                        <textarea
-                          value={noteForm.content}
-                          onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm transition outline-none"
-                          rows={6}
-                          placeholder="Write your thoughts or action points..."
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
-                          <input
-                            type="text"
-                            value={noteForm.category}
-                            onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
-                            placeholder="e.g., Ideas, Architecture, Personal"
-                          />
+                      <button
+                        onClick={() => setShowScheduleForm(!showScheduleForm)}
+                        className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
+                      >
+                        <Plus size={16} />
+                        <span>{showScheduleForm ? 'Close Form' : 'Add Routine Task'}</span>
+                      </button>
+                    </div>
+
+                    {showScheduleForm && (
+                      <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                          {editingSchedule ? 'Edit Schedule Task' : 'New Schedule Task'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Task Title</label>
+                            <input
+                              type="text"
+                              value={scheduleForm.title}
+                              onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., Morning Deep Work Session"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Description</label>
+                            <textarea
+                              value={scheduleForm.description}
+                              onChange={(e) => setScheduleForm({ ...scheduleForm, description: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={2}
+                              placeholder="What will you focus on during this block?"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Schedule Time</label>
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={parseTime24To12(scheduleForm.time).hour}
+                                  onChange={(e) => {
+                                    const newHour = parseInt(e.target.value, 10);
+                                    const { minute, period } = parseTime24To12(scheduleForm.time);
+                                    setScheduleForm({ ...scheduleForm, time: convert12To24(newHour, minute, period) });
+                                  }}
+                                  className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => i + 1).map(h => (
+                                    <option key={h} value={h}>{h}</option>
+                                  ))}
+                                </select>
+                                <span className="text-[#64748B] dark:text-[#94A3B8] font-bold">:</span>
+                                <select
+                                  value={parseTime24To12(scheduleForm.time).minute}
+                                  onChange={(e) => {
+                                    const { hour, period } = parseTime24To12(scheduleForm.time);
+                                    setScheduleForm({ ...scheduleForm, time: convert12To24(hour, e.target.value, period) });
+                                  }}
+                                  className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                                >
+                                  {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                  ))}
+                                </select>
+                                <select
+                                  value={parseTime24To12(scheduleForm.time).period}
+                                  onChange={(e) => {
+                                    const { hour, minute } = parseTime24To12(scheduleForm.time);
+                                    setScheduleForm({ ...scheduleForm, time: convert12To24(hour, minute, e.target.value as 'AM' | 'PM') });
+                                  }}
+                                  className="px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                                >
+                                  <option value="AM">AM</option>
+                                  <option value="PM">PM</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Duration (minutes)</label>
+                              <input
+                                type="number"
+                                value={scheduleForm.estimatedDuration}
+                                onChange={(e) => setScheduleForm({ ...scheduleForm, estimatedDuration: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                                min="1"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Priority</label>
+                              <select
+                                value={scheduleForm.priority}
+                                onChange={(e) => setScheduleForm({ ...scheduleForm, priority: e.target.value as 'low' | 'medium' | 'high' })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                              >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
+                              <input
+                                type="text"
+                                value={scheduleForm.category}
+                                onChange={(e) => setScheduleForm({ ...scheduleForm, category: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm outline-none"
+                                placeholder="e.g., Deep Work, Health, Reading"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-2">Repeats On Days</label>
+                            <div className="flex flex-wrap gap-2">
+                              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => {
+                                    const days = scheduleForm.dayOfWeek.includes(index)
+                                      ? scheduleForm.dayOfWeek.filter(d => d !== index)
+                                      : [...scheduleForm.dayOfWeek, index];
+                                    setScheduleForm({ ...scheduleForm, dayOfWeek: days });
+                                  }}
+                                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition ${scheduleForm.dayOfWeek.includes(index)
+                                    ? 'bg-[#315EFB] text-white border-[#315EFB] shadow-xs'
+                                    : 'bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] border-[#E2E8F0] dark:border-[#22324F] hover:border-[#315EFB]/40'
+                                    }`}
+                                >
+                                  {day}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 pt-2">
+                            <button
+                              onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule}
+                              className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                            >
+                              <Save size={16} />
+                              <span>{editingSchedule ? 'Update Task' : 'Save Task'}</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowScheduleForm(false); setEditingSchedule(null); setScheduleForm({ title: '', description: '', time: '', dayOfWeek: [], priority: 'medium', category: 'general', estimatedDuration: '30' }); }}
+                              className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Tags (comma separated)</label>
-                          <input
-                            type="text"
-                            value={noteForm.tags}
-                            onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm outline-none"
-                            placeholder="e.g., design, priorities"
-                          />
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {scheduleTasks.map(schedule => (
+                        <div
+                          key={schedule.id}
+                          className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                  <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
+                                    {schedule.title}
+                                  </h3>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${schedule.priority === 'high'
+                                      ? 'bg-red-50 dark:bg-red-950/40 text-[#DC2626] border border-red-200 dark:border-red-900/60'
+                                      : schedule.priority === 'medium'
+                                        ? 'bg-amber-50 dark:bg-amber-950/40 text-[#D97706] border border-amber-200 dark:border-amber-900/60'
+                                        : 'bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/60'
+                                      }`}
+                                  >
+                                    {schedule.priority}
+                                  </span>
+                                </div>
+                                {schedule.description && (
+                                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mb-2">
+                                    {schedule.description}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  onClick={() => handleEditSchedule(schedule)}
+                                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
+                                  aria-label="Edit schedule"
+                                >
+                                  <Edit2 size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteSchedule(schedule.id)}
+                                  className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                                  aria-label="Delete schedule"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#22324F] flex flex-col gap-2">
+                            <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
+                              <span className="font-semibold text-[#17233C] dark:text-[#F8FAFC]">
+                                🕐 {formatTime12Hour(schedule.time)} ({schedule.estimatedDuration} min)
+                              </span>
+                              <span className="capitalize">{schedule.category}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                                schedule.dayOfWeek.includes(index) && (
+                                  <span key={index} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[10px] font-medium text-[#315EFB]">
+                                    {day}
+                                  </span>
+                                )
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {scheduleTasks.length === 0 && (
+                        <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                            <ListTodo size={24} />
+                          </div>
+                          <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No schedule routines defined</h4>
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                            Create scheduled routines that repeat on chosen days of the week to populate your daily focus automatically.
+                          </p>
+                          <button
+                            onClick={() => setShowScheduleForm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                          >
+                            <Plus size={15} />
+                            <span>Add First Scheduled Task</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'analysis' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Insights & Performance Analysis</h2>
+                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                        Track completion accuracy, weekly adherence trends, and growth metrics.
+                      </p>
+                    </div>
+
+                    {/* Perfection Meter Card */}
+                    <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] flex items-center gap-2">
+                          <BarChart3 size={18} className="text-[#315EFB]" />
+                          <span>Perfection & Consistency Index</span>
+                        </h3>
+                        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#315EFB] border border-blue-200 dark:border-blue-900/50">
+                          Rolling 7-Day Window
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-center my-6">
+                        <div className="relative w-44 h-44">
+                          <svg className="w-44 h-44 transform -rotate-90">
+                            <circle
+                              cx="88"
+                              cy="88"
+                              r="72"
+                              stroke="currentColor"
+                              strokeWidth="12"
+                              fill="transparent"
+                              className="text-[#E2E8F0] dark:text-[#1E293B]"
+                            />
+                            <circle
+                              cx="88"
+                              cy="88"
+                              r="72"
+                              stroke="url(#analysisGradient)"
+                              strokeWidth="12"
+                              strokeLinecap="round"
+                              fill="transparent"
+                              strokeDasharray={`${(calculatePerfection() / 100) * 452.4} 452.4`}
+                              className="transition-all duration-700 ease-out"
+                            />
+                            <defs>
+                              <linearGradient id="analysisGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#315EFB" />
+                                <stop offset="60%" stopColor="#7857E8" />
+                                <stop offset="100%" stopColor="#EC4899" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <div className="text-3xl font-extrabold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">
+                              {calculatePerfection()}%
+                            </div>
+                            <div className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B] dark:text-[#94A3B8] mt-0.5">
+                              Adherence
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          onClick={editingNote ? handleUpdateNote : handleAddNote}
-                          className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
-                        >
-                          <Save size={16} />
-                          <span>{editingNote ? 'Update Note' : 'Save Note'}</span>
-                        </button>
-                        <button
-                          onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }}
-                          className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
-                        >
-                          Cancel
-                        </button>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#E2E8F0] dark:border-[#22324F]">
+                        <div className="p-4 rounded-xl bg-green-50/60 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 text-center">
+                          <div className="text-2xl font-bold text-[#16A34A]">
+                            {dailyTasks.filter(t => t.completed).length}
+                          </div>
+                          <div className="text-xs font-medium text-[#16A34A] mt-1">Completed Tasks</div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-center">
+                          <div className="text-2xl font-bold text-[#DC2626]">
+                            {dailyTasks.filter(t => t.missed).length}
+                          </div>
+                          <div className="text-xs font-medium text-[#DC2626] mt-1">Missed Tasks</div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-center">
+                          <div className="text-2xl font-bold text-[#315EFB]">
+                            {dailyTasks.length}
+                          </div>
+                          <div className="text-xs font-medium text-[#315EFB] mt-1">Total Tracked</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 7-Day Performance Breakdown */}
+                    <div className="bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                      <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                        Past 7 Days History
+                      </h3>
+                      <div className="space-y-2.5">
+                        {(() => {
+                          const last7Days: string[] = [];
+                          for (let i = 6; i >= 0; i--) {
+                            const date = new Date();
+                            date.setDate(date.getDate() - i);
+                            last7Days.push(date.toISOString().split('T')[0]);
+                          }
+                          return last7Days.map(date => {
+                            const dayTasks = dailyTasks.filter(t => t.date === date);
+                            const completed = dayTasks.filter(t => t.completed).length;
+                            const total = dayTasks.length;
+                            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                            const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+                            const dayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                            return (
+                              <div
+                                key={date}
+                                className="flex items-center justify-between p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#22324F]/60"
+                              >
+                                <div className="flex items-center gap-3 w-28">
+                                  <span className="text-xs font-bold text-[#17233C] dark:text-[#F8FAFC]">{dayName}</span>
+                                  <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{dayDate}</span>
+                                </div>
+                                <div className="flex items-center gap-3 flex-1 max-w-sm">
+                                  <div className="flex-1 bg-[#E2E8F0] dark:bg-[#22324F] h-2 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-2 rounded-full transition-all duration-300 ${percentage === 100 ? 'bg-[#16A34A]' : percentage >= 50 ? 'bg-[#F97316]' : 'bg-[#315EFB]'
+                                        }`}
+                                      style={{ width: `${percentage}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs font-mono font-medium text-[#17233C] dark:text-[#F8FAFC] w-14 text-right">
+                                    {completed}/{total}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {manualNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map(note => (
-                    <div
-                      key={note.id}
-                      className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
-                    >
+                {activeTab === 'notes' && (
+                  <div className="space-y-6 max-w-7xl mx-auto pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#151F32] p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
                       <div>
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
-                              {note.title}
-                            </h3>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                              <span className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] font-medium text-[11px]">
-                                {note.category}
-                              </span>
-                              <span>•</span>
-                              <span>{new Date(note.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button
-                              onClick={() => handleEditNote(note)}
-                              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
-                              aria-label="Edit note"
-                            >
-                              <Edit2 size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteNote(note.id)}
-                              className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                              aria-label="Delete note"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] whitespace-pre-wrap mt-3 line-clamp-4">
-                          {note.content}
+                        <h2 className="text-xl font-bold tracking-tight text-[#17233C] dark:text-[#F8FAFC]">Manual Notes & Ideas</h2>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
+                          Quickly jot reflections, meeting notes, project plans, and insights.
                         </p>
                       </div>
-
-                      {note.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F]">
-                          {note.tags.map((tag, idx) => (
-                            <span key={idx} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[10px] text-[#64748B] dark:text-[#94A3B8]">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {manualNotes.length === 0 && (
-                    <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
-                      <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
-                        <StickyNote size={24} />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No notes saved</h4>
-                      <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
-                        Create flexible personal notes, ideas, meeting logs, or reminders.
-                      </p>
                       <button
-                        onClick={() => setShowNoteForm(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                        onClick={() => setShowNoteForm(!showNoteForm)}
+                        className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs self-start sm:self-auto"
                       >
-                        <Plus size={15} />
-                        <span>Write First Note</span>
+                        <Plus size={16} />
+                        <span>{showNoteForm ? 'Close Form' : 'New Note'}</span>
                       </button>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
 
-            {activeTab === 'budget' && (
-              <BudgetPlanner user={user} theme={theme} />
-            )}
-          </main>
-        </div>
-
-        {/* Chatbot Floating Button & Window */}
-        <div className="fixed bottom-6 right-6 z-50">
-          {chatbotOpen ? (
-            <div className="bg-white dark:bg-gray-800  shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
-              {/* Chat Header */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white p-4  flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10  bg-white/20 flex items-center justify-center">
-                    <Bot size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">MyMate Assistant</h3>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs opacity-90">Your personal coach</p>
-                      <div className="flex items-center gap-1">
-                        {ollamaAvailable ? (
-                          <>
-                            <Wifi size={12} className="text-green-300" />
-                            <span className="text-xs opacity-75">AI Powered</span>
-                          </>
-                        ) : (
-                          <>
-                            <WifiOff size={12} className="text-yellow-300" />
-                            <span className="text-xs opacity-75">Basic Mode</span>
-                          </>
-                        )}
+                    {showNoteForm && (
+                      <div className="bg-white dark:bg-[#151F32] rounded-2xl p-6 border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                        <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] mb-4">
+                          {editingNote ? 'Edit Note' : 'Create New Note'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Note Title</label>
+                            <input
+                              type="text"
+                              value={noteForm.title}
+                              onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              placeholder="e.g., Weekly Retrospective"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Content</label>
+                            <textarea
+                              value={noteForm.content}
+                              onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] focus:border-[#315EFB] focus:ring-2 focus:ring-[#315EFB]/20 bg-[#F8FAFC] text-[#17233C] placeholder-[#94A3B8] text-sm transition outline-none"
+                              rows={6}
+                              placeholder="Write your thoughts or action points..."
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Category</label>
+                              <input
+                                type="text"
+                                value={noteForm.category}
+                                onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] text-sm outline-none"
+                                placeholder="e.g., Ideas, Architecture, Personal"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-[#17233C] dark:text-[#F8FAFC] mb-1.5">Tags (comma separated)</label>
+                              <input
+                                type="text"
+                                value={noteForm.tags}
+                                onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] focus:border-[#315EFB] bg-[#F8FAFC] dark:bg-[#1E293B] text-[#17233C] dark:text-[#F8FAFC] placeholder-[#94A3B8] text-sm outline-none"
+                                placeholder="e.g., design, priorities"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 pt-2">
+                            <button
+                              onClick={editingNote ? handleUpdateNote : handleAddNote}
+                              className="inline-flex items-center gap-2 bg-[#315EFB] hover:bg-[#274cd0] text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-xs"
+                            >
+                              <Save size={16} />
+                              <span>{editingNote ? 'Update Note' : 'Save Note'}</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowNoteForm(false); setEditingNote(null); setNoteForm({ title: '', content: '', category: 'general', tags: '' }); }}
+                              className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#22324F] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B] text-xs font-semibold transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setChatbotOpen(false)}
-                  className="p-2 hover:bg-white/20  transition-colors"
-                  aria-label="Close chat"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+                    )}
 
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
-                {chatMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%]  p-3 ${message.isUser
-                        ? 'bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white'
-                        : 'bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 border border-gray-200 dark:border-gray-600'
-                        }`}
-                    >
-                      {!message.isUser && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <Bot size={16} className="text-indigo-600" />
-                          <span className="text-xs font-semibold text-indigo-600">Assistant</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {manualNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map(note => (
+                        <div
+                          key={note.id}
+                          className="bg-white dark:bg-[#151F32] p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#22324F] shadow-sm hover:border-[#315EFB]/30 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-base font-bold text-[#17233C] dark:text-[#F8FAFC] truncate">
+                                  {note.title}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                  <span className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] font-medium text-[11px]">
+                                    {note.category}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{new Date(note.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  onClick={() => handleEditNote(note)}
+                                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#17233C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC] transition"
+                                  aria-label="Edit note"
+                                >
+                                  <Edit2 size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteNote(note.id)}
+                                  className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                                  aria-label="Delete note"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] whitespace-pre-wrap mt-3 line-clamp-4">
+                              {note.content}
+                            </p>
+                          </div>
+
+                          {note.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#22324F]">
+                              {note.tags.map((tag, idx) => (
+                                <span key={idx} className="px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[10px] text-[#64748B] dark:text-[#94A3B8]">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                      {manualNotes.length === 0 && (
+                        <div className="md:col-span-2 bg-white dark:bg-[#151F32] rounded-2xl p-12 text-center border border-[#E2E8F0] dark:border-[#22324F] shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] dark:bg-[#1E293B] text-[#94A3B8] flex items-center justify-center mx-auto mb-3">
+                            <StickyNote size={24} />
+                          </div>
+                          <h4 className="text-sm font-semibold text-[#17233C] dark:text-[#F8FAFC]">No notes saved</h4>
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-sm mx-auto mt-1 mb-4">
+                            Create flexible personal notes, ideas, meeting logs, or reminders.
+                          </p>
+                          <button
+                            onClick={() => setShowNoteForm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#315EFB] text-white hover:bg-[#274cd0] transition shadow-xs"
+                          >
+                            <Plus size={15} />
+                            <span>Write First Note</span>
+                          </button>
                         </div>
                       )}
-                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                      <span className={`text-xs mt-1 block ${message.isUser ? 'text-indigo-100' : 'text-gray-400'}`}>
-                        {formatTime12Hour(new Date(message.timestamp).toTimeString().split(' ')[0])}
-                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
 
-              {/* Chat Input */}
-              <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-xl">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && !isLoadingResponse) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    placeholder={isLoadingResponse ? "AI is thinking..." : "Type your message..."}
-                    disabled={isLoadingResponse}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!chatInput.trim() || isLoadingResponse}
-                    className="px-4 py-2 bg-[#6C2BEF] text-white  hover:bg-[#5A1FD8] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                    aria-label="Send message"
-                  >
-                    {isLoadingResponse ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent  animate-spin" />
-                    ) : (
-                      <Send size={20} />
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                  Ask about your tasks, goals, skills, reflections, or performance
-                </p>
-              </div>
+                {activeTab === 'budget' && (
+                  <BudgetPlanner user={user} theme={theme} />
+                )}
+              </main>
             </div>
-          ) : (
-            <button
-              onClick={() => setChatbotOpen(true)}
-              className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white  shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
-              aria-label="Open chatbot"
-            >
-              <MessageCircle size={28} />
-            </button>
-          )}
-        </div>
-      </div>
-    </>
-  );
+
+            {/* Chatbot Floating Button & Window */}
+            <div className="fixed bottom-6 right-6 z-50">
+              {chatbotOpen ? (
+                <div className="bg-white dark:bg-gray-800  shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200 dark:border-gray-700">
+                  {/* Chat Header */}
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white p-4  flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10  bg-white/20 flex items-center justify-center">
+                        <Bot size={24} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">MyMate Assistant</h3>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs opacity-90">Your personal coach</p>
+                          <div className="flex items-center gap-1">
+                            {ollamaAvailable ? (
+                              <>
+                                <Wifi size={12} className="text-green-300" />
+                                <span className="text-xs opacity-75">AI Powered</span>
+                              </>
+                            ) : (
+                              <>
+                                <WifiOff size={12} className="text-yellow-300" />
+                                <span className="text-xs opacity-75">Basic Mode</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setChatbotOpen(false)}
+                      className="p-2 hover:bg-white/20  transition-colors"
+                      aria-label="Close chat"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  {/* Chat Messages */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
+                    {chatMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[80%]  p-3 ${message.isUser
+                            ? 'bg-[#6C2BEF] dark:bg-[#5A1FD8] text-white'
+                            : 'bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 border border-gray-200 dark:border-gray-600'
+                            }`}
+                        >
+                          {!message.isUser && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <Bot size={16} className="text-indigo-600" />
+                              <span className="text-xs font-semibold text-indigo-600">Assistant</span>
+                            </div>
+                          )}
+                          <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                          <span className={`text-xs mt-1 block ${message.isUser ? 'text-indigo-100' : 'text-gray-400'}`}>
+                            {formatTime12Hour(new Date(message.timestamp).toTimeString().split(' ')[0])}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Chat Input */}
+                  <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-xl">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && !isLoadingResponse) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        placeholder={isLoadingResponse ? "AI is thinking..." : "Type your message..."}
+                        disabled={isLoadingResponse}
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600  focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-700 text-[#172554] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!chatInput.trim() || isLoadingResponse}
+                        className="px-4 py-2 bg-[#6C2BEF] text-white  hover:bg-[#5A1FD8] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                        aria-label="Send message"
+                      >
+                        {isLoadingResponse ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent  animate-spin" />
+                        ) : (
+                          <Send size={20} />
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                      Ask about your tasks, goals, skills, reflections, or performance
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setChatbotOpen(true)}
+                  className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white  shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
+                  aria-label="Open chatbot"
+                >
+                  <MessageCircle size={28} />
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+        );
 };
 
 
 const MYMateWithErrorBoundary = () => (
-  <ErrorBoundary>
-    <MYMate />
-  </ErrorBoundary>
-);
+        <ErrorBoundary>
+          <MYMate />
+        </ErrorBoundary>
+        );
 
-export default MYMateWithErrorBoundary;
+        export default MYMateWithErrorBoundary;
