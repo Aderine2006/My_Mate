@@ -8,6 +8,7 @@ import BudgetPlanner from './components/BudgetPlanner';
 import SkillsTracker from './components/skills/SkillsTracker';
 import ProfileDashboard from './components/profile/ProfileDashboard';
 import type { SkillTopic } from './types/skill';
+import CelebrationOverlay, { MicroCheck, type CelebrationScenario, type CelebrationStats } from './components/CelebrationOverlay';
 
 interface User {
   id: string;
@@ -242,6 +243,14 @@ const MYMate = () => {
   });
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationScenario, setCelebrationScenario] = useState<CelebrationScenario>('all_tasks_complete');
+  const [celebrationStats, setCelebrationStats] = useState<CelebrationStats>({ completedCount: 0, totalCount: 0, completionPct: 0 });
+  const [celebrationAnimKey, setCelebrationAnimKey] = useState(0);
+  // Micro-check (single task) toast state
+  const [showMicroCheck, setShowMicroCheck] = useState(false);
+  const microCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Dedup guard: stores the date for which we last fired the full celebration
+  const celebratedDateRef = useRef<string>('');
   const [currentDate, setCurrentDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
 
   // Helper function to clear all data state
@@ -722,11 +731,32 @@ const MYMate = () => {
     // Only celebrate if a task was just completed (not uncompleted)
     const completedTask = updated.find(task => task.id === taskId);
     if (allCompleted && completedTask?.completed) {
+      // Dedup guard: only fire once per calendar day
+      if (celebratedDateRef.current === today) return;
+      celebratedDateRef.current = today;
+
+      const completedCount = todayTasks.filter(t => t.completed).length;
+      const totalCount = todayTasks.length;
+      const completionPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+      // First task ever = no previously completed tasks in any date
+      const allPreviouslyPending = dailyTasks.every(t => !t.completed || t.id === taskId);
+      const scenario = allPreviouslyPending ? 'first_ever_task' : 'all_tasks_complete';
+
+      setCelebrationScenario(scenario);
+      setCelebrationStats({
+        completedCount,
+        totalCount,
+        completionPct,
+        streakDays: streak.currentStreak,
+      });
+      setCelebrationAnimKey(k => k + 1);
       setShowCelebration(true);
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        setShowCelebration(false);
-      }, 5000);
+    } else if (completedTask?.completed) {
+      // Single task micro-toast
+      if (microCheckTimerRef.current) clearTimeout(microCheckTimerRef.current);
+      setShowMicroCheck(true);
+      microCheckTimerRef.current = setTimeout(() => setShowMicroCheck(false), 2200);
     }
   };
 
@@ -1409,8 +1439,10 @@ const MYMate = () => {
         adjustScheduleForMissedTasks();
       }
       updateStreak();
-      // Reset celebration when date changes
+      // Reset celebration state when date changes
       setShowCelebration(false);
+      setShowMicroCheck(false);
+      celebratedDateRef.current = ''; // allow fresh celebration on new day
     }
   }, [currentDate, user]);
 
@@ -1544,313 +1576,7 @@ const MYMate = () => {
     );
   }
 
-  // Celebration Component
-  const CelebrationOverlay = () => {
-    if (!showCelebration) return null;
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        {/* Confetti/Spray Effect */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(100)].map((_, i) => {
-            const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const left = Math.random() * 100;
-            const delay = Math.random() * 2;
-            const duration = 2 + Math.random() * 2;
-            const size = 8 + Math.random() * 12;
-
-            return (
-              <div
-                key={i}
-                className="absolute "
-                style={{
-                  left: `${left}%`,
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  backgroundColor: color,
-                  animation: `confetti-fall ${duration}s ease-out ${delay}s forwards`,
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Crackers/Sparkles Effect */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(50)].map((_, i) => {
-            const left = Math.random() * 100;
-            const top = Math.random() * 100;
-            const delay = Math.random() * 1.5;
-            const duration = 1 + Math.random() * 1.5;
-            const size = 4 + Math.random() * 8;
-
-            return (
-              <div
-                key={i}
-                className="absolute "
-                style={{
-                  left: `${left}%`,
-                  top: `${top}%`,
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  backgroundColor: '#FFD700',
-                  boxShadow: `0 0 ${size * 2}px #FFD700, 0 0 ${size * 3}px #FFD700`,
-                  animation: `sparkle ${duration}s ease-out ${delay}s forwards`,
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Celebration Message */}
-        <div className="relative z-10 text-center pointer-events-auto">
-          <div className="bg-gradient-to-r from-[#FF9D24] via-[#F43F72] to-[#F43F72] text-white px-12 py-8  shadow-2xl transform animate-bounce">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-4xl font-bold mb-2">Congratulations!</h2>
-            <p className="text-2xl">You've completed all tasks for today!</p>
-            <p className="text-xl mt-2 opacity-90">Amazing work! 🚀</p>
-          </div>
-        </div>
-
-        {/* CSS Animations and Theme Styles */}
-        <style>{`
-          @keyframes confetti-fall {
-            0% {
-              transform: translateY(-100vh) rotate(0deg);
-              opacity: 1;
-            }
-            100% {
-              transform: translateY(100vh) rotate(720deg);
-              opacity: 0;
-            }
-          }
-          
-          @keyframes sparkle {
-            0%, 100% {
-              transform: scale(0) rotate(0deg);
-              opacity: 1;
-            }
-            50% {
-              transform: scale(1.5) rotate(180deg);
-              opacity: 0.8;
-            }
-          }
-
-          /* Productive/Scifi Theme Styles */
-          .productive {
-            --bg-primary: #0a0e27;
-            --bg-secondary: #0f1428;
-            --bg-card: #121830;
-            --text-primary: #00f0ff;
-            --text-secondary: #a0aec0;
-            --accent-cyan: #00f0ff;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #f43f72;
-            --accent-green: #10b981;
-            --border-glow: 0 0 10px rgba(0, 240, 255, 0.3);
-          }
-
-          .productive body {
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
-            color: #00f0ff;
-          }
-
-          .productive .min-h-screen {
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
-            position: relative;
-          }
-
-          .productive .min-h-screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-              linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-          }
-
-          .productive .bg-white {
-            background: rgba(18, 24, 48, 0.95) !important;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
-          }
-
-          .productive .bg-gray-50 {
-            background: rgba(15, 20, 40, 0.9) !important;
-            border: 1px solid rgba(0, 240, 255, 0.15);
-          }
-
-          .productive .bg-gray-100 {
-            background: rgba(18, 24, 48, 0.8) !important;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-          }
-
-          .productive .bg-gray-200 {
-            background: rgba(0, 240, 255, 0.1) !important;
-          }
-
-          .productive .bg-gray-800 {
-            background: rgba(18, 24, 48, 0.95) !important;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-          }
-
-          .productive .bg-gray-900 {
-            background: rgba(10, 14, 39, 0.98) !important;
-          }
-
-          .productive .bg-gray-700 {
-            background: rgba(26, 31, 58, 0.9) !important;
-            border: 1px solid rgba(0, 240, 255, 0.15);
-          }
-
-          .productive .text-gray-800,
-          .productive .text-gray-700,
-          .productive .text-gray-900,
-          .productive .text-[#172554] {
-            color: #00f0ff !important;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-          }
-
-          .productive .text-gray-600,
-          .productive .text-gray-500 {
-            color: #a0aec0 !important;
-          }
-
-          .productive .text-gray-400,
-          .productive .text-gray-300 {
-            color: #718096 !important;
-          }
-
-          .productive .border-gray-200,
-          .productive .border-gray-300 {
-            border-color: rgba(0, 240, 255, 0.3) !important;
-          }
-
-          .productive .border-gray-600,
-          .productive .border-gray-700 {
-            border-color: rgba(0, 240, 255, 0.2) !important;
-          }
-
-          .productive .shadow-md,
-          .productive .shadow-lg,
-          .productive .shadow-xl {
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), 0 0 60px rgba(139, 92, 246, 0.1) !important;
-          }
-
-          .productive .shadow {
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15) !important;
-          }
-
-          .productive button {
-            transition: all 0.3s ease;
-          }
-
-          .productive button:hover {
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-          }
-
-          .productive input,
-          .productive textarea,
-          .productive select {
-            background: rgba(18, 24, 48, 0.9) !important;
-            border: 1px solid rgba(0, 240, 255, 0.3) !important;
-            color: #00f0ff !important;
-          }
-
-          .productive input:focus,
-          .productive textarea:focus,
-          .productive select:focus {
-            border-color: #00f0ff !important;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
-          }
-
-          .productive .bg-gradient-to-r {
-            background: linear-gradient(90deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2), rgba(244, 63, 114, 0.2)) !important;
-          }
-
-          .productive .bg-gradient-to-br {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.15)) !important;
-          }
-
-          /* Neon glow effects for specific elements */
-          .productive .bg-[#6C2BEF] {
-            background: linear-gradient(135deg, #00f0ff, #8b5cf6) !important;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(139, 92, 246, 0.3) !important;
-          }
-
-          .productive .bg-[#5A1FD8] {
-            background: linear-gradient(135deg, #8b5cf6, #6C2BEF) !important;
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5) !important;
-          }
-
-          .productive .bg-[#4816C7] {
-            background: linear-gradient(135deg, #6C2BEF, #4816C7) !important;
-          }
-
-          .productive .bg-[#3610B6] {
-            background: linear-gradient(180deg, #0a0e27, #1a1f3a) !important;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-          }
-
-          /* Sidebar in productive mode */
-          .productive .bg-\[\#3610B6\] {
-            background: linear-gradient(180deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.95)) !important;
-            border-right: 1px solid rgba(0, 240, 255, 0.3);
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
-          }
-
-          /* Header in productive mode */
-          .productive header {
-            background: rgba(10, 14, 39, 0.95) !important;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.3) !important;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
-          }
-
-          /* Progress bars in productive mode */
-          .productive .bg-green-500 {
-            background: linear-gradient(90deg, #00f0ff, #10b981) !important;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-          }
-
-          .productive .bg-yellow-500 {
-            background: linear-gradient(90deg, #f59e0b, #f43f72) !important;
-            box-shadow: 0 0 10px rgba(245, 158,  11, 0.5);
-          }
-
-          .productive .bg-red-500 {
-            background: linear-gradient(90deg, #f43f72, #ef4444) !important;
-            box-shadow: 0 0 10px rgba(244, 63, 114, 0.5);
-          }
-
-          /* Scrollbar styling for productive theme */
-          .productive ::-webkit-scrollbar {
-            width: 8px;
-          }
-
-          .productive ::-webkit-scrollbar-track {
-            background: rgba(10, 14, 39, 0.5);
-          }
-
-          .productive ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #00f0ff, #8b5cf6);
-            border-radius: 4px;
-          }
-
-          .productive ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #8b5cf6, #f43f72);
-          }
-        `}</style>
-      </div>
-    );
-  };
+  // Celebration component is now imported from ./components/CelebrationOverlay
 
   return (
     <>
@@ -2068,7 +1794,15 @@ const MYMate = () => {
       `}</style>
 
       <div className="flex h-screen min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-[#0B1120] text-[#17233C] dark:text-[#F8FAFC]">
-        <CelebrationOverlay />
+        <CelebrationOverlay
+          show={showCelebration}
+          scenario={celebrationScenario}
+          stats={celebrationStats}
+          userName={user?.name}
+          onDismiss={() => setShowCelebration(false)}
+          animKey={celebrationAnimKey}
+        />
+        <MicroCheck show={showMicroCheck} />
         {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm md:hidden" />}
 
         {/* Modern Collapsible Sidebar */}
